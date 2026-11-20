@@ -1,0 +1,12 @@
+The dataset in src/data/gta6.json (served at /gta6.json) is dedicated to the
+public domain under Creative Commons CC0 1.0 Universal.
+
+https://creativecommons.org/publicdomain/zero/1.0/
+
+You can copy, modify and distribute it, even commercially, without asking
+permission or giving credit.
+
+The dataset contains facts (names, counts, thresholds) and explanations written
+by contributors in their own words. It contains no game assets and no text
+copied from guides. Grand Theft Auto is a trademark of Take-Two Interactive;
+this project is not affiliated with Rockstar Games or Take-Two Interactive.

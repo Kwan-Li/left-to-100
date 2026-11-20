@@ -1,0 +1,2415 @@
+{
+  "version": "2026.11.20-1",
+  "game": "Grand Theft Auto VI",
+  "updated": "2026-11-20",
+  "totals": {
+    "requirements": 35,
+    "cardSets": 18,
+    "cards": 480,
+    "cardSetsRequired": 15
+  },
+  "categories": [
+    {
+      "id": "story-tasks",
+      "name": "Story & Tasks"
+    },
+    {
+      "id": "exploration-activities",
+      "name": "Exploration & Activities"
+    },
+    {
+      "id": "discovery",
+      "name": "Discovery"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "story-completion",
+      "categoryId": "story-tasks",
+      "name": "Story Completion",
+      "unit": "percent",
+      "required": 100,
+      "total": 100,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "GTABase lists this entry under its own Story heading instead of grouping it with Tasks."
+    },
+    {
+      "id": "optional-tasks",
+      "categoryId": "story-tasks",
+      "name": "Optional Tasks Completed",
+      "unit": "count",
+      "required": 100,
+      "total": null,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "No fixed total is shown; guides only estimate a few hundred tasks are available, so missing some during the story is harmless."
+    },
+    {
+      "id": "gang-operations",
+      "categoryId": "story-tasks",
+      "name": "Gang Operations Cleared",
+      "unit": "count",
+      "required": 39,
+      "total": 39,
+      "whereToCount": "On the map, hovering a gang operation icon shows which valuables are still left there.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "bank-jobs",
+      "categoryId": "story-tasks",
+      "name": "Bank Jobs Fully Completed",
+      "unit": "count",
+      "required": 22,
+      "total": 22,
+      "whereToCount": "Map > Robberies (money bag icon) > Bank Jobs.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "payday-loan-jobs",
+      "categoryId": "story-tasks",
+      "name": "Payday Loan Jobs Fully Completed",
+      "unit": "count",
+      "required": 7,
+      "total": 7,
+      "whereToCount": "Map > Robberies (money bag icon) > Payday Loans.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "smash-n-grabs",
+      "categoryId": "story-tasks",
+      "name": "Smash 'N' Grabs Fully Completed",
+      "unit": "count",
+      "required": 34,
+      "total": 35,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "stick-ups",
+      "categoryId": "story-tasks",
+      "name": "Stick Ups Fully Completed",
+      "unit": "count",
+      "required": 50,
+      "total": 91,
+      "whereToCount": "Map > Robberies (money bag icon) > Stick Ups.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "narcotics-fenced",
+      "categoryId": "story-tasks",
+      "name": "Narcotics Fenced",
+      "unit": "dollars",
+      "required": 100000,
+      "total": null,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Every checklist source gives $100,000. One aside in PowerPyx's flamingo section mentions $200,000, which contradicts its own checklist table."
+    },
+    {
+      "id": "jewelry-fenced",
+      "categoryId": "story-tasks",
+      "name": "Jewelry Fenced",
+      "unit": "dollars",
+      "required": 100000,
+      "total": null,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "marked-bills-fenced",
+      "categoryId": "story-tasks",
+      "name": "Marked Bills Fenced",
+      "unit": "dollars",
+      "required": 250000,
+      "total": null,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "vaults-hit",
+      "categoryId": "story-tasks",
+      "name": "Vaults Hit",
+      "unit": "count",
+      "required": 8,
+      "total": 8,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "One vault per large bank; guides say these unlock in Chapter 4."
+    },
+    {
+      "id": "vehicles-fenced",
+      "categoryId": "story-tasks",
+      "name": "Vehicles Fenced",
+      "unit": "dollars",
+      "required": 200000,
+      "total": null,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "kenton-sets",
+      "categoryId": "exploration-activities",
+      "name": "Kenton Sets Completed",
+      "unit": "count",
+      "required": 5,
+      "total": 7,
+      "whereToCount": "Progress > Collections > Kenton's Treasures (also Progress > Characters > Kenton Rees).",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "collectible-card-sets",
+      "categoryId": "exploration-activities",
+      "name": "Collectible Card Sets Found",
+      "unit": "count",
+      "required": 15,
+      "total": 18,
+      "whereToCount": "Progress > Collections > Collectible Cards.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "waink-locations",
+      "categoryId": "exploration-activities",
+      "name": "WAiNK Locations Scanned",
+      "unit": "count",
+      "required": 100,
+      "total": null,
+      "whereToCount": "Progress > Collections > WAiNK Locations.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "No source gives a total number of WAiNK locations."
+    },
+    {
+      "id": "underwater-discoveries",
+      "categoryId": "exploration-activities",
+      "name": "Underwater Discoveries Found",
+      "unit": "count",
+      "required": 33,
+      "total": 33,
+      "whereToCount": "Progress > Collections > Exploration > Underwater Discoveries.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "magazines-books-comics",
+      "categoryId": "exploration-activities",
+      "name": "Magazines, Books & Comics Found",
+      "unit": "count",
+      "required": 30,
+      "total": 34,
+      "whereToCount": "Progress > Collections > Exploration. The menu gives a count only, not which titles you have read.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "The 34 total is split as 27 magazines/books/comics plus 7 Book Swaps by PowerPyx's checklist, GTABase and Timesaver. PowerPyx's dedicated magazine page lists 27 slots and gives no separate Book Swap count."
+    },
+    {
+      "id": "meditation-spots",
+      "categoryId": "exploration-activities",
+      "name": "Meditation Spots Completed",
+      "unit": "count",
+      "required": 15,
+      "total": 18,
+      "whereToCount": "Progress > Collections > Exploration > Meditations.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "cocaine-flamingos",
+      "categoryId": "exploration-activities",
+      "name": "Cocaine Flamingos Destroyed",
+      "unit": "count",
+      "required": 100,
+      "total": 125,
+      "whereToCount": "Progress > Collections > Exploration > Cocaine Flamingos; the row only appears once you have destroyed one.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "unique-playlists",
+      "categoryId": "exploration-activities",
+      "name": "Unique Playlists Completed",
+      "unit": "count",
+      "required": 2,
+      "total": 2,
+      "whereToCount": "Progress > Collections > Exploration > Unique Playlists; the row only appears once you have found one.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "discovered-styles",
+      "categoryId": "exploration-activities",
+      "name": "Discovered Styles",
+      "unit": "count",
+      "required": 70,
+      "total": 79,
+      "whereToCount": "Progress > Collections > Discovered Styles.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "The 79 total is reported as 13 + 15 character tattoos, 17 magazine tattoos and 34 luxury watches."
+    },
+    {
+      "id": "unique-races",
+      "categoryId": "exploration-activities",
+      "name": "Unique Races Won",
+      "unit": "count",
+      "required": 30,
+      "total": 40,
+      "whereToCount": "Progress > Activities > Racing.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "race-challenge-golds",
+      "categoryId": "exploration-activities",
+      "name": "Race Challenge Gold Medals",
+      "unit": "count",
+      "required": 10,
+      "total": 13,
+      "whereToCount": "Progress > Activities > Race Challenges.",
+      "status": "disputed",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "Timesaver.gg",
+          "url": "https://timesaver.gg/tools/gta-6/completion"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "PowerPyx, KeenGamer, Press Start and Timesaver give 10 of 13. Shacknews lists 42 and Push Square lists 30; both match the numbers on neighbouring lines (Shooting Range 42, Unique Races 30), so they look like transcription slips, but the conflict is unresolved until someone checks the in-game list."
+    },
+    {
+      "id": "shooting-range-golds",
+      "categoryId": "exploration-activities",
+      "name": "Shooting Range Gold Medals",
+      "unit": "count",
+      "required": 42,
+      "total": 42,
+      "whereToCount": "Progress > Activities > Shooting Ranges.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "GTABase splits the 42 as 18 at Griffin and 24 at Rodgers Ranch. PowerPyx's own range section quotes per-range medal figures (54 and 72) that do not match its checklist's 42."
+    },
+    {
+      "id": "video-games",
+      "categoryId": "exploration-activities",
+      "name": "Video Games Played",
+      "unit": "count",
+      "required": 4,
+      "total": 4,
+      "whereToCount": "Progress > Activities > Games.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "pool-opponents",
+      "categoryId": "exploration-activities",
+      "name": "Pool Opponents Defeated",
+      "unit": "count",
+      "required": 5,
+      "total": 7,
+      "whereToCount": "Progress > Activities > Sports > Pool.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "mini-golf",
+      "categoryId": "exploration-activities",
+      "name": "Mini Golf Locations Played",
+      "unit": "count",
+      "required": 2,
+      "total": 3,
+      "whereToCount": "Progress > Activities > Sports; hover each course to see whether it is done.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "basketball-hoops",
+      "categoryId": "exploration-activities",
+      "name": "Basketball Hoops",
+      "unit": "count",
+      "required": 90,
+      "total": 100,
+      "whereToCount": "Progress > Activities > Basketball.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "drone-time-trials",
+      "categoryId": "exploration-activities",
+      "name": "Drone Time Trials Completed",
+      "unit": "count",
+      "required": 42,
+      "total": 42,
+      "whereToCount": "Progress > Activities > Top Fun Drones.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Reported as 14 locations with 3 trials each."
+    },
+    {
+      "id": "stunts",
+      "categoryId": "exploration-activities",
+      "name": "Stunts Completed",
+      "unit": "count",
+      "required": 300,
+      "total": 397,
+      "whereToCount": "Progress > Activities > Stunts; R3 switches to a per-region breakdown.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "The 397 total is reported as 130 Stunt Jumps, 202 Under the Bridges, 40 Knife Flights and 25 Base Jumps."
+    },
+    {
+      "id": "challenges",
+      "categoryId": "exploration-activities",
+      "name": "Challenges Completed",
+      "unit": "count",
+      "required": 70,
+      "total": 80,
+      "whereToCount": "Progress > Challenges.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Reported as 8 categories of 10 challenges."
+    },
+    {
+      "id": "bret-target-decks",
+      "categoryId": "exploration-activities",
+      "name": "Bret's Target Decks",
+      "unit": "count",
+      "required": 15,
+      "total": 15,
+      "whereToCount": "Progress > Contacts > Bret Vogel.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "HappyGamer files this under its crime/story group rather than Exploration & Activities."
+    },
+    {
+      "id": "base-model-vehicles",
+      "categoryId": "discovery",
+      "name": "Base Model Vehicles",
+      "unit": "count",
+      "required": 200,
+      "total": 277,
+      "whereToCount": "Progress > Vehicles.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "standard-issue-weapons",
+      "categoryId": "discovery",
+      "name": "Standard Issue Weapons",
+      "unit": "count",
+      "required": 50,
+      "total": 66,
+      "whereToCount": "Progress > Weapons.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "The 66 total is reported as 53 guns, 9 melee and 4 explosives."
+    },
+    {
+      "id": "animals",
+      "categoryId": "discovery",
+      "name": "Animals",
+      "unit": "count",
+      "required": 100,
+      "total": 255,
+      "whereToCount": "Progress > Animals.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Press Start",
+          "url": "https://press-start.com.au/news/2026/11/18/grand-theft-auto-6-100-percent-checklist/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    }
+  ],
+  "cardSets": [
+    {
+      "id": "vice-city-flamingos",
+      "name": "Vice City Flamingos",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "vice-city-narcos",
+      "name": "Vice City Narcos",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "vice-city-manatees",
+      "name": "Vice City Manatees",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "GTADB notes that the detailed card list it worked from shows 30 slots for this set even though the overview says 24."
+    },
+    {
+      "id": "vice-city-club-de-futbol",
+      "name": "Vice City Club De Fútbol",
+      "size": 30,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Spelled without the accent (\"Futbol\") by Push Square, Game-Checklists and GMTreks."
+    },
+    {
+      "id": "liberty-city-swingers",
+      "name": "Liberty City Swingers",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "liberty-city-penetrators",
+      "name": "Liberty City Penetrators",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "liberty-city-wrath",
+      "name": "Liberty City Wrath",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "los-santos-corkers",
+      "name": "Los Santos Corkers",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "los-santos-panic",
+      "name": "Los Santos Panic",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "los-santos-pounders",
+      "name": "Los Santos Pounders",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "backyard-wrestling",
+      "name": "Backyard Wrestling",
+      "size": 12,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "americas-next-top-hooker",
+      "name": "America's Next Top Hooker",
+      "size": 24,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "delights-dancers",
+      "name": "Delights Dancers",
+      "size": 18,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "jack-of-hearts-dancers",
+      "name": "Jack of Hearts Dancers",
+      "size": 36,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Push Square's main list shortens it to \"Jack of Hearts\"."
+    },
+    {
+      "id": "nine1nine-dancers",
+      "name": "Nine1Nine Dancers",
+      "size": 36,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Push Square's main list shortens it to \"Nine1Nine\"."
+    },
+    {
+      "id": "legends-of-ratface",
+      "name": "The Legends of Ratface",
+      "size": 36,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Game-Checklists and a PowerPyx sidebar write \"The Legend of Ratface\" (singular)."
+    },
+    {
+      "id": "right-wing-americas-hero",
+      "name": "Right Wing: America's Hero",
+      "size": 36,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "ed-comics-universe",
+      "name": "Ed Comics Universe",
+      "size": 36,
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "not-started",
+      "label": "Not started",
+      "order": 0
+    },
+    {
+      "id": "chapter-1",
+      "label": "Chapter 1",
+      "order": 1
+    },
+    {
+      "id": "chapter-2",
+      "label": "Chapter 2",
+      "order": 2
+    },
+    {
+      "id": "chapter-3",
+      "label": "Chapter 3",
+      "order": 3
+    },
+    {
+      "id": "chapter-4",
+      "label": "Chapter 4",
+      "order": 4
+    },
+    {
+      "id": "chapter-5",
+      "label": "Chapter 5",
+      "order": 5
+    },
+    {
+      "id": "story-finished",
+      "label": "Story finished",
+      "order": 6
+    }
+  ],
+  "missables": [
+    {
+      "id": "meditation-first-safehouse-balcony",
+      "requirementId": "meditation-spots",
+      "label": "Lucia's balcony meditation at the first safehouse",
+      "where": "Balcony of Jason's house in Key Lento; reported to appear partway through Chapter 1.",
+      "lostAfterChapterId": "chapter-1",
+      "effect": "The meditation counter can then reach only 17 of 18, so one of the three spare meditations is already spent; 15 is still reachable. The separate all-meditations trophy may also be lost.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-meditation-spot-locations/"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        },
+        {
+          "publisher": "Dork",
+          "url": "https://readdork.com/gaming/gta-6-walkthrough"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "PowerPyx saw it add 1 to the counter but notes it is not marked like the other spots; whether the trophy needs it is unconfirmed."
+    },
+    {
+      "id": "card-victor-maravilla",
+      "requirementId": "collectible-card-sets",
+      "cardSetId": "los-santos-corkers",
+      "label": "Victor Maravilla card (Los Santos Corkers)",
+      "where": "Starlet Motel, Gellhorn (Kelly County): on the kitchen fridge.",
+      "lostAfterChapterId": "chapter-2",
+      "effect": "Los Santos Corkers can no longer be completed, leaving 17 completable sets; 15 are needed, so two spare sets remain.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-los-santos-corkers-collectible-card-set-locations/"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Location and wording match PowerPyx closely on the other sites, so this is treated as one origin. GTADB says it is unknown whether the card can be picked up later."
+    },
+    {
+      "id": "card-vicki",
+      "requirementId": "collectible-card-sets",
+      "cardSetId": "delights-dancers",
+      "label": "Vicki card (Delights Dancers)",
+      "where": "Starlet Motel, Gellhorn (Kelly County): office bathroom floor beside the toilet.",
+      "lostAfterChapterId": "chapter-2",
+      "effect": "Delights Dancers can no longer be completed. Missing both Starlet Motel cards leaves 16 completable sets, one spare above the 15 needed.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-delights-dancers-collectible-card-set-locations/"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Same single-origin caveat as the Victor Maravilla card. The Harley card in the same set (inside Delights) is reported as still collectable later."
+    },
+    {
+      "id": "magazines-first-safehouse",
+      "requirementId": "magazines-books-comics",
+      "label": "Five reading items at the first safehouse: Ashes of Glory, Lethal By Design, Orca A Whole Different Animal, Off the Hook, Body Copy",
+      "where": "Jason's house in Key Lento: bedside table, living room tables, the tool shed underneath and the back deck.",
+      "lostAfterChapterId": "chapter-1",
+      "effect": "These copies disappear. PowerPyx says most titles also exist elsewhere, but no second spot is confirmed for these five; 30 of 34 are needed, so up to four titles can be missing.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-magazines-books-comics-locations/"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Game-Checklists also lists magazines at this house as lost after Chapter 1 and says some issues appear elsewhere."
+    },
+    {
+      "id": "magazines-starlet-motel",
+      "requirementId": "magazines-books-comics",
+      "label": "Two reading items at the Starlet Motel: Help Me Help You Help Me, Wizard Wang",
+      "where": "Starlet Motel, Gellhorn: reception room table and cafeteria table.",
+      "lostAfterChapterId": "chapter-2",
+      "effect": "These copies disappear; other locations may exist but none are confirmed. Counts against the 4-item margin (30 of 34).",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-magazines-books-comics-locations/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "magazines-bayside-apartment",
+      "requirementId": "magazines-books-comics",
+      "label": "Two reading items at the Bayside Apartment: Passion B.C., Two Pricks in the Bush",
+      "where": "Bayside Apartment, Vice City: beside the bathtub and on the table in front of the TV.",
+      "lostAfterChapterId": "chapter-3",
+      "effect": "These copies disappear; other locations may exist but none are confirmed. Counts against the 4-item margin (30 of 34).",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-magazines-books-comics-locations/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    }
+  ],
+  "pointsOfNoReturn": [
+    {
+      "id": "end-of-chapter-1",
+      "chapterId": "chapter-1",
+      "label": "End of Chapter 1: the first safehouse becomes unavailable, along with its meditation spot and reading items. Cash on hand is reported lost too, so bank it first.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        },
+        {
+          "publisher": "Dork",
+          "url": "https://readdork.com/gaming/gta-6-walkthrough"
+        },
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-meditation-spot-locations/"
+        },
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-magazines-books-comics-locations/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "end-of-chapter-2",
+      "chapterId": "chapter-2",
+      "label": "End of Chapter 2: the Starlet Motel stops being a safehouse and its rooms (two cards, two reading items) can no longer be entered.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        },
+        {
+          "publisher": "Dork",
+          "url": "https://readdork.com/gaming/gta-6-walkthrough"
+        },
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-los-santos-corkers-collectible-card-set-locations/"
+        },
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-delights-dancers-collectible-card-set-locations/"
+        },
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-magazines-books-comics-locations/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "end-of-chapter-3",
+      "chapterId": "chapter-3",
+      "label": "End of Chapter 3: one apartment interior with two reading items is reported to close, and some fences may stop buying.",
+      "status": "disputed",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-magazines-books-comics-locations/"
+        },
+        {
+          "publisher": "Dork",
+          "url": "https://readdork.com/gaming/gta-6-walkthrough"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "PowerPyx marks two Bayside Apartment items as lost after Chapter 3 and Dork advises selling loot before the Chapter 3 finale, but Game-Checklists lists no lock at the end of Chapter 3."
+    },
+    {
+      "id": "end-of-chapter-4",
+      "chapterId": "chapter-4",
+      "label": "End of Chapter 4: reported as a hard save point. Missions cannot be replayed and choices made here are permanent, so keep a manual save.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "chapter-5-finale",
+      "chapterId": "chapter-5",
+      "label": "Chapter 5 finale: story missions cannot be replayed afterwards. Free roam continues and every checklist item stays doable.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "checklist-hidden-until-credits",
+      "requirementIds": [
+        "story-completion"
+      ],
+      "title": "The checklist stays hidden until the story ends",
+      "detail": "The in-game list (Progress > Stats > 100% Completion) cannot be viewed before the credits, but anything done earlier still counts. Use the individual Progress menus to track counts in the meantime.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "Shacknews",
+          "url": "https://www.shacknews.com/article/151397/gta6-100-percent-checklist"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-100percent-completion-checklist"
+        },
+        {
+          "publisher": "Timesaver.gg",
+          "url": "https://timesaver.gg/tools/gta-6/completion"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "kenton-sets-vs-underwater",
+      "requirementIds": [
+        "kenton-sets",
+        "underwater-discoveries"
+      ],
+      "title": "Kenton needs 5 of 7, but Underwater Discoveries need all 7",
+      "detail": "The Kenton entry is satisfied by 5 of the 7 shipwreck sets, yet the 33 underwater discoveries sit in those same wrecks and all 33 are required, so in practice all 7 sets must be done.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7QVK2451GMWZMRK5HSNS3M5"
+        },
+        {
+          "publisher": "HappyGamer",
+          "url": "https://happygamer.com/gta-6-100-percent-completion-checklist-176515/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "meditation-two-characters",
+      "requirementIds": [
+        "meditation-spots"
+      ],
+      "title": "18 meditations come from only 10 spots",
+      "detail": "Eight of the ten spots can be done once as each lead character for two meditations each. The first-safehouse balcony spot counts once and the final mountain spot, which appears only after the others, also counts once. 15 of the 18 are required.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-meditation-spot-locations/"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        },
+        {
+          "publisher": "EGamers.io",
+          "url": "https://egamers.io/gta-6-100-completion-the-full-checklist-and-what-each-section-needs/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "The per-spot breakdown comes from PowerPyx alone. Other guides only repeat \"18 across 10 locations\"."
+    },
+    {
+      "id": "vehicles-base-models-only",
+      "requirementIds": [
+        "base-model-vehicles"
+      ],
+      "title": "Only base models count toward the 200",
+      "detail": "The vehicle database is reported to hold 557 entries: 277 base models plus 280 Standout variants parked at fixed spots. Only base models count toward the 200, and boats and aircraft are included.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        },
+        {
+          "publisher": "Timesaver.gg",
+          "url": "https://timesaver.gg/tools/gta-6/cars"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "Timesaver says its vehicle counts come from PowerPyx, and GTABase repeats the same figures, so this is one origin."
+    },
+    {
+      "id": "sold-cards-still-count",
+      "requirementIds": [
+        "collectible-card-sets"
+      ],
+      "title": "Selling cards does not undo progress",
+      "detail": "Cards sold at pawn shops stay marked as found in Collections, so selling them is safe. A display box at home reportedly shows only cards you still own.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Push Square",
+          "url": "https://www.pushsquare.com/guides/gta-6-collectible-card-locations"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "card-variants-and-duplicates",
+      "requirementIds": [
+        "collectible-card-sets"
+      ],
+      "title": "Colour variants count separately; duplicates do not",
+      "detail": "Each colour or metal variant of a card fills its own slot in a set. Picking up a second copy of the same variant adds nothing, though it can be sold. The cheapest 15 complete sets total 372 cards.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-all-collectible-card-sets-locations/"
+        },
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/card-sets-checklist/"
+        },
+        {
+          "publisher": "GTADB",
+          "url": "https://gtadb.net/articles/gta-6-collectible-cards-locations-guide/"
+        },
+        {
+          "publisher": "GMTreks",
+          "url": "https://gmtreks.com/gta6/page/01M7R0QZ7X2YFSP9GFEPQ5ADDV"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "trophy-thresholds-lower",
+      "requirementIds": [
+        "stunts",
+        "challenges",
+        "unique-races",
+        "meditation-spots",
+        "collectible-card-sets"
+      ],
+      "title": "Trophy targets are not the checklist targets",
+      "detail": "Several trophies fire at lower counts than the checklist needs: 250 stunts (300 needed), 50 challenges (70), 20 race wins (30) and 3 card sets (15). The meditation trophy goes the other way and wants every meditation, while the checklist accepts 15.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "Timesaver.gg",
+          "url": "https://timesaver.gg/tools/gta-6/completion"
+        },
+        {
+          "publisher": "KeenGamer",
+          "url": "https://www.keengamer.com/articles/guides/gta-6-trophy-guide-platinum-roadmap-all-55-trophies/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "stunts-any-mix",
+      "requirementIds": [
+        "stunts"
+      ],
+      "title": "Any mix of stunt types works",
+      "detail": "Jumps, under-bridge passes, knife flights and base jumps all feed the same 300 count. Doing each stunt once is enough, and the optional challenges attached to each stunt icon are not needed.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "smash-n-grab-backroom-safe",
+      "requirementIds": [
+        "smash-n-grabs"
+      ],
+      "title": "A store robbery may not count without its safe",
+      "detail": "Guides warn that skipping the backroom safe during a Smash ’N’ Grab can leave that store not \"fully completed\".",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "EGamers.io",
+          "url": "https://egamers.io/gta-6-100-completion-the-full-checklist-and-what-each-section-needs/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "basketball-distinct-hoops",
+      "requirementIds": [
+        "basketball-hoops"
+      ],
+      "title": "Each hoop counts once",
+      "detail": "The 90 must be different hoops; scoring repeatedly at one hoop adds nothing.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "drone-par-times",
+      "requirementIds": [
+        "drone-time-trials"
+      ],
+      "title": "Par time only matters on two of three trials",
+      "detail": "At each drone location the first two trials must beat par (28 runs in total); the third only has to be finished.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "video-games-start-only",
+      "requirementIds": [
+        "video-games"
+      ],
+      "title": "Starting a game is enough",
+      "detail": "Each of the four video games only needs to be launched, not beaten.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "mini-golf-not-golf",
+      "requirementIds": [
+        "mini-golf"
+      ],
+      "title": "Full-size golf courses do not count",
+      "detail": "Only the three mini golf courses count toward this entry; the two regular golf courses are separate.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "flamingo-beak-variant",
+      "requirementIds": [
+        "cocaine-flamingos"
+      ],
+      "title": "Only one flamingo variant counts",
+      "detail": "Only flamingos with a black-and-white beak are reported to count toward the 125.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        },
+        {
+          "publisher": "EGamers.io",
+          "url": "https://egamers.io/gta-6-100-completion-the-full-checklist-and-what-each-section-needs/"
+        }
+      ],
+      "lastVerified": "2026-11-20",
+      "note": "EGamers attributes this to PowerPyx; treated as one origin."
+    },
+    {
+      "id": "weapons-holding-counts",
+      "requirementIds": [
+        "standard-issue-weapons"
+      ],
+      "title": "Holding a weapon once registers it",
+      "detail": "A weapon is logged as soon as you equip it once; no kills or purchases beyond that are needed.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "EGamers.io",
+          "url": "https://egamers.io/gta-6-100-completion-the-full-checklist-and-what-each-section-needs/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "animals-breeds-separate",
+      "requirementIds": [
+        "animals"
+      ],
+      "title": "Binoculars are enough and breeds count separately",
+      "detail": "Studying an animal through binoculars logs it, no hunting required, and different dog and cat breeds each count as their own entry.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "EGamers.io",
+          "url": "https://egamers.io/gta-6-100-completion-the-full-checklist-and-what-each-section-needs/"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "gang-ops-slow-respawn",
+      "requirementIds": [
+        "gang-operations"
+      ],
+      "title": "Missed valuables take a long time to come back",
+      "detail": "If you leave a gang operation with a valuable still inside, the site does respawn, but only after a long wait; clear it fully on the first visit.",
+      "status": "reported",
+      "sources": [
+        {
+          "publisher": "PowerPyx",
+          "url": "https://www.powerpyx.com/gta-6-100-completion-checklist-guide/"
+        },
+        {
+          "publisher": "GTABase",
+          "url": "https://www.gtabase.com/articles/gta-6/gta-6-100-completion-guide-interactive-checklist"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    },
+    {
+      "id": "fences-close",
+      "requirementIds": [
+        "narcotics-fenced",
+        "jewelry-fenced",
+        "marked-bills-fenced",
+        "vehicles-fenced"
+      ],
+      "title": "Some fences close during the story",
+      "detail": "Certain fences are reported to stop trading for good as the story advances, so sell stolen goods you are holding before chapter finales.",
+      "status": "verified",
+      "sources": [
+        {
+          "publisher": "Game-Checklists",
+          "url": "https://game-checklists.com/gta6/guides/missables/"
+        },
+        {
+          "publisher": "Dork",
+          "url": "https://readdork.com/gaming/gta-6-walkthrough"
+        }
+      ],
+      "lastVerified": "2026-11-20"
+    }
+  ]
+}

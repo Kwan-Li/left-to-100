@@ -1,0 +1,106 @@
+---
+import '../styles/global.css';
+import { data } from '../data';
+import { SITE, href } from '../site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** JSON-LD objects for this page. */
+  schema?: Record<string, unknown>[];
+  active?: 'home' | 'cards' | 'missables' | 'data';
+}
+
+const { title, description, schema = [], active } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImage = new URL(href('/og.png'), Astro.site).toString();
+const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
+
+const nav = [
+  { id: 'home', label: '100% calculator', path: '/' },
+  { id: 'cards', label: 'Card sets', path: '/card-sets/' },
+  { id: 'missables', label: 'Missables', path: '/missables/' },
+  { id: 'data', label: 'Open data', path: '/data/' },
+] as const;
+
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: new URL(href('/'), Astro.site).toString(),
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="theme-color" content="#120d24" />
+    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={href("/favicon-32.png")} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={href('/icon-192.png')} />
+    <link rel="manifest" href={href('/manifest.webmanifest')} />
+    <link rel="sitemap" href={href('/sitemap-index.xml')} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(website)} />
+    {schema.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href={href('/')}>
+          <span class="brand-mark" aria-hidden="true">%</span>
+          <span>{SITE.name}</span>
+        </a>
+        <nav aria-label="Main">
+          <ul>
+            {nav.map((n) => (
+              <li>
+                <a href={href(n.path)} aria-current={active === n.id ? 'page' : undefined}>{n.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          Data version <code>{data.version}</code>, updated {data.updated}. Figures are from public guides published days after
+          launch; treat them as provisional. <a href={href('/data/')}>See sources and status</a>.
+        </p>
+        <p>
+          Free and open source: code MIT, data CC0. <a href={SITE.repo}>Report a correction on GitHub</a>.
+        </p>
+        <p class="muted">{SITE.disclaimer}</p>
+      </div>
+    </footer>
+    <script>
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {});
+      }
+    </script>
+  </body>
+</html>

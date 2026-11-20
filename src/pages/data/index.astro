@@ -1,0 +1,113 @@
+---
+import { allSources, data, statusCounts } from '../../data';
+import Layout from '../../layouts/Layout.astro';
+import { SITE, href } from '../../site';
+
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const disputed = [...data.requirements, ...data.cardSets, ...data.missables, ...data.pointsOfNoReturn, ...data.exceptions].filter(
+  (r) => r.status === 'disputed',
+);
+const label = (r: { name?: string; label?: string; title?: string; id: string }) => r.name ?? r.label ?? r.title ?? r.id;
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'GTA 6 100% completion dataset',
+    description: `Requirements, thresholds, card set sizes, missables and known traps for Grand Theft Auto VI 100% completion, with sources and a verification status for every fact.`,
+    url: pageUrl,
+    license: 'https://creativecommons.org/publicdomain/zero/1.0/',
+    isAccessibleForFree: true,
+    version: data.version,
+    dateModified: data.updated,
+    creator: { '@type': 'Organization', name: `${SITE.name} contributors`, url: SITE.repo },
+    distribution: [
+      { '@type': 'DataDownload', encodingFormat: 'application/json', contentUrl: new URL(href('/gta6.json'), Astro.site).toString() },
+    ],
+  },
+];
+---
+
+<Layout
+  title="Open GTA 6 100% Completion Data (CC0, Sourced)"
+  description="Free CC0 GTA 6 100% completion dataset: requirements, card sets, missables and traps. Every fact is sourced and marked verified, reported or disputed."
+  schema={schema}
+  active="data"
+>
+  <h1>Open <span class="accent">GTA 6 100%</span> data</h1>
+  <p class="lead">
+    Everything this site calculates comes from one public JSON file. Use it in your own tracker, bot or guide. It's CC0, so no
+    permission or credit is needed.
+  </p>
+  <p>
+    <a class="btn primary" href={href('/gta6.json')} download>Download gta6.json</a>
+    <a class="btn ghost" href={SITE.repo}>View on GitHub</a>
+  </p>
+
+  <h2>How facts are checked</h2>
+  <div class="grid-2">
+    <div class="panel">
+      <p><span class="badge verified">verified</span></p>
+      <p class="muted">Two or more independent publishers, each doing their own work, agree. {statusCounts.verified} facts.</p>
+    </div>
+    <div class="panel">
+      <p><span class="badge reported">reported</span></p>
+      <p class="muted">One original source so far, even if other sites repeat it. {statusCounts.reported} facts.</p>
+    </div>
+    <div class="panel">
+      <p><span class="badge disputed">disputed</span></p>
+      <p class="muted">Independent sources disagree. Shown as disputed, never guessed. {statusCounts.disputed} facts.</p>
+    </div>
+  </div>
+  <p class="prose muted">
+    Nobody on this project copies guide text. Numbers and names are facts; every explanation is written in our own words.
+    The team doesn't have access to the game, so corrections from players with sources are what keep this accurate.
+  </p>
+
+  {
+    disputed.length > 0 && (
+      <>
+        <h2>Currently disputed</h2>
+        <ul>
+          {disputed.map((r) => (
+            <li>
+              <strong>{label(r as never)}</strong>
+              {r.note ? `: ${r.note}` : ''}
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  <h2>What's in the file</h2>
+  <div class="table-wrap">
+    <table>
+      <tbody>
+        <tr><td>Requirements</td><td class="num">{data.requirements.length}</td></tr>
+        <tr><td>Card sets</td><td class="num">{data.cardSets.length}</td></tr>
+        <tr><td>Chapters (labels only)</td><td class="num">{data.chapters.length}</td></tr>
+        <tr><td>Missables</td><td class="num">{data.missables.length}</td></tr>
+        <tr><td>Points of no return</td><td class="num">{data.pointsOfNoReturn.length}</td></tr>
+        <tr><td>Known traps</td><td class="num">{data.exceptions.length}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Send a correction</h2>
+  <p class="prose">
+    Found a wrong number? <a href={`${SITE.repo}/issues/new?template=correction.yml`}>Open a correction</a> with at least one
+    source link. A screenshot or video timestamp from your own game helps most.
+  </p>
+
+  <h2>Sources ({allSources.length})</h2>
+  <ul>
+    {
+      allSources.map((s) => (
+        <li>
+          {s.publisher}: <a href={s.url} rel="nofollow noopener">{s.url}</a>
+        </li>
+      ))
+    }
+  </ul>
+</Layout>

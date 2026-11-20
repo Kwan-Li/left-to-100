@@ -1,0 +1,169 @@
+---
+import Planner from '../components/Planner';
+import DontLose from '../components/DontLose';
+import { StatusBadge } from '../components/StatusBadge';
+import { data, minimumCards } from '../data';
+import Layout from '../layouts/Layout.astro';
+import { SITE, href } from '../site';
+
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const flamingos = data.requirements.find((r) => /flamingo/i.test(r.name));
+const stunts = data.requirements.find((r) => /stunt/i.test(r.name));
+const fmt = (unit: string, n: number) => (unit === 'dollars' ? `$${n.toLocaleString('en-US')}` : unit === 'percent' ? `${n}%` : n.toLocaleString('en-US'));
+
+const examples = [
+  `${data.totals.cardSetsRequired} of ${data.totals.cardSets} card sets`,
+  flamingos && flamingos.total ? `${flamingos.required} of ${flamingos.total} ${flamingos.name.toLowerCase()}` : null,
+  stunts && stunts.total ? `${stunts.required} of ${stunts.total} stunts` : null,
+].filter(Boolean);
+
+const faqs = [
+  {
+    q: 'When does the 100% checklist unlock in GTA 6?',
+    a: 'The in-game 100% Completion list (Progress > Stats) only appears after you finish the main story. Everything you do before that still counts; you just can\'t see the list. That is why this calculator exists.',
+  },
+  {
+    q: 'How many requirements are on the GTA 6 100% checklist?',
+    a: `${data.totals.requirements}. They are grouped as ${data.categories.map((c) => c.name).join(', ')}.`,
+  },
+  {
+    q: 'Do I need every collectible for 100%?',
+    a: `No. Most requirements only need part of the total, for example ${examples.join(', ')}. The calculator shows how many of each you can skip.`,
+  },
+  {
+    q: 'What is the fewest collectible cards needed for 100%?',
+    a: `${minimumCards} of ${data.totals.cards}, if you finish the ${data.totals.cardSetsRequired} smallest sets. Your own minimum depends on which sets you have already started; the card set planner works it out.`,
+  },
+  {
+    q: 'Can I miss anything that counts toward 100%?',
+    a: 'A few items are reported to become unavailable after certain chapters. None of them block 100% on their own, but they use up some of your room to skip. The "Before you finish" panel warns you about the ones in your current chapter only, without plot details.',
+  },
+  {
+    q: 'Is this an official Rockstar tool?',
+    a: `No. ${SITE.name} is an unofficial, free and open-source fan project. Every number links to its public sources and is marked verified, reported or disputed.`,
+  },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: `${SITE.name}: GTA 6 100% Completion Calculator`,
+    url: pageUrl,
+    applicationCategory: 'GameApplication',
+    operatingSystem: 'Any (web browser)',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    description: 'Enter your GTA 6 progress counts and see what is left for each 100% requirement, how many you can skip, and which card sets to finish.',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<Layout
+  title="GTA 6 100% Completion Calculator & Checklist (All 35)"
+  description={`Free GTA 6 100% calculator: all ${data.totals.requirements} requirements before the checklist unlocks, what's left, what you can skip, and which card sets to finish.`}
+  schema={schema}
+  active="home"
+>
+  <h1>GTA 6 <span class="accent">100% completion</span> calculator</h1>
+  <p class="lead">
+    The in-game checklist stays hidden until the story ends. Type in the counts from your Progress menus and see what's left for
+    each of the {data.totals.requirements} requirements, and how many you can skip. Free, no account, spoiler-safe.
+  </p>
+  <p>
+    <a class="btn primary" href={href('/card-sets/')}>Plan your card sets →</a>
+  </p>
+
+  <h2 id="calculator">Your 100% plan</h2>
+  <Planner client:load pageUrl={pageUrl} />
+
+  <h2 id="dont-lose">Before you finish this chapter</h2>
+  <DontLose client:load />
+
+  <h2 id="checklist">All {data.totals.requirements} GTA 6 100% requirements</h2>
+  <p class="prose">
+    Here is the full list, with what you need and how many exist, so you can see it now instead of waiting for the end
+    of the story. Each figure is marked <em>verified</em> (two or more independent sources agree), <em>reported</em> (one
+    original source) or <em>disputed</em>.
+  </p>
+  {
+    data.categories.map((cat) => (
+      <>
+        <h3>{cat.name}</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Requirement</th>
+                <th class="num">Needed</th>
+                <th class="num">Exist</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.requirements
+                .filter((r) => r.categoryId === cat.id)
+                .map((r) => (
+                  <tr>
+                    <td>{r.name}</td>
+                    <td class="num">{fmt(r.unit, r.required)}</td>
+                    <td class="num">{r.total === null ? '—' : fmt(r.unit, r.total)}</td>
+                    <td>
+                      <StatusBadge status={r.status} />
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    ))
+  }
+
+  <h2 id="how">How it works</h2>
+  <div class="grid-2">
+    <div class="panel">
+      <h3>1. Enter what the game shows</h3>
+      <p class="muted">
+        Before the story ends, your counts are spread across the Progress menus. Enter the ones you can find and leave the
+        rest blank. Blank means unknown, never zero.
+      </p>
+    </div>
+    <div class="panel">
+      <h3>2. See what's left and what you can skip</h3>
+      <p class="muted">
+        Each requirement shows how many you still need and how many of the rest you can ignore. There's no made-up overall
+        percentage, because Rockstar hasn't published how the categories are weighted.
+      </p>
+    </div>
+    <div class="panel">
+      <h3>3. Plan your card sets</h3>
+      <p class="muted">
+        You only need {data.totals.cardSetsRequired} of {data.totals.cardSets} sets. The <a href={href('/card-sets/')}>card set planner</a>
+        picks the sets that need the fewest extra cards based on what you already have.
+      </p>
+    </div>
+    <div class="panel">
+      <h3>4. Don't lose anything</h3>
+      <p class="muted">
+        Set your chapter and you'll only see warnings for things lost at the end of it, with no plot details. Share a link to
+        move your progress to another device.
+      </p>
+    </div>
+  </div>
+
+  <h2 id="faq">Frequently asked questions</h2>
+  {
+    faqs.map((f) => (
+      <details class="faq">
+        <summary>{f.q}</summary>
+        <p>{f.a}</p>
+      </details>
+    ))
+  }
+</Layout>

@@ -1,0 +1,9 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { href } from '../site';
+---
+
+<Layout title="Page not found" description="This page doesn't exist.">
+  <h1>Page not found</h1>
+  <p class="lead">That page doesn't exist. <a href={href('/')}>Go to the 100% calculator</a>.</p>
+</Layout>

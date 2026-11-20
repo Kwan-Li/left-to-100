@@ -1,0 +1,43 @@
+name: Data correction
+description: Report a wrong number, name or missable.
+title: "Correction: "
+labels: [data]
+body:
+  - type: input
+    id: item
+    attributes:
+      label: What is wrong?
+      description: The requirement, card set or missable, as named on the site.
+    validations:
+      required: true
+  - type: input
+    id: current
+    attributes:
+      label: What the site says
+    validations:
+      required: true
+  - type: input
+    id: correct
+    attributes:
+      label: What it should say
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: At least one link. A screenshot or a video timestamp from your own game is best. Guides are fine too.
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform (if from your own game)
+      options: [PS5, Xbox Series X|S, Not from my game]
+  - type: checkboxes
+    id: spoilers
+    attributes:
+      label: Spoilers
+      options:
+        - label: My report contains no plot spoilers (chapters and locations are fine).
+          required: true

@@ -1,0 +1,39 @@
+{
+  "name": "skip-budget",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "check": "astro check",
+    "images": "node scripts/make-images.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/preact": "^6.1.6",
+    "@astrojs/sitemap": "^3.7.6",
+    "astro": "^7.4.13",
+    "lz-string": "^1.5.0",
+    "preact": "^11.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@testing-library/preact": "^3.2.6",
+    "@types/node": "^26.6.6",
+    "fast-check": "^4.10.3",
+    "happy-dom": "^21.0.4",
+    "sharp": "0.35.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.1"
+  },
+  "description": "Free, open-source GTA 6 100% completion calculator: what is left, what to skip, which card sets to finish.",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@12.18.0"
+}

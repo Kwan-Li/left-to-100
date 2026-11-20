@@ -1,0 +1,130 @@
+---
+import CardOptimizer from '../../components/CardOptimizer';
+import { StatusBadge } from '../../components/StatusBadge';
+import { data, minimumCards } from '../../data';
+import Layout from '../../layouts/Layout.astro';
+import { href } from '../../site';
+
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const sorted = [...data.cardSets].sort((a, b) => a.size - b.size || a.name.localeCompare(b.name));
+const smallest = sorted.slice(0, data.totals.cardSetsRequired);
+const largest = sorted.slice(data.totals.cardSetsRequired);
+const cardMissables = data.missables.filter((m) => m.cardSetId);
+
+const faqs = [
+  {
+    q: 'How many card sets do you need for 100% in GTA 6?',
+    a: `${data.totals.cardSetsRequired} of the ${data.totals.cardSets} collectible card sets.`,
+  },
+  {
+    q: 'Which GTA 6 card sets should I skip?',
+    a: `From scratch, skipping the ${largest.length} largest sets (${largest.map((s) => `${s.name}, ${s.size} cards`).join('; ')}) leaves the fewest cards to find. If you've already started some sets, enter your counts and the planner picks the cheapest ${data.totals.cardSetsRequired} for you.`,
+  },
+  {
+    q: 'What is the minimum number of cards for 100%?',
+    a: `${minimumCards} of ${data.totals.cards}, by finishing the ${data.totals.cardSetsRequired} smallest sets.`,
+  },
+  {
+    q: 'Do sold cards still count?',
+    a: 'Guides report that a card stays logged in your collection after you sell it, so selling duplicates does not undo set progress.',
+  },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '100% calculator', item: new URL(href('/'), Astro.site).toString() },
+      { '@type': 'ListItem', position: 2, name: 'Card sets', item: pageUrl },
+    ],
+  },
+];
+---
+
+<Layout
+  title="GTA 6 Card Sets: Which 15 to Finish (Card Set Planner)"
+  description={`GTA 6 100% needs ${data.totals.cardSetsRequired} of ${data.totals.cardSets} card sets. Enter your counts and get the ${data.totals.cardSetsRequired} that need the fewest extra cards. Minimum: ${minimumCards} cards.`}
+  schema={schema}
+  active="cards"
+>
+  <h1>GTA 6 card sets: <span class="accent">which {data.totals.cardSetsRequired} to finish</span></h1>
+  <p class="lead">
+    100% needs {data.totals.cardSetsRequired} of {data.totals.cardSets} card sets, not all {data.totals.cards} cards. Enter how many
+    you've logged per set, and the planner picks the {data.totals.cardSetsRequired} sets that need the fewest extra cards.
+  </p>
+
+  <CardOptimizer client:load pageUrl={pageUrl} />
+
+  <h2 id="all-sets">All {data.totals.cardSets} card sets, smallest first</h2>
+  <p class="prose">
+    Starting from zero, the {data.totals.cardSetsRequired} smallest sets add up to <strong>{minimumCards}</strong> cards. Skipping the
+    {largest.length} largest saves {data.totals.cards - minimumCards} pickups compared with collecting everything.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Set</th>
+          <th class="num">Cards</th>
+          <th>From scratch</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          sorted.map((s) => (
+            <tr>
+              <td>{s.name}</td>
+              <td class="num">{s.size}</td>
+              <td>{smallest.includes(s) ? 'Finish' : 'Skip'}</td>
+              <td>
+                <StatusBadge status={s.status} />
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {
+    cardMissables.length > 0 && (
+      <>
+        <h2 id="missable-cards">Cards reported missable</h2>
+        <div class="callout spoiler">
+          Mild spoiler: this names chapters and locations, not plot. <a href={href('/missables/')}>Use the chapter-gated view instead</a>.
+        </div>
+        <details class="faq">
+          <summary>Show {cardMissables.length} missable cards</summary>
+          <ul>
+            {cardMissables.map((m) => {
+              const set = data.cardSets.find((s) => s.id === m.cardSetId);
+              const ch = data.chapters.find((c) => c.id === m.lostAfterChapterId);
+              return (
+                <li>
+                  <strong>{m.label}</strong> ({set?.name}): {m.where}. Reported lost after {ch?.label}. <StatusBadge status={m.status} />
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      </>
+    )
+  }
+
+  <h2 id="faq">Card set FAQ</h2>
+  {
+    faqs.map((f) => (
+      <details class="faq">
+        <summary>{f.q}</summary>
+        <p>{f.a}</p>
+      </details>
+    ))
+  }
+</Layout>
