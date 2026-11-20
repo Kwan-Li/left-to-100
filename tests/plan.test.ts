@@ -1,6 +1,16 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { cardPlan, emptyState, passedMissables, rowResult, summary, upcomingMissables, type PlayerState } from '../src/lib/plan';
+import {
+  cardPlan,
+  emptyState,
+  passedMissables,
+  rowResult,
+  setVerdicts,
+  summary,
+  upcomingMissables,
+  type MissableAnswer,
+  type PlayerState,
+} from '../src/lib/plan';
 import { decodeState, encodeState, sanitize } from '../src/lib/state';
 import { fixture } from './fixture';
 
@@ -39,6 +49,52 @@ describe('requirement rows', () => {
 
   it('summary counts rows and never reports a weighted percent', () => {
     expect(summary(data, state({ req: { stunts: 30, meditation: 3 } }))).toEqual({ done: 1, remaining: 1, unknown: 1, total: 3 });
+  });
+});
+
+describe('out-of-range counts', () => {
+  it('a count above the total is invalid: not done, and unknown in the summary', () => {
+    const st = state({ req: { stunts: 41, meditation: 15 } });
+    expect(rowResult(data, st, req('stunts'))).toEqual({ kind: 'invalid', value: 41, max: 40 });
+    expect(summary(data, st)).toEqual({ done: 1, remaining: 0, unknown: 2, total: 3 });
+  });
+
+  it('the total itself is still valid', () => {
+    expect(rowResult(data, state({ req: { stunts: 40 } }), req('stunts')).kind).toBe('done');
+  });
+
+  it('has no maximum when the total is unknown', () => {
+    expect(rowResult(data, state({ req: { cash: 1e9 } }), req('cash')).kind).toBe('done');
+  });
+
+  it('keeps blank and 0 distinct', () => {
+    expect(rowResult(data, state(), req('stunts')).kind).toBe('unknown');
+    expect(rowResult(data, state({ req: { stunts: 0 } }), req('stunts'))).toMatchObject({ kind: 'remaining', remaining: 30 });
+  });
+
+  it('a card count above the set size leaves the set unknown, so there is no plan', () => {
+    const p = cardPlan(data, state({ cards: { ...allCards(0), a: 7 } }));
+    expect(p).toEqual({ kind: 'incomplete', missingSetIds: ['a'] });
+    expect(setVerdicts(data, state({ cards: { ...allCards(0), a: 7 } }), p).a).toBeNull();
+  });
+
+  it('a card count equal to the set size is complete', () => {
+    const p = cardPlan(data, state({ cards: { ...allCards(0), a: 6 } }));
+    expect(p).toMatchObject({ kind: 'exact', plan: { setIds: ['a', 'b', 'c'] } });
+  });
+
+  it('property: any count above the total is never done and never feeds the summary', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 41, max: 1e7 }), (v) => {
+        const st = state({ req: { stunts: v } });
+        return rowResult(data, st, req('stunts')).kind === 'invalid' && summary(data, st).done === 0;
+      }),
+    );
+  });
+
+  it('saved progress keeps an out-of-range card count; untrusted input is still clamped', () => {
+    expect(sanitize(data, { cards: { a: 9 } }, { keepOutOfRange: true }).cards).toEqual({ a: 9 });
+    expect(sanitize(data, { cards: { a: 9, b: -2 } }).cards).toEqual({ a: 6, b: 0 });
   });
 });
 
@@ -139,6 +195,85 @@ describe('card-set optimizer', () => {
         return p.kind === 'exact' && p.plan.min === needs.slice(0, 3).reduce((s, n) => s + n, 0);
       }),
     );
+  });
+});
+
+describe('per-set verdicts', () => {
+  const answers = fc.constantFrom<MissableAnswer | undefined>('logged', 'missed', 'unknown', undefined);
+  const arbFull = fc.record({
+    counts: fc.tuple(...data.cardSets.map((s) => fc.integer({ min: 0, max: s.size }))),
+    lose: fc.subarray(data.cardSets.map((s) => s.id)),
+    a: answers,
+    b: answers,
+    chapterId: fc.constantFrom('ch2', 'post'),
+  });
+  const build = ({ counts, lose, a, b, chapterId }: { counts: number[]; lose: string[]; a?: MissableAnswer; b?: MissableAnswer; chapterId: string }) => {
+    const missables: PlayerState['missables'] = {};
+    if (a) missables['card-a'] = a;
+    if (b) missables['card-b'] = b;
+    return state({ chapterId, cards: Object.fromEntries(data.cardSets.map((s, i) => [s.id, counts[i]])), unobtainable: lose, missables });
+  };
+
+  it('property: in an exact plan every displayed verdict matches the plan', () => {
+    fc.assert(
+      fc.property(arbFull, (input) => {
+        const st = build(input);
+        const p = cardPlan(data, st);
+        if (p.kind !== 'exact') return true;
+        const v = setVerdicts(data, st, p);
+        let finishCost = 0;
+        for (const s of data.cardSets) {
+          const need = p.needs.find((n) => n.set.id === s.id)!.needed;
+          const inPlan = p.plan.setIds.includes(s.id);
+          expect(v[s.id], s.id).not.toBeNull();
+          if (v[s.id] === 'done') expect(need).toBe(0);
+          if (v[s.id] === 'finish') {
+            expect(inPlan).toBe(true);
+            finishCost += need;
+          }
+          if (v[s.id] === 'skip') expect(inPlan).toBe(false);
+          expect(v[s.id]).not.toBe('uncertain');
+          if (inPlan) expect(['finish', 'done']).toContain(v[s.id]);
+        }
+        expect(finishCost).toBe(p.plan.min);
+        return true;
+      }),
+    );
+  });
+
+  it('property: in a range plan, uncertain sets the best case finishes get the uncertain verdict', () => {
+    fc.assert(
+      fc.property(arbFull, (input) => {
+        const st = build(input);
+        const p = cardPlan(data, st);
+        if (p.kind !== 'range') return true;
+        const v = setVerdicts(data, st, p);
+        for (const id of p.uncertainSetIds) {
+          if (p.best.setIds.includes(id)) expect(v[id], id).toBe('uncertain');
+          else expect(v[id], id).toBe('skip');
+        }
+        for (const s of data.cardSets) {
+          // A firm verdict must hold in both cases.
+          const worst = p.worst ? p.worst.setIds.includes(s.id) : p.needs.find((n) => n.set.id === s.id)!.availability === 'available';
+          if (v[s.id] === 'finish') expect(p.best.setIds.includes(s.id) && worst).toBe(true);
+          if (v[s.id] === 'skip') expect(p.best.setIds.includes(s.id) || worst).toBe(false);
+        }
+        return true;
+      }),
+    );
+  });
+
+  it('a fully logged set is done and never uncertain, even with an unanswered missable', () => {
+    const st = state({ chapterId: 'post', cards: { ...allCards(0), a: 6 }, missables: { 'card-b': 'logged' } });
+    const p = cardPlan(data, st);
+    expect(p.kind).toBe('exact');
+    expect(setVerdicts(data, st, p).a).toBe('done');
+  });
+
+  it('a set marked unobtainable is skipped', () => {
+    const st = state({ cards: allCards(0), unobtainable: ['a'] });
+    const v = setVerdicts(data, st, cardPlan(data, st));
+    expect(v).toEqual({ a: 'skip', b: 'finish', c: 'finish', d: 'finish', e: 'skip' });
   });
 });
 

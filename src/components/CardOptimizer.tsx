@@ -1,14 +1,23 @@
 import { clientData } from '../data/client';
 import type { Dataset } from '../data/schema';
-import { cardPlan, passedMissables, type CardPlan } from '../lib/plan';
+import { r1 } from '../copy/r1';
+import { cardPlan, isOverMax, passedMissables, setVerdicts, type CardPlan, type SetVerdict } from '../lib/plan';
 import { ChapterPicker } from './ChapterPicker';
+import { CountInput } from './CountInput';
 import { MissableQuestions } from './MissableQuestions';
 import { ShareBar } from './ShareBar';
-import { StatusBadge } from './StatusBadge';
-import { parseCount, useStore } from './useStore';
+import { FormBadge } from './StatusBadge';
+import { useStore } from './useStore';
 import './planner.css';
 
-function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill: () => void }) {
+const VERDICT_TEXT: Record<SetVerdict, string> = {
+  done: r1.verdictDone,
+  finish: 'Finish',
+  skip: 'Skip',
+  uncertain: r1.verdictUncertain,
+};
+
+function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; blank: number; onFill: () => void }) {
   const name = (id: string) => data.cardSets.find((s) => s.id === id)?.name ?? id;
   const k = data.totals.cardSetsRequired;
   const skipNames = (ids: string[]) => data.cardSets.filter((s) => !ids.includes(s.id)).map((s) => s.name);
@@ -17,13 +26,17 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
     return (
       <div class="result">
         <p class="result-big">Enter a count for every set to get your plan.</p>
-        <p class="muted">
-          {plan.missingSetIds.length} of {data.cardSets.length} {plan.missingSetIds.length === 1 ? 'set is' : 'sets are'} blank. Enter 0 for
-          sets you haven't started.
-        </p>
-        <button type="button" class="btn" onClick={onFill}>
-          Set blank sets to 0
-        </button>
+        {/* Sets with an out-of-range count show their own error; only truly blank sets are counted here. */}
+        {blank > 0 && (
+          <>
+            <p class="muted">
+              {blank} of {data.cardSets.length} {blank === 1 ? 'set is' : 'sets are'} blank. Enter 0 for sets you haven't started.
+            </p>
+            <button type="button" class="btn primary" onClick={onFill}>
+              Set blank sets to 0
+            </button>
+          </>
+        )}
       </div>
     );
 
@@ -89,8 +102,9 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
 export default function CardOptimizer({ data = clientData, pageUrl }: { data?: Dataset; pageUrl: string }) {
   const [state, setState, ready] = useStore(data);
   const plan = cardPlan(data, state);
-  const chosen = plan.kind === 'exact' ? plan.plan.setIds : plan.kind === 'range' ? plan.best.setIds : [];
+  const verdicts = setVerdicts(data, state, plan);
   const needs = 'needs' in plan ? plan.needs : [];
+  const blank = data.cardSets.filter((s) => state.cards[s.id] === undefined || state.cards[s.id] === null).length;
   const cardMissables = passedMissables(data, state).filter((m) => m.cardSetId);
 
   const setCards = (id: string, v: number | null) => {
@@ -111,8 +125,8 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
     <div class="optimizer" aria-busy={!ready}>
       <div class="panel planner-top">
         <ChapterPicker data={data} state={state} setState={setState} />
-        <div role="status" aria-live="polite">
-          <Result data={data} plan={plan} onFill={fillZero} />
+        <div id="card-result" role="status" aria-live="polite">
+          <Result data={data} plan={plan} blank={blank} onFill={fillZero} />
         </div>
         <ShareBar data={data} state={state} pageUrl={pageUrl} />
       </div>
@@ -128,43 +142,65 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
       <section class="panel">
         <h3>Your card sets</h3>
         <p class="muted">Enter how many cards from each set are logged in your collection. Sold cards still count.</p>
+        <p class="badge-legend muted">{r1.badgeLegend}</p>
         <ul class="set-grid">
           {data.cardSets.map((s) => {
             const n = needs.find((x) => x.set.id === s.id);
-            const pick = chosen.includes(s.id);
+            const verdict = verdicts[s.id];
+            const value = state.cards[s.id];
+            const invalid = isOverMax(value, s.size);
+            const marked = state.unobtainable.includes(s.id);
             const inputId = `set-${s.id}`;
+            const outId = `${inputId}-out`;
             return (
-              <li class={`set ${pick ? 'pick' : ''} ${n?.availability ?? ''}`}>
+              <li key={s.id} class={`set ${verdict ? `v-${verdict}` : ''} ${n?.availability ?? ''}`}>
                 <div class="set-head">
                   <label for={inputId} class="set-name">
                     {s.name}
                   </label>
-                  <StatusBadge status={s.status} sources={s.sources} note={s.note} />
+                  <span class="set-tags">
+                    <FormBadge status={s.status} sources={s.sources} note={s.note} />
+                    {verdict && <span class={`set-verdict ${verdict}`}>{VERDICT_TEXT[verdict]}</span>}
+                  </span>
                 </div>
                 <div class="set-row">
-                  <input
+                  <CountInput
                     id={inputId}
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
+                    value={value}
                     max={s.size}
-                    placeholder="?"
-                    value={state.cards[s.id] ?? ''}
-                    onInput={(e) => setCards(s.id, parseCount((e.target as HTMLInputElement).value))}
+                    describedBy={`${inputId}-size ${outId}`}
+                    onValue={(v) => setCards(s.id, v)}
                   />
-                  <span class="muted">/ {s.size}</span>
-                  {n && <span class={`set-need ${n.needed === 0 ? 'done' : ''}`}>{n.needed === 0 ? 'Done' : `${n.needed} to go`}</span>}
+                  <span class="muted" id={`${inputId}-size`}>
+                    / {s.size}
+                  </span>
+                  <span id={outId} class={invalid ? 'out bad' : 'set-need'}>
+                    {invalid ? r1.errMax(s.size) : n && n.needed > 0 ? `${n.needed} to go` : ''}
+                  </span>
                 </div>
-                {chosen.length > 0 && <div class={`set-verdict ${pick ? 'go' : 'skip'}`}>{pick ? 'Finish' : 'Skip'}</div>}
-                {n?.reasons.map((r) => <p class="set-reason">{r}</p>)}
-                <label class="toggle small">
-                  <input type="checkbox" checked={state.unobtainable.includes(s.id)} onChange={(e) => toggleLost(s.id, (e.target as HTMLInputElement).checked)} />
-                  I can't finish this set
-                </label>
+                <div class="set-reasons">
+                  {n?.reasons.map((r) => (
+                    <p key={r} class="set-reason">
+                      {r}
+                    </p>
+                  ))}
+                </div>
+                <div class="set-foot">
+                  {/* A finished set can't be lost; keep the toggle only so an old mark can still be cleared. */}
+                  {(verdict !== 'done' || marked) && (
+                    <label class="toggle small">
+                      <input type="checkbox" checked={marked} onChange={(e) => toggleLost(s.id, (e.target as HTMLInputElement).checked)} />
+                      I can't finish this set
+                    </label>
+                  )}
+                </div>
               </li>
             );
           })}
         </ul>
+        <p class="back-link">
+          <a href="#card-result">{r1.backToResult}</a>
+        </p>
       </section>
     </div>
   );

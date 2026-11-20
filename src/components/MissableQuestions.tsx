@@ -1,6 +1,7 @@
 import type { Dataset, Missable } from '../data/schema';
 import type { MissableAnswer, PlayerState } from '../lib/plan';
-import { StatusBadge } from './StatusBadge';
+import { r1 } from '../copy/r1';
+import { FormBadge } from './StatusBadge';
 
 const OPTIONS: { value: MissableAnswer; label: string }[] = [
   { value: 'logged', label: 'Got it' },
@@ -8,7 +9,10 @@ const OPTIONS: { value: MissableAnswer; label: string }[] = [
   { value: 'unknown', label: 'Not sure' },
 ];
 
-/** Asks about missables the player has already passed. */
+/**
+ * Asks about missables the player has already passed. An unanswered question shows no selection
+ * (the plan still treats it as 'unknown').
+ */
 export function MissableQuestions({
   items,
   state,
@@ -23,17 +27,17 @@ export function MissableQuestions({
   return (
     <ul class="mq-list">
       {items.map((m) => {
-        const answer = state.missables[m.id] ?? 'unknown';
+        const answer: MissableAnswer | undefined = state.missables[m.id];
         return (
-          <li class="mq">
+          <li key={m.id} class="mq">
             <fieldset>
               <legend>
-                {m.label} <StatusBadge status={m.status} sources={m.sources} note={m.note} />
+                {m.label} <FormBadge status={m.status} sources={m.sources} note={m.note} />
               </legend>
               <p class="muted">{m.where}</p>
               <div class="mq-options">
                 {OPTIONS.map((o) => (
-                  <label class={`seg ${answer === o.value ? 'on' : ''}`}>
+                  <label key={o.value} class={`seg ${answer === o.value ? 'on' : ''}`}>
                     <input
                       type="radio"
                       name={`mq-${m.id}`}
@@ -45,6 +49,7 @@ export function MissableQuestions({
                   </label>
                 ))}
               </div>
+              {answer === undefined && <p class="mq-hint muted">{r1.missableUnanswered}</p>}
             </fieldset>
           </li>
         );

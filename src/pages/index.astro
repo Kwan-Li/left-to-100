@@ -4,6 +4,7 @@ import DontLose from '../components/DontLose';
 import { StatusBadge } from '../components/StatusBadge';
 import { data, minimumCards } from '../data';
 import Layout from '../layouts/Layout.astro';
+import { r1 } from '../copy/r1';
 import { SITE, href } from '../site';
 
 const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
@@ -72,18 +73,19 @@ const schema = [
 >
   <h1>GTA 6 <span class="accent">100% completion</span> calculator</h1>
   <p class="lead">
-    GTA 6 hides its 100% checklist until the story ends. Enter counts from your Progress menus to see what's left for all
-    {data.totals.requirements} requirements and how many you can skip. Free, spoiler-safe, no account needed.
+    GTA 6 hides its 100% checklist until the story ends. Enter counts from your Progress menus to see what's left for all {
+      data.totals.requirements
+    } requirements and how many you can skip. Free, spoiler-safe, no account needed.
   </p>
-  <p>
-    <a class="btn primary" href={href('/card-sets/')}>Plan your card sets →</a>
+  <p class="btn-row hero-actions">
+    <a class="btn primary" href="#calculator">{r1.heroCta}</a>
+    <a class="btn ghost" href={href('/card-sets/')}>Plan your card sets →</a>
   </p>
 
   <h2 id="calculator">Your 100% plan</h2>
   <Planner client:load pageUrl={pageUrl} />
 
-  <h2 id="dont-lose">Before you finish this chapter</h2>
-  <DontLose client:load />
+  <DontLose client:load headingId="dont-lose" />
 
   <h2 id="checklist">All {data.totals.requirements} GTA 6 100% requirements</h2>
   <p class="prose">
@@ -144,8 +146,8 @@ const schema = [
     <div class="panel">
       <h3>3. Plan your card sets</h3>
       <p class="muted">
-        You only need {data.totals.cardSetsRequired} of {data.totals.cardSets} card sets. The <a href={href('/card-sets/')}>card set planner</a>
-        picks the {data.totals.cardSetsRequired} sets that need the fewest extra cards from where you are now.
+        You only need {data.totals.cardSetsRequired} of {data.totals.cardSets} card sets. The <a href={href('/card-sets/')}>card set planner</a> picks
+        the {data.totals.cardSetsRequired} sets that need the fewest extra cards from where you are now.
       </p>
     </div>
     <div class="panel">

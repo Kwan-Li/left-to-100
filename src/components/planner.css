@@ -3,6 +3,11 @@
   gap: 16px;
 }
 
+.chapter-block {
+  display: grid;
+  gap: 8px;
+}
+
 .chapter-picker {
   display: grid;
   gap: 6px;
@@ -17,9 +22,28 @@
   font-weight: 400;
 }
 
+.chapter-strip {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+
+.chapter-strip.warn {
+  border-color: color-mix(in srgb, var(--orange) 55%, var(--line));
+}
+
+.chapter-strip a {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .summary {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
@@ -48,6 +72,34 @@
   color: var(--muted);
 }
 
+.summary-total {
+  font-size: 0.95rem;
+}
+
+.jump-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: -4px 0 0;
+  font-size: 0.9rem;
+}
+
+.jump-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.jump-nav a:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
 .planner-actions {
   display: flex;
   flex-wrap: wrap;
@@ -59,7 +111,9 @@
 .toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 0;
   cursor: pointer;
   font-weight: 600;
 }
@@ -68,12 +122,14 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--muted);
-  margin-top: 8px;
+  padding: 8px 0;
 }
 
 .toggle input {
-  width: 18px;
-  height: 18px;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
   accent-color: var(--pink);
 }
 
@@ -81,11 +137,6 @@
   display: grid;
   gap: 6px;
   justify-items: start;
-}
-
-.share-buttons {
-  display: flex;
-  gap: 8px;
 }
 
 .share-msg {
@@ -98,9 +149,20 @@
   font: 0.8rem var(--mono);
   color: var(--text);
   background: var(--bg-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   padding: 6px 8px;
+  min-height: 44px;
+}
+
+.badge-legend {
+  margin: 14px 4px;
+  font-size: 0.85rem;
+}
+
+.badge-legend + .panel,
+.badge-legend + .sr-only + .panel {
+  margin-top: 0;
 }
 
 .req-group h3 {
@@ -116,11 +178,23 @@
   padding: 0;
 }
 
+/* ------------------------------------------------------------------ */
+/* Requirement rows: name and target on the left, input and outcome on */
+/* the right at every width; traps collapse into a <details> below.    */
+/* ------------------------------------------------------------------ */
+
 .req {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px 16px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'name input'
+    'meta input'
+    'hint input'
+    'traps input'
+    'open open';
+  grid-template-rows: auto auto auto auto auto;
+  column-gap: 16px;
+  align-items: start;
   padding: 12px 0;
   border-top: 1px solid var(--line);
 }
@@ -130,42 +204,103 @@
 }
 
 .req-name {
+  grid-area: name;
   font-weight: 700;
+  line-height: 1.3;
   cursor: pointer;
 }
 
 .req-meta {
+  grid-area: meta;
   font-size: 0.88rem;
   color: var(--muted);
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 2px 6px;
   align-items: center;
+  margin-top: 2px;
 }
 
 .req-hint {
+  grid-area: hint;
   font-size: 0.82rem;
   color: var(--muted);
   margin-top: 2px;
 }
 
-.req-trap {
-  font-size: 0.85rem;
-  margin-top: 6px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--orange) 12%, transparent);
-}
-
 .req-input {
+  grid-area: input;
   display: grid;
   justify-items: end;
+  align-content: start;
   gap: 4px;
   min-width: 170px;
 }
 
+.req-traps {
+  grid-area: traps;
+  margin-top: 4px;
+}
+
+/* Open traps take the full row width under the input. */
+.req-traps[open] {
+  grid-area: open;
+}
+
+.req-traps summary {
+  position: relative;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--orange);
+  padding: 2px 0;
+  list-style: none;
+}
+
+.req-traps summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A 44px-tall hit area without making the collapsed row taller. */
+.req-traps summary::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+.req-traps summary::before {
+  content: '▸';
+  font-size: 0.8em;
+  transition: transform 0.15s;
+}
+
+.req-traps[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.req.done .req-traps summary {
+  color: var(--muted);
+}
+
+.req-trap {
+  font-size: 0.85rem;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+}
+
 .out {
   font-size: 0.88rem;
+  line-height: 1.35;
   text-align: right;
 }
 
@@ -192,30 +327,138 @@
 
 .out.bad {
   color: var(--red);
+  font-weight: 600;
 }
 
 .req.done .req-name {
   color: var(--muted);
 }
 
-@media (max-width: 560px) {
+/* $ and % next to the number. Decorative: the target text already names the unit. */
+.affix {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.affix-sym {
+  position: absolute;
+  color: var(--muted);
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.affix.dollars .affix-sym {
+  left: 10px;
+}
+
+.affix.percent .affix-sym {
+  right: 10px;
+}
+
+.affix.dollars input {
+  padding-left: 22px;
+}
+
+.affix.percent input {
+  padding-right: 26px;
+}
+
+@media (max-width: 640px) {
   .req {
-    grid-template-columns: 1fr;
+    padding: 6px 0 7px;
+    column-gap: 12px;
+  }
+
+  .req-name {
+    font-size: 0.98rem;
+    line-height: 1.2;
+  }
+
+  .req-meta {
+    font-size: 0.84rem;
+    line-height: 1.35;
+    margin-top: 0;
+  }
+
+  .req-traps {
+    margin-top: 1px;
+  }
+
+  .req-traps summary {
+    line-height: 1.3;
+    padding: 1px 0;
   }
 
   .req-input {
-    justify-items: start;
-    grid-auto-flow: column;
-    align-items: center;
-    justify-content: start;
+    min-width: 0;
+    max-width: 9.5rem;
+    gap: 2px;
+  }
+
+  .req-input input[type='number'] {
+    width: 6.25em;
   }
 
   .out {
-    text-align: left;
+    font-size: 0.82rem;
+    line-height: 1.3;
+  }
+
+  .planner-top {
+    gap: 12px;
+  }
+
+  .chip {
+    padding: 4px 10px;
+    font-size: 0.88rem;
+  }
+
+  .chip strong {
+    font-size: 1rem;
+  }
+
+  .summary-total {
+    font-size: 0.88rem;
+  }
+
+  /* One row of jump links that scrolls sideways instead of wrapping into two 44px rows. */
+  .jump-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: -2px -14px 0;
+    padding: 0 14px;
+  }
+
+  .jump-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .jump-nav a {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .badge-legend {
+    margin: 10px 2px;
+  }
+
+  /* The "where to check" hint shows while the row's input has focus: it's needed while counting, and
+     keeping it out of the collapsed row keeps each row short. Screen readers get it via aria-describedby. */
+  .req-hint {
+    display: none;
+  }
+
+  .req:focus-within .req-hint {
+    display: block;
   }
 }
 
-/* Card optimizer */
+/* ------------------------------------------------------------------ */
+/* Card optimizer                                                      */
+/* ------------------------------------------------------------------ */
+
 .result {
   border-radius: 12px;
   padding: 14px 16px;
@@ -225,6 +468,10 @@
 
 .result p {
   margin: 4px 0;
+}
+
+.result .btn {
+  margin-top: 8px;
 }
 
 .result-big {
@@ -241,6 +488,7 @@
   color: var(--red);
 }
 
+/* Tiles share row tracks (subgrid), so inputs line up across a row even when a name wraps. */
 .set-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -248,36 +496,57 @@
 }
 
 .set {
-  position: relative;
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 0;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px;
+  padding: 12px 12px 0;
   background: var(--bg-2);
 }
 
-.set.pick {
+.set.v-finish {
   border-color: var(--teal);
 }
 
-.set.lost {
-  opacity: 0.65;
+.set.v-done {
+  border-color: color-mix(in srgb, var(--ok) 60%, var(--line));
 }
 
-.set.uncertain {
+.set.v-uncertain {
   border-style: dashed;
   border-color: var(--yellow);
 }
 
+/* Unobtainable: a red-tinted tile and dashed border instead of fading the whole card. */
+.set.lost {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--red) 55%, var(--line));
+  background: color-mix(in srgb, var(--red) 6%, var(--bg-2));
+}
+
 .set-head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px 8px;
   align-items: flex-start;
 }
 
+/* The name keeps at least ~9em; a long verdict chip wraps under it instead of squeezing it. */
 .set-name {
+  flex: 1 1 9em;
   font-weight: 700;
+  line-height: 1.3;
   cursor: pointer;
+}
+
+.set-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 .set-row {
@@ -286,10 +555,12 @@
   gap: 8px;
   margin-top: 8px;
   flex-wrap: wrap;
+  align-self: end;
 }
 
-.set-row input {
+.set-row input[type='number'] {
   width: 5em;
+  background: var(--card-input-bg);
 }
 
 .set-need {
@@ -298,22 +569,33 @@
   font-weight: 700;
 }
 
-.set-need.done {
-  color: var(--ok);
+.set-need:empty {
+  display: none;
+}
+
+/* Skipped sets: the remaining count is information, not a call to action. */
+.set.v-skip .set-need {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.set-row .out.bad {
+  text-align: left;
+  font-size: 0.82rem;
 }
 
 .set-verdict {
   display: inline-block;
-  margin-top: 8px;
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 2px 8px;
   border-radius: 6px;
+  white-space: nowrap;
 }
 
-.set-verdict.go {
+.set-verdict.finish {
   background: color-mix(in srgb, var(--teal) 20%, transparent);
   color: var(--teal);
 }
@@ -323,13 +605,48 @@
   color: var(--muted);
 }
 
+.set-verdict.done {
+  background: color-mix(in srgb, var(--ok) 18%, transparent);
+  color: var(--ok);
+}
+
+.set-verdict.done::before {
+  content: '✓ ';
+}
+
+.set-verdict.uncertain {
+  background: color-mix(in srgb, var(--yellow) 18%, transparent);
+  color: var(--yellow);
+}
+
+.set-reasons:empty {
+  min-height: 8px;
+}
+
 .set-reason {
   font-size: 0.8rem;
   color: var(--yellow);
   margin: 6px 0 0;
 }
 
-/* Missable questions */
+.set-foot {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.set-foot:empty {
+  border-top-color: transparent;
+}
+
+.back-link {
+  margin: 16px 0 0;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
+/* Missable questions                                                  */
+/* ------------------------------------------------------------------ */
+
 .mq {
   border-top: 1px solid var(--line);
   padding: 12px 0;
@@ -343,6 +660,7 @@
   border: 0;
   margin: 0;
   padding: 0;
+  min-width: 0;
 }
 
 .mq legend {
@@ -357,18 +675,23 @@
 
 .mq-options {
   display: inline-flex;
-  border: 1px solid var(--line);
+  flex-wrap: wrap;
+  border: 1px solid var(--control-border);
   border-radius: 10px;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .seg {
   position: relative;
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
-  border-left: 1px solid var(--line);
+  border-left: 1px solid var(--control-border);
 }
 
 .seg:first-child {
@@ -379,12 +702,24 @@
   position: absolute;
   opacity: 0;
   inset: 0;
+  margin: 0;
   cursor: pointer;
 }
 
-.seg.on {
+.seg:hover {
   background: var(--surface-2);
-  color: var(--pink);
+}
+
+/* Selected: solid fill, a check mark and heavier weight, so it reads without relying on color alone. */
+.seg.on {
+  background: var(--seg-on-bg);
+  color: var(--seg-on-ink);
+  font-weight: 800;
+}
+
+.seg.on::before {
+  content: '✓';
+  margin-right: 6px;
 }
 
 .seg:has(input:focus-visible) {
@@ -392,7 +727,23 @@
   outline-offset: -3px;
 }
 
-/* Don't lose */
+.mq .mq-hint {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Don't lose                                                          */
+/* ------------------------------------------------------------------ */
+
+.dl-heading {
+  margin-top: 56px;
+}
+
+.panel + .dl-heading {
+  margin-top: 32px;
+}
+
 .dl {
   border-top: 1px solid var(--line);
   padding: 10px 0;
@@ -409,4 +760,10 @@
 .dont-lose h3,
 .optimizer h3 {
   margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .dl-heading {
+    margin-top: 40px;
+  }
 }

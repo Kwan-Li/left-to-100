@@ -12,8 +12,13 @@ function toCount(v: unknown): Count {
   return Math.max(0, Math.floor(v));
 }
 
-/** Rebuild a state from untrusted input, keeping only known ids and valid values. */
-export function sanitize(data: Dataset, raw: unknown): PlayerState {
+/**
+ * Rebuild a state from untrusted input, keeping only known ids and valid values.
+ * Card counts above the set size are clamped, except with `keepOutOfRange` (used for this device's own
+ * saved progress): there an over-the-maximum count stays as typed so the row keeps showing its error
+ * instead of silently turning into a finished set after a reload.
+ */
+export function sanitize(data: Dataset, raw: unknown, { keepOutOfRange = false }: { keepOutOfRange?: boolean } = {}): PlayerState {
   const base = emptyState(data);
   if (!raw || typeof raw !== 'object') return base;
   const r = raw as Partial<PlayerState>;
@@ -24,7 +29,7 @@ export function sanitize(data: Dataset, raw: unknown): PlayerState {
   }
   for (const s of data.cardSets) {
     const v = toCount(r.cards?.[s.id]);
-    if (v !== null) base.cards[s.id] = Math.min(v, s.size);
+    if (v !== null) base.cards[s.id] = keepOutOfRange ? v : Math.min(v, s.size);
   }
   if (Array.isArray(r.unobtainable)) {
     base.unobtainable = r.unobtainable.filter((id) => data.cardSets.some((s) => s.id === id));
@@ -78,7 +83,7 @@ export function forgetLoadedState() {
 function readStorage(data: Dataset): PlayerState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? sanitize(data, JSON.parse(raw)) : null;
+    return raw ? sanitize(data, JSON.parse(raw), { keepOutOfRange: true }) : null;
   } catch {
     return null;
   }

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import emblem from '../brand/emblem.svg?raw';
 import { data } from '../data';
 import { SITE, href } from '../site';
 
@@ -14,6 +15,8 @@ interface Props {
 const { title, description, schema = [], active } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImage = new URL(href('/og.png'), Astro.site).toString();
+/** The same emblem art as the favicon and OG image, sized for the header. */
+const brandMark = emblem.replace('<svg ', '<svg width="32" height="32" aria-hidden="true" focusable="false" ');
 const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
 
 const nav = [
@@ -40,7 +43,8 @@ const website = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="robots" content="index,follow,max-image-preview:large" />
-    <meta name="theme-color" content="#120d24" />
+    <meta name="theme-color" content="#120d24" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbf7ff" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
     <link rel="icon" href={href("/favicon-32.png")} sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href={href('/icon-192.png')} />
@@ -68,7 +72,7 @@ const website = {
     <header class="site-header">
       <div class="wrap header-inner">
         <a class="brand" href={href('/')}>
-          <span class="brand-mark" aria-hidden="true">%</span>
+          <span class="brand-mark" set:html={brandMark} />
           <span>{SITE.name}</span>
         </a>
         <nav aria-label="Main">

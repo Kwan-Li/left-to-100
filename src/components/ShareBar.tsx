@@ -1,4 +1,5 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { r1 } from '../copy/r1';
 import type { Dataset } from '../data/schema';
 import type { PlayerState } from '../lib/plan';
 import { resetState, shareUrl } from '../lib/state';
@@ -6,6 +7,17 @@ import { resetState, shareUrl } from '../lib/state';
 export function ShareBar({ data, state, pageUrl }: { data: Dataset; state: PlayerState; pageUrl: string }) {
   const [msg, setMsg] = useState('');
   const [link, setLink] = useState('');
+  /** Reset is two steps: the first click swaps the buttons for an inline confirm. */
+  const [confirming, setConfirming] = useState(false);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const resetRef = useRef<HTMLButtonElement>(null);
+  const returnFocus = useRef(false);
+
+  useEffect(() => {
+    if (confirming) cancelRef.current?.focus();
+    else if (returnFocus.current) resetRef.current?.focus();
+    returnFocus.current = false;
+  }, [confirming]);
 
   const share = async () => {
     const url = shareUrl(state, pageUrl);
@@ -19,22 +31,40 @@ export function ShareBar({ data, state, pageUrl }: { data: Dataset; state: Playe
   };
 
   const reset = () => {
-    if (confirm('Reset all saved progress on this device? Your counts, card sets, chapter, and missable answers will be cleared.')) {
-      resetState(data);
-      setMsg('Progress reset.');
-      setLink('');
-    }
+    resetState(data);
+    setMsg('Progress reset.');
+    setLink('');
+    returnFocus.current = true;
+    setConfirming(false);
+  };
+
+  const cancel = () => {
+    returnFocus.current = true;
+    setConfirming(false);
   };
 
   return (
     <div class="share">
-      <div class="share-buttons">
-        <button type="button" class="btn primary" onClick={share}>
-          Copy share link
-        </button>
-        <button type="button" class="btn ghost" onClick={reset}>
-          Reset progress
-        </button>
+      <div class="btn-row">
+        {confirming ? (
+          <>
+            <button type="button" class="btn danger" onClick={reset}>
+              {r1.resetConfirm}
+            </button>
+            <button type="button" class="btn ghost" ref={cancelRef} onClick={cancel}>
+              {r1.resetCancel}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" class="btn ghost" onClick={share}>
+              Copy share link
+            </button>
+            <button type="button" class="btn ghost" ref={resetRef} onClick={() => setConfirming(true)}>
+              Reset progress
+            </button>
+          </>
+        )}
       </div>
       <p class="share-msg muted" role="status" aria-live="polite">
         {msg || 'Saved on this device. No account needed.'}

@@ -8,6 +8,8 @@ const disputed = [...data.requirements, ...data.cardSets, ...data.missables, ...
   (r) => r.status === 'disputed',
 );
 const label = (r: { name?: string; label?: string; title?: string; id: string }) => r.name ?? r.label ?? r.title ?? r.id;
+/** Join a label and its note: a colon, unless the label already ends a sentence. */
+const noteJoin = (text: string) => (/[.!?]$/.test(text) ? ' ' : ': ');
 
 const schema = [
   {
@@ -39,13 +41,13 @@ const schema = [
     Everything this site calculates comes from one public JSON file. Use it in your own tracker, bot, or guide—it's CC0, so no
     permission or credit is needed.
   </p>
-  <p>
+  <p class="btn-row">
     <a class="btn primary" href={href('/gta6.json')} download>Download gta6.json</a>
     <a class="btn ghost" href={SITE.repo}>View on GitHub</a>
   </p>
 
-  <h2>How facts are checked</h2>
-  <div class="grid-2">
+  <h2 id="statuses">How facts are checked</h2>
+  <div class="grid-3">
     <div class="panel">
       <p><span class="badge verified">verified</span></p>
       <p class="muted">Two or more independent publishers doing their own work agree. {statusCounts.verified} {statusCounts.verified === 1 ? 'fact' : 'facts'}.</p>
@@ -72,7 +74,7 @@ const schema = [
           {disputed.map((r) => (
             <li>
               <strong>{label(r as never)}</strong>
-              {r.note ? `: ${r.note}` : ''}
+              {r.note ? `${noteJoin(label(r as never))}${r.note}` : ''}
             </li>
           ))}
         </ul>
@@ -101,7 +103,7 @@ const schema = [
   </p>
 
   <h2>Sources ({allSources.length})</h2>
-  <ul>
+  <ul class="source-list">
     {
       allSources.map((s) => (
         <li>

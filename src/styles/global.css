@@ -6,13 +6,25 @@
   --line: #3a3166;
   --text: #f4f0ff;
   --muted: #b3a9d6;
-  --pink: #ff4fa3;
+  --pink: #ff5aa9;
   --orange: #ffa24c;
   --teal: #2ee6c8;
   --yellow: #ffe066;
   --red: #ff6b6b;
   --ok: #3ddc97;
   --focus: #ffe066;
+  /* Borders of inputs, selects and segmented controls: 3:1 or better against every surface they sit on. */
+  --control-border: #8075b8;
+  /* Fill of the card-set inputs, distinct from the tile behind them. */
+  --card-input-bg: var(--bg);
+  /* Primary buttons: the sunset gradient with dark ink, 4.5:1 or better across the whole gradient. */
+  --grad-a: #ff4fa3;
+  --grad-b: #ffa24c;
+  --on-grad: #1b0a22;
+  /* Selected segment in the missable questions. */
+  --seg-on-bg: var(--pink);
+  --seg-on-ink: #1b0a22;
+  --header-h: 70px;
   --radius: 14px;
   --shadow: 0 10px 30px rgb(0 0 0 / 0.35);
   --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -29,13 +41,16 @@
     --line: #ddd2f5;
     --text: #1b1433;
     --muted: #5d537d;
-    --pink: #d61f78;
-    --orange: #c45f00;
-    --teal: #00806e;
-    --yellow: #8a6a00;
-    --red: #c62828;
-    --ok: #12804f;
+    --pink: #a41358;
+    --orange: #8e4000;
+    --teal: #006254;
+    --yellow: #705400;
+    --red: #a42121;
+    --ok: #0d643c;
     --focus: #6b3fd6;
+    --control-border: #847aa6;
+    --card-input-bg: var(--surface);
+    --seg-on-ink: #ffffff;
     --shadow: 0 8px 24px rgb(40 20 90 / 0.08);
     color-scheme: light;
   }
@@ -60,6 +75,17 @@ body {
     radial-gradient(900px 400px at -10% 10%, color-mix(in srgb, var(--teal) 12%, transparent), transparent 60%),
     var(--bg);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body > main {
+  flex: 1 0 auto;
+}
+
+/* Anchor targets clear the sticky header. */
+[id] {
+  scroll-margin-top: calc(var(--header-h) + 12px);
 }
 
 a {
@@ -94,8 +120,8 @@ code {
   position: absolute;
   left: -999px;
   top: 8px;
-  background: var(--yellow);
-  color: #000;
+  background: var(--text);
+  color: var(--bg);
   padding: 8px 12px;
   border-radius: 8px;
   z-index: 10;
@@ -140,14 +166,14 @@ code {
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
+  display: block;
+  flex: none;
   width: 32px;
   height: 32px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--pink), var(--orange));
-  color: #fff;
-  font-weight: 900;
+}
+
+.brand-mark svg {
+  display: block;
 }
 
 .site-header nav ul {
@@ -160,8 +186,11 @@ code {
 }
 
 .site-header nav a {
-  display: block;
-  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  white-space: nowrap;
   border-radius: 999px;
   color: var(--muted);
   text-decoration: none;
@@ -234,10 +263,33 @@ h3 {
   margin-top: 16px;
 }
 
-.grid-2 {
+.grid-2,
+.grid-3 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
+}
+
+.grid-2 > .panel,
+.grid-3 > .panel {
+  margin-top: 0;
+}
+
+@media (min-width: 641px) {
+  .grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
 }
 
 /* Badges */
@@ -255,6 +307,14 @@ h3 {
   white-space: nowrap;
 }
 
+a.badge {
+  text-decoration: none;
+}
+
+a.badge:hover {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
 .badge.verified {
   color: var(--ok);
 }
@@ -264,6 +324,14 @@ h3 {
 }
 
 .badge.disputed {
+  color: var(--red);
+}
+
+a.badge.reported:hover {
+  color: var(--yellow);
+}
+
+a.badge.disputed:hover {
   color: var(--red);
 }
 
@@ -313,18 +381,27 @@ details.faq {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  padding: 14px 18px;
   margin-bottom: 10px;
 }
 
+/* The padding lives on the summary so the whole bar is the tap target. */
 details.faq summary {
   cursor: pointer;
   font-weight: 700;
+  padding: 12px 18px;
+  min-height: 44px;
+}
+
+details.faq > :not(summary) {
+  margin: 0 18px 14px;
 }
 
 details.faq p {
-  margin: 10px 0 0;
   color: var(--muted);
+}
+
+details.faq ul {
+  padding-left: 20px;
 }
 
 /* Callouts */
@@ -344,6 +421,7 @@ details.faq p {
 /* Footer */
 .site-footer {
   margin-top: 80px;
+  flex: none;
   border-top: 1px solid var(--line);
   padding: 24px 0 40px;
   font-size: 0.9rem;
@@ -357,28 +435,51 @@ details.faq p {
 /* Buttons and inputs (also used by islands) */
 .btn {
   appearance: none;
-  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--control-border);
   background: var(--surface-2);
   color: var(--text);
   font: inherit;
   font-weight: 700;
-  padding: 8px 14px;
+  line-height: 1.2;
+  padding: 8px 16px;
   border-radius: 10px;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .btn:hover {
   border-color: var(--pink);
+  color: var(--text);
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, var(--pink), var(--orange));
+  background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
   border-color: transparent;
-  color: #fff;
+  color: var(--on-grad);
+}
+
+.btn.primary:hover {
+  color: var(--on-grad);
+  filter: saturate(1.15) brightness(1.04);
 }
 
 .btn.ghost {
   background: transparent;
+}
+
+.btn.danger {
+  color: var(--red);
+  border-color: var(--red);
+  background: transparent;
+}
+
+.btn.danger:hover {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
 }
 
 input[type='number'],
@@ -386,15 +487,29 @@ select {
   font: inherit;
   color: var(--text);
   background: var(--bg-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
-  padding: 6px 8px;
+  padding: 8px 10px;
+  min-height: 44px;
 }
 
 input[type='number'] {
   width: 7.5em;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red);
 }
 
 input[type='number']::placeholder {
@@ -418,5 +533,105 @@ input[type='number']::placeholder {
   * {
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Data page                                                           */
+/* ------------------------------------------------------------------ */
+
+.source-list a {
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile                                                              */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  :root {
+    --header-h: 56px;
+  }
+
+  /* One row, at most 56px: brand, then a nav strip that scrolls sideways. Not sticky on phones. */
+  .site-header {
+    position: static;
+  }
+
+  [id] {
+    scroll-margin-top: 12px;
+  }
+
+  .header-inner {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 5px 0;
+  }
+
+  .brand {
+    flex: none;
+    gap: 8px;
+    font-size: 1rem;
+  }
+
+  .site-header nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+
+  .site-header nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-header nav ul {
+    flex-wrap: nowrap;
+    gap: 2px;
+    padding-right: 24px;
+  }
+
+  .site-header nav a {
+    padding: 0 10px;
+    font-size: 0.9rem;
+  }
+
+  h1 {
+    margin: 16px 0 8px;
+  }
+
+  h2 {
+    margin-top: 36px;
+  }
+
+  .lead {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .hero-actions + h2 {
+    margin-top: 28px;
+  }
+
+  .panel {
+    padding: 16px 14px;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  th,
+  td {
+    padding: 8px;
+  }
+
+  .badge {
+    font-size: 0.66rem;
+    padding: 2px 6px;
+    letter-spacing: 0.02em;
   }
 }

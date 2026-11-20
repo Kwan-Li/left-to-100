@@ -12,6 +12,7 @@
     "test": "vitest run",
     "check": "astro check",
     "images": "node scripts/make-images.mjs",
+    "contrast": "node scripts/contrast-check.mjs",
     "astro": "astro"
   },
   "dependencies": {
