@@ -458,6 +458,35 @@ describe('Round 3: hide done waits for the pointer', () => {
   });
 });
 
+describe('Round 4: hide done keeps the row while focus is anywhere inside it', () => {
+  it('Tab from a row that just became Done to its "Watch out" toggle keeps the row; leaving the row hides it', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    fireEvent.click(screen.getByLabelText('Hide done'));
+    await new Promise((r) => setTimeout(r, 350)); // past the 300ms window of the click on "Hide done"
+    const story = data.requirements.find((r) => r.id === 'story-completion')!;
+    const input = screen.getByLabelText(story.name) as HTMLInputElement;
+    const li = input.closest('li')!;
+    const summary = li.querySelector('details > summary') as HTMLElement;
+    const next = li.nextElementSibling!.querySelector('input') as HTMLInputElement;
+    input.focus();
+    fireEvent.input(input, { target: { value: '100' } });
+    await waitFor(() => expect(li.textContent).toContain('Done'));
+    // Tab: focus moves from the input to the summary in the same row.
+    summary.focus();
+    fireEvent.focusOut(input, { relatedTarget: summary });
+    fireEvent.focusIn(summary, { relatedTarget: input });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(li.isConnected).toBe(true);
+    expect(screen.queryByLabelText(story.name)).toBe(input);
+    // Tab again: focus leaves the row for the next row's input, so the row hides and focus stays put.
+    next.focus();
+    fireEvent.focusOut(summary, { relatedTarget: next });
+    fireEvent.focusIn(next, { relatedTarget: summary });
+    await waitFor(() => expect(screen.queryByLabelText(story.name)).toBeNull(), { timeout: 100 });
+    expect(next.isConnected).toBe(true);
+  });
+});
+
 describe('Round 3: "Watch out" notes and the chapter strip', () => {
   it('opening the notes leaves the summary in place and renders the notes in their own full-width cell', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);

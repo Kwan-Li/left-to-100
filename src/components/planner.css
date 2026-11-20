@@ -396,7 +396,16 @@
 }
 
 @media (max-width: 640px) {
+  /* The "where to check" and at-risk lines take the full row width under the input, so a focused row doesn't
+     stretch into a tall, narrow column of text; the outcome stays under the input, beside the name. */
   .req {
+    grid-template-areas:
+      'name input'
+      'meta input'
+      'traps input'
+      'hint hint'
+      'risk risk'
+      'open open';
     padding: 6px 0 7px;
     column-gap: 12px;
   }
@@ -453,13 +462,15 @@
     font-size: 0.88rem;
   }
 
-  /* One row of jump links that scrolls sideways instead of wrapping into two 44px rows. */
+  /* One row of jump links that scrolls sideways instead of wrapping into two 44px rows. The 5px above and below
+     (taken back by the margins) keeps a keyboard focus ring inside the scroll box; edgeFades() scrolls a focused
+     link clear of the side fades. */
   .jump-nav {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
-    margin: -2px -14px 0;
-    padding: 0 14px;
+    margin: -7px -14px -5px;
+    padding: 5px 14px;
   }
 
   .jump-nav::-webkit-scrollbar {

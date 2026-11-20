@@ -118,7 +118,10 @@ function ChapterStrip({ data, state }: { data: Dataset; state: PlayerState }) {
 export default function Planner({ data = clientData, pageUrl }: { data?: Dataset; pageUrl: string }) {
   const [state, setState, ready] = useStore(data);
   const [hideDone, setHideDone] = useState(false);
-  /** The row whose input has focus stays visible even when Hide done would remove it. */
+  /**
+   * The row with focus anywhere inside it (its input, "Watch out" toggle or a badge) stays visible even when Hide
+   * done would remove it, so Tab from a row that just became Done lands on its next control, not on <body>.
+   */
   const [focusId, setFocusId] = useState<string | null>(null);
   /**
    * The row whose input was focused last shows its "where to check" hint on phones. Kept on blur: if the hint
@@ -206,14 +209,19 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
     });
 
   const onFocus = (r: Requirement) => {
-    setFocusId(r.id);
     setHintId(r.id);
     valueAtFocus.current = state.req[r.id];
   };
   const onBlur = (r: Requirement) => {
+    if (state.req[r.id] !== valueAtFocus.current) setAnnouncement(r1.announce(r.name, outcomeText(r, rowResult(data, state, r))));
+  };
+  const onRowFocusIn = (r: Requirement) => setFocusId(r.id);
+  /** Focus moving between controls in the same row keeps it; leaving the row releases it (or holds it for a tap). */
+  const onRowFocusOut = (r: Requirement, e: FocusEvent) => {
+    const to = e.relatedTarget;
+    if (to instanceof Node && (e.currentTarget as HTMLElement).contains(to)) return;
     if (pointerBusy()) setHeldId(r.id);
     setFocusId((id) => (id === r.id ? null : id));
-    if (state.req[r.id] !== valueAtFocus.current) setAnnouncement(r1.announce(r.name, outcomeText(r, rowResult(data, state, r))));
   };
 
   return (
@@ -282,7 +290,12 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
                   const riskHint = res.kind === 'remaining' && res.atRisk && r3.rowAtRiskHint ? r3.rowAtRiskHint : null;
                   const trapsOpen = openTraps.has(r.id);
                   return (
-                    <li key={r.id} class={`req ${res.kind}${r.id === hintId ? ' show-hint' : ''}`}>
+                    <li
+                      key={r.id}
+                      class={`req ${res.kind}${r.id === hintId ? ' show-hint' : ''}`}
+                      onFocusIn={() => onRowFocusIn(r)}
+                      onFocusOut={(e) => onRowFocusOut(r, e)}
+                    >
                       <label for={inputId} class="req-name">
                         {r.name}
                       </label>
