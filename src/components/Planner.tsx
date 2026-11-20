@@ -1,6 +1,7 @@
 import { clientData } from '../data/client';
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { r1 } from '../copy/r1';
+import { r2 } from '../copy/r2';
 import type { Dataset, Requirement } from '../data/schema';
 import {
   currentChapter,
@@ -12,6 +13,7 @@ import {
   type PlayerState,
   type RowResult,
 } from '../lib/plan';
+import { edgeFades } from '../lib/edgeFades';
 import { ChapterPicker } from './ChapterPicker';
 import { CountInput } from './CountInput';
 import { ShareBar } from './ShareBar';
@@ -72,21 +74,33 @@ function Outcome({ id, r, res }: { id: string; r: Requirement; res: RowResult })
   );
 }
 
-/** One line under the chapter picker: what the "before you finish" panel holds, with a link to it. */
+/**
+ * One line under the chapter picker: what the "before you finish" panel holds, with a link to it.
+ * `n` counts checklist missables only; a save reminder (point of no return) alone gets its own line.
+ */
 function ChapterStrip({ data, state }: { data: Dataset; state: PlayerState }) {
   const label = currentChapter(data, state)?.label ?? '';
-  const n = upcomingMissables(data, state).length + data.pointsOfNoReturn.filter((p) => p.chapterId === state.chapterId).length;
-  const text =
-    state.chapterId === 'not-started'
-      ? r1.chapterStrip.notStarted
-      : state.chapterId === 'story-finished'
-        ? r1.chapterStrip.finished
-        : n > 0
-          ? r1.chapterStrip.some(n, label)
+  const n = upcomingMissables(data, state).length;
+  const saveReminder = data.pointsOfNoReturn.some((p) => p.chapterId === state.chapterId);
+  const notStarted = state.chapterId === 'not-started';
+  const text = notStarted
+    ? r1.chapterStrip.notStarted
+    : state.chapterId === 'story-finished'
+      ? r1.chapterStrip.finished
+      : n > 0
+        ? r1.chapterStrip.some(n, label)
+        : saveReminder
+          ? r2.chapterStrip.saveOnly(label)
           : r1.chapterStrip.none(label);
   return (
     <p class={`chapter-strip ${n > 0 ? 'warn' : ''}`}>
-      <span>{text}</span> <a href="#dont-lose">{r1.chapterStripLink}</a>
+      <span>{text}</span>
+      {!notStarted && (
+        <>
+          {' '}
+          <a href="#dont-lose">{r1.chapterStripLink}</a>
+        </>
+      )}
     </p>
   );
 }
@@ -96,9 +110,25 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
   const [hideDone, setHideDone] = useState(false);
   /** The row whose input has focus stays visible even when Hide done would remove it. */
   const [focusId, setFocusId] = useState<string | null>(null);
+  /**
+   * The row whose input was focused last shows its "where to check" hint on phones. Kept on blur: if the hint
+   * collapsed when focus left, the rows below would jump up under a tap that is already landing.
+   */
+  const [hintId, setHintId] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const valueAtFocus = useRef<Count | undefined>(undefined);
+  const jumpNav = useRef<HTMLElement>(null);
   const s = summary(data, state);
+
+  useEffect(() => (jumpNav.current ? edgeFades(jumpNav.current) : undefined), []);
+
+  const groups = data.categories.map((cat) => {
+    const rows = data.requirements.filter((r) => r.categoryId === cat.id);
+    const visible = rows.filter((r) => !hideDone || r.id === focusId || rowResult(data, state, r).kind !== 'done');
+    return { cat, rows, visible };
+  });
+  /** The last input on the page gets a "done" Enter key instead of "next". */
+  const lastId = groups.flatMap((g) => g.visible).at(-1)?.id;
 
   const setReq = (id: string, v: number | null) => {
     const req = { ...state.req };
@@ -109,6 +139,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
 
   const onFocus = (r: Requirement) => {
     setFocusId(r.id);
+    setHintId(r.id);
     valueAtFocus.current = state.req[r.id];
   };
   const onBlur = (r: Requirement) => {
@@ -137,7 +168,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
             of {s.total} {s.total === 1 ? 'requirement' : 'requirements'}
           </span>
         </div>
-        <nav class="jump-nav" aria-label={r1.jumpNavLabel}>
+        <nav class="jump-nav" aria-label={r1.jumpNavLabel} ref={jumpNav}>
           {data.categories.map((cat) => (
             <a key={cat.id} href={`#cat-${cat.id}`}>
               {cat.name}
@@ -150,7 +181,6 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
             <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone((e.target as HTMLInputElement).checked)} />
             Hide done
           </label>
-          <ShareBar data={data} state={state} pageUrl={pageUrl} />
         </div>
       </div>
 
@@ -159,9 +189,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
         {announcement}
       </p>
 
-      {data.categories.map((cat) => {
-        const rows = data.requirements.filter((r) => r.categoryId === cat.id);
-        const visible = rows.filter((r) => !hideDone || r.id === focusId || rowResult(data, state, r).kind !== 'done');
+      {groups.map(({ cat, rows, visible }) => {
         return (
           <section key={cat.id} class="panel req-group" aria-labelledby={`cat-${cat.id}`}>
             <h3 id={`cat-${cat.id}`}>
@@ -177,7 +205,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
                   const inputId = `req-${r.id}`;
                   const ids = { target: `${inputId}-target`, hint: `${inputId}-hint`, out: `${inputId}-out` };
                   return (
-                    <li key={r.id} class={`req ${res.kind}`}>
+                    <li key={r.id} class={`req ${res.kind}${r.id === hintId ? ' show-hint' : ''}`}>
                       <label for={inputId} class="req-name">
                         {r.name}
                       </label>
@@ -196,6 +224,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
                           value={state.req[r.id]}
                           max={requirementMax(r)}
                           unit={r.unit}
+                          last={r.id === lastId}
                           describedBy={[ids.target, r.whereToCount ? ids.hint : null, ids.out].filter(Boolean).join(' ')}
                           onValue={(v) => setReq(r.id, v)}
                           onFocus={() => onFocus(r)}
@@ -222,6 +251,11 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
           </section>
         );
       })}
+
+      {/* Share and reset sit after the last row, so the calculator's first rows come first on small screens. */}
+      <div class="panel share-panel">
+        <ShareBar data={data} state={state} pageUrl={pageUrl} />
+      </div>
     </div>
   );
 }

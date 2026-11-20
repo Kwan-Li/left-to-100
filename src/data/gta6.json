@@ -1839,6 +1839,7 @@
     },
     {
       "id": "magazines-first-safehouse",
+      "count": 5,
       "requirementId": "magazines-books-comics",
       "label": "Five reading items at the first safehouse: Ashes of Glory, Lethal By Design, Orca A Whole Different Animal, Off the Hook, Body Copy",
       "where": "Jason's house in Key Lento: bedside table, living room tables, the tool shed underneath, and the back deck.",
@@ -1860,6 +1861,7 @@
     },
     {
       "id": "magazines-starlet-motel",
+      "count": 2,
       "requirementId": "magazines-books-comics",
       "label": "Two reading items at the Starlet Motel: Help Me Help You Help Me, Wizard Wang",
       "where": "Starlet Motel, Gellhorn: reception room table and cafeteria table.",
@@ -1876,6 +1878,7 @@
     },
     {
       "id": "magazines-bayside-apartment",
+      "count": 2,
       "requirementId": "magazines-books-comics",
       "label": "Two reading items at the Bayside Apartment: Passion B.C., Two Pricks in the Bush",
       "where": "Bayside Apartment, Vice City: beside the bathtub and on the table in front of the TV.",

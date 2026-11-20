@@ -80,6 +80,9 @@ for (const [name, theme] of Object.entries(themes)) {
   // Control borders on the control's own fill and on every surface a control sits on.
   const fills = { 'input fill (bg-2)': t('bg-2'), 'card input fill': t('card-input-bg'), ...plain };
   for (const [bgName, bg] of Object.entries(fills)) add('control border', '--control-border', t('control-border'), bgName, bg, 3);
+  // Number-input placeholder ("?") at full strength on both input fills (home rows, card tiles).
+  add('placeholder', '--placeholder', t('placeholder'), 'home input fill (bg-2)', t('bg-2'), 4.5);
+  add('placeholder', '--placeholder', t('placeholder'), 'card input fill (--card-input-bg)', t('card-input-bg'), 4.5);
   add('control border', '--red (invalid)', t('red'), 'input fill (bg-2)', t('bg-2'), 3);
   add('control border', '--red (invalid)', t('red'), 'card input fill', t('card-input-bg'), 3);
   for (const [bgName, bg] of Object.entries(plain)) add('focus ring', '--focus', t('focus'), bgName, bg, 3);

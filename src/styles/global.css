@@ -17,6 +17,8 @@
   --control-border: #8075b8;
   /* Fill of the card-set inputs, distinct from the tile behind them. */
   --card-input-bg: var(--bg);
+  /* Number-input placeholder ("?"): full strength, 4.5:1 or better on both input fills (checked by pnpm contrast). */
+  --placeholder: var(--muted);
   /* Primary buttons: the sunset gradient with dark ink, 4.5:1 or better across the whole gradient. */
   --grad-a: #ff4fa3;
   --grad-b: #ffa24c;
@@ -163,6 +165,7 @@ code {
   letter-spacing: -0.02em;
   color: var(--text);
   text-decoration: none;
+  min-height: 44px;
 }
 
 .brand-mark {
@@ -513,8 +516,25 @@ input[aria-invalid='true'] {
 }
 
 input[type='number']::placeholder {
-  color: var(--muted);
-  opacity: 0.8;
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+/* Sideways strips (header nav, planner jump links): fade only an edge that hides more links. Classes are set
+   by script on load and on scroll, so a strip with nothing more to show has no fade at all. */
+.fade-r {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+
+.fade-l {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px);
+  mask-image: linear-gradient(90deg, transparent, #000 28px);
+}
+
+.fade-l.fade-r {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
 }
 
 .sr-only {
@@ -564,14 +584,14 @@ input[type='number']::placeholder {
 
   .header-inner {
     flex-wrap: nowrap;
-    gap: 8px;
+    gap: 2px;
     padding: 5px 0;
   }
 
   .brand {
     flex: none;
-    gap: 8px;
-    font-size: 1rem;
+    gap: 6px;
+    font-size: 0.95rem;
   }
 
   .site-header nav {
@@ -579,8 +599,6 @@ input[type='number']::placeholder {
     min-width: 0;
     overflow-x: auto;
     scrollbar-width: none;
-    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
-    mask-image: linear-gradient(90deg, #000 85%, transparent);
   }
 
   .site-header nav::-webkit-scrollbar {
@@ -589,13 +607,12 @@ input[type='number']::placeholder {
 
   .site-header nav ul {
     flex-wrap: nowrap;
-    gap: 2px;
-    padding-right: 24px;
+    gap: 0;
   }
 
   .site-header nav a {
-    padding: 0 10px;
-    font-size: 0.9rem;
+    padding: 0 8px;
+    font-size: 0.88rem;
   }
 
   h1 {
@@ -626,12 +643,33 @@ input[type='number']::placeholder {
 
   th,
   td {
-    padding: 8px;
+    padding: 8px 6px;
+  }
+
+  th:first-child,
+  td:first-child {
+    padding-left: 10px;
+  }
+
+  th:last-child,
+  td:last-child {
+    padding-right: 10px;
+  }
+
+  /* Static tables fit a 360px screen without sideways scrolling. */
+  th {
+    font-size: 0.72rem;
+    letter-spacing: 0;
   }
 
   .badge {
     font-size: 0.66rem;
     padding: 2px 6px;
     letter-spacing: 0.02em;
+  }
+
+  td .badge {
+    padding: 1px 5px;
+    letter-spacing: 0;
   }
 }

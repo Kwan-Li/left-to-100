@@ -27,6 +27,7 @@ export function CountInput({
   max,
   unit = 'count',
   describedBy,
+  last = false,
   onValue,
   onFocus,
   onBlur,
@@ -36,6 +37,8 @@ export function CountInput({
   max: number | null;
   unit?: 'count' | 'dollars' | 'percent';
   describedBy?: string;
+  /** The last count input on the page: the Enter key reads "done" (it closes the keyboard). */
+  last?: boolean;
   onValue: (v: number | null) => void;
   onFocus?: () => void;
   onBlur?: () => void;
@@ -47,7 +50,7 @@ export function CountInput({
       type="number"
       inputMode="numeric"
       pattern="[0-9]*"
-      enterKeyHint="next"
+      enterKeyHint={last ? 'done' : 'next'}
       min={0}
       max={max ?? undefined}
       placeholder="?"

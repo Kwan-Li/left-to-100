@@ -76,6 +76,11 @@ export const Missable = z.object({
   lostAfterChapterId: z.string(),
   /** What losing it means for 100%, in original words. */
   effect: z.string().min(1),
+  /**
+   * How many checklist items this entry covers when it groups several (e.g. five magazines in one house).
+   * Missing it uses this many skips. Omitted = 1.
+   */
+  count: z.number().int().min(1).optional(),
   ...Provenance,
 });
 export type Missable = z.infer<typeof Missable>;

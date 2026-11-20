@@ -43,9 +43,24 @@ export function ShareBar({ data, state, pageUrl }: { data: Dataset; state: Playe
     setConfirming(false);
   };
 
+  /** Opening the confirm drops any earlier "Link copied" status, so only the question is on screen. */
+  const askReset = () => {
+    setMsg('');
+    setLink('');
+    setConfirming(true);
+  };
+
   return (
     <div class="share">
-      <div class="btn-row">
+      <div
+        class="btn-row"
+        onKeyDown={(e) => {
+          if (confirming && e.key === 'Escape') {
+            e.preventDefault();
+            cancel();
+          }
+        }}
+      >
         {confirming ? (
           <>
             <button type="button" class="btn danger" onClick={reset}>
@@ -60,7 +75,7 @@ export function ShareBar({ data, state, pageUrl }: { data: Dataset; state: Playe
             <button type="button" class="btn ghost" onClick={share}>
               Copy share link
             </button>
-            <button type="button" class="btn ghost" ref={resetRef} onClick={() => setConfirming(true)}>
+            <button type="button" class="btn ghost" ref={resetRef} onClick={askReset}>
               Reset progress
             </button>
           </>

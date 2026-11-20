@@ -40,6 +40,21 @@
   white-space: nowrap;
 }
 
+/* Standalone text links get a 44px-tall tap target. */
+.chapter-strip a,
+.back-link a,
+.result-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  vertical-align: middle;
+}
+
+/* Inside the strip's text line the 44px target overlaps the strip's padding instead of making the line taller. */
+.chapter-strip a {
+  margin-block: -10px;
+}
+
 .summary {
   display: flex;
   flex-wrap: wrap;
@@ -444,13 +459,14 @@
     margin: 10px 2px;
   }
 
-  /* The "where to check" hint shows while the row's input has focus: it's needed while counting, and
-     keeping it out of the collapsed row keeps each row short. Screen readers get it via aria-describedby. */
+  /* The "where to check" hint shows for the row whose input was focused last (Planner sets .show-hint): it's
+     needed while counting, and keeping it out of the other rows keeps them short. It stays after blur, so a
+     tap elsewhere never lands on a row that just moved. Screen readers get it via aria-describedby. */
   .req-hint {
     display: none;
   }
 
-  .req:focus-within .req-hint {
+  .req.show-hint .req-hint {
     display: block;
   }
 }
@@ -639,8 +655,22 @@
 }
 
 .back-link {
-  margin: 16px 0 0;
+  margin: 8px 0 0;
   font-weight: 600;
+}
+
+.result.bad .result-link {
+  color: var(--red);
+}
+
+/* Section titles inside the card optimizer: h2 for the outline, h3 size for the panel. */
+.panel-title {
+  font-size: 1.15rem;
+  margin: 0 0 8px;
+}
+
+.share-panel {
+  margin-top: 16px;
 }
 
 /* ------------------------------------------------------------------ */

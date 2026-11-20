@@ -84,6 +84,28 @@ const website = {
             ))}
           </ul>
         </nav>
+        <script is:inline>
+          // Phones: the nav is a sideways strip. Before first paint, scroll it (sideways only, never the page) so the
+          // current page's link is in view, centered where possible, then fade only the edges that hide more links.
+          (() => {
+            const nav = document.querySelector('.site-header nav');
+            if (!nav) return;
+            const cur = nav.querySelector('a[aria-current="page"]');
+            if (cur && nav.scrollWidth > nav.clientWidth) {
+              const n = nav.getBoundingClientRect();
+              const c = cur.getBoundingClientRect();
+              nav.scrollLeft += c.left + c.width / 2 - (n.left + n.width / 2);
+            }
+            const update = () => {
+              const max = nav.scrollWidth - nav.clientWidth;
+              nav.classList.toggle('fade-l', nav.scrollLeft > 1);
+              nav.classList.toggle('fade-r', max - nav.scrollLeft > 1);
+            };
+            update();
+            nav.addEventListener('scroll', update, { passive: true });
+            addEventListener('resize', update);
+          })();
+        </script>
       </div>
     </header>
     <main id="main" class="wrap">

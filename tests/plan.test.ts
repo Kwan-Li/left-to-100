@@ -1,8 +1,11 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
+import raw from '../src/data/gta6.json';
+import { Dataset } from '../src/data/schema';
 import {
   cardPlan,
   emptyState,
+  lostFor,
   passedMissables,
   rowResult,
   setVerdicts,
@@ -11,10 +14,11 @@ import {
   type MissableAnswer,
   type PlayerState,
 } from '../src/lib/plan';
-import { decodeState, encodeState, sanitize } from '../src/lib/state';
+import { decodeState, encodeState, MAX_COUNT, sanitize } from '../src/lib/state';
 import { fixture } from './fixture';
 
 const data = fixture();
+const realData = Dataset.parse(raw);
 const req = (id: string) => data.requirements.find((r) => r.id === id)!;
 const allCards = (v: number | ((size: number) => number)): PlayerState['cards'] =>
   Object.fromEntries(data.cardSets.map((s) => [s.id, typeof v === 'number' ? v : v(s.size)]));
@@ -74,7 +78,7 @@ describe('out-of-range counts', () => {
 
   it('a card count above the set size leaves the set unknown, so there is no plan', () => {
     const p = cardPlan(data, state({ cards: { ...allCards(0), a: 7 } }));
-    expect(p).toEqual({ kind: 'incomplete', missingSetIds: ['a'] });
+    expect(p).toEqual({ kind: 'incomplete', missingSetIds: ['a'], invalidSetIds: ['a'] });
     expect(setVerdicts(data, state({ cards: { ...allCards(0), a: 7 } }), p).a).toBeNull();
   });
 
@@ -92,9 +96,70 @@ describe('out-of-range counts', () => {
     );
   });
 
-  it('saved progress keeps an out-of-range card count; untrusted input is still clamped', () => {
-    expect(sanitize(data, { cards: { a: 9 } }, { keepOutOfRange: true }).cards).toEqual({ a: 9 });
-    expect(sanitize(data, { cards: { a: 9, b: -2 } }).cards).toEqual({ a: 6, b: 0 });
+  it('keeps an out-of-range count as typed (up to a sane cap); negatives become 0', () => {
+    expect(sanitize(data, { cards: { a: 9, b: -2, c: 1e9 } }).cards).toEqual({ a: 9, b: 0, c: MAX_COUNT });
+    expect(sanitize(data, { req: { stunts: 41, meditation: 1e9, cash: 1e9 } }).req).toEqual({ stunts: 41, meditation: MAX_COUNT, cash: 1e9 });
+  });
+});
+
+describe('grouped missables', () => {
+  const grouped = fixture({
+    missables: [
+      ...data.missables,
+      { ...data.missables[0], id: 'stunt-pack', requirementId: 'stunts', label: 'Five stunts', count: 5, lostAfterChapterId: 'ch1' },
+    ],
+  });
+  const g = (p: Partial<PlayerState>): PlayerState => ({ ...emptyState(grouped), ...p });
+  const stunts = grouped.requirements.find((r) => r.id === 'stunts')!;
+
+  it('a missed group uses one skip per item it covers', () => {
+    // 40 total, 30 needed: 10 spare. Missing the group of 5 leaves 5.
+    expect(lostFor(grouped, g({ chapterId: 'ch2', missables: { 'stunt-pack': 'missed' } }), 'stunts')).toBe(5);
+    expect(rowResult(grouped, g({ chapterId: 'ch2', req: { stunts: 10 }, missables: { 'stunt-pack': 'missed' } }), stunts)).toMatchObject({
+      kind: 'remaining',
+      skipLeft: 5,
+      impossible: false,
+    });
+  });
+
+  it('a group without a count still counts as one', () => {
+    expect(lostFor(grouped, g({ chapterId: 'ch2', missables: { 'med-1': 'missed' } }), 'meditation')).toBe(1);
+  });
+
+  it('a group bigger than the spare room makes the requirement impossible', () => {
+    const tight = fixture({
+      missables: [{ ...data.missables[0], id: 'stunt-pack', requirementId: 'stunts', count: 11, lostAfterChapterId: 'ch1' }],
+    });
+    const st = { ...emptyState(tight), chapterId: 'ch2', req: { stunts: 0 }, missables: { 'stunt-pack': 'missed' as const } };
+    expect(rowResult(tight, st, stunts)).toMatchObject({ kind: 'remaining', skipLeft: 0, impossible: true });
+  });
+
+  it('an unanswered or logged group, or one still ahead, uses no skips', () => {
+    expect(lostFor(grouped, g({ chapterId: 'ch2' }), 'stunts')).toBe(0);
+    expect(lostFor(grouped, g({ chapterId: 'ch2', missables: { 'stunt-pack': 'logged' } }), 'stunts')).toBe(0);
+    expect(lostFor(grouped, g({ chapterId: 'ch1', missables: { 'stunt-pack': 'missed' } }), 'stunts')).toBe(0);
+  });
+
+  it('the real dataset sets a count only where its own text gives the quantity', () => {
+    const counted = Object.fromEntries(realData.missables.filter((m) => m.count !== undefined).map((m) => [m.id, m.count]));
+    expect(counted).toEqual({ 'magazines-first-safehouse': 5, 'magazines-starlet-motel': 2, 'magazines-bayside-apartment': 2 });
+    const mags = realData.requirements.find((r) => r.id === 'magazines-books-comics')!;
+    const st = { ...emptyState(realData), chapterId: 'story-finished', req: { [mags.id]: 0 }, missables: { 'magazines-first-safehouse': 'missed' as const } };
+    // 34 total, 30 needed: 4 spare. Five lost reading items can't be made up.
+    expect(rowResult(realData, st, mags)).toMatchObject({ kind: 'remaining', skipLeft: 0, impossible: true });
+  });
+});
+
+describe('card goal already met', () => {
+  it('shows achieved once enough sets are complete, whatever the other sets say', () => {
+    const st = state({ cards: { a: 6, b: 8, c: 10, d: 99 } });
+    expect(cardPlan(data, st)).toEqual({ kind: 'achieved', doneSetIds: ['a', 'b', 'c'] });
+    const v = setVerdicts(data, st, cardPlan(data, st));
+    expect(v).toEqual({ a: 'done', b: 'done', c: 'done', d: null, e: null });
+  });
+
+  it('two complete sets of three is not achieved yet', () => {
+    expect(cardPlan(data, state({ cards: { ...allCards(0), a: 6, b: 8 } })).kind).toBe('exact');
   });
 });
 
@@ -114,7 +179,7 @@ describe('chapter gating', () => {
 describe('card-set optimizer', () => {
   it('needs every set count before giving a number', () => {
     const p = cardPlan(data, state({ cards: { a: 1 } }));
-    expect(p).toEqual({ kind: 'incomplete', missingSetIds: ['b', 'c', 'd', 'e'] });
+    expect(p).toEqual({ kind: 'incomplete', missingSetIds: ['b', 'c', 'd', 'e'], invalidSetIds: [] });
   });
 
   it('with nothing logged, the minimum is the sum of the smallest sets', () => {
@@ -192,7 +257,9 @@ describe('card-set optimizer', () => {
         const cards = Object.fromEntries(data.cardSets.map((s, i) => [s.id, counts[i]]));
         const p = cardPlan(data, state({ cards }));
         const needs = data.cardSets.map((s, i) => s.size - counts[i]).sort((x, y) => x - y);
-        return p.kind === 'exact' && p.plan.min === needs.slice(0, 3).reduce((s, n) => s + n, 0);
+        const min = needs.slice(0, 3).reduce((s, n) => s + n, 0);
+        // Three finished sets settle it: the plan says so instead of listing sets to skip.
+        return min === 0 ? p.kind === 'achieved' : p.kind === 'exact' && p.plan.min === min;
       }),
     );
   });
@@ -283,9 +350,22 @@ describe('state', () => {
     expect(decodeState(data, encodeState(s))).toEqual(s);
   });
 
-  it('drops unknown ids and clamps values', () => {
+  it('drops unknown ids and bad values, but keeps an over-max count as typed', () => {
     const s = sanitize(data, { chapterId: 'nope', req: { stunts: -3, bogus: 9 }, cards: { a: 99 }, unobtainable: ['zzz'], missables: { 'card-a': 'hax' } });
-    expect(s).toEqual({ ...emptyState(data), req: { stunts: 0 }, cards: { a: 6 } });
+    expect(s).toEqual({ ...emptyState(data), req: { stunts: 0 }, cards: { a: 99 } });
+  });
+
+  it('a share link keeps over-max counts, so the importer sees the same error as the sharer', () => {
+    const s = state({ req: { stunts: 41, meditation: 5000 }, cards: { ...allCards(0), a: 7, b: 9999 } });
+    const back = decodeState(data, encodeState(s))!;
+    expect(back).toEqual(s);
+    expect(rowResult(data, back, req('stunts'))).toEqual({ kind: 'invalid', value: 41, max: 40 });
+    expect(cardPlan(data, back)).toMatchObject({ kind: 'incomplete', invalidSetIds: ['a', 'b'] });
+  });
+
+  it('a loaded state never marks a fully logged set unobtainable', () => {
+    const s = sanitize(data, { cards: { a: 6, b: 3 }, unobtainable: ['a', 'b'] });
+    expect(s.unobtainable).toEqual(['b']);
   });
 
   it('rejects garbage links', () => {

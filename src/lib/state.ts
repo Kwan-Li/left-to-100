@@ -7,32 +7,37 @@ import { emptyState, type Count, type MissableAnswer, type PlayerState } from '.
 const STORAGE_KEY = 'left-to-100:v1';
 const HASH_KEY = 's';
 
-function toCount(v: unknown): Count {
+/** Highest count kept from a link or saved progress. Far above any real total, so a typo survives as typed. */
+export const MAX_COUNT = 9999;
+/** Cash targets run into the hundreds of thousands, so dollar fields get a higher ceiling. */
+export const MAX_DOLLARS = 999_999_999_999;
+
+function toCount(v: unknown, cap: number): Count {
   if (typeof v !== 'number' || !Number.isFinite(v)) return null;
-  return Math.max(0, Math.floor(v));
+  return Math.min(cap, Math.max(0, Math.floor(v)));
 }
 
 /**
  * Rebuild a state from untrusted input, keeping only known ids and valid values.
- * Card counts above the set size are clamped, except with `keepOutOfRange` (used for this device's own
- * saved progress): there an over-the-maximum count stays as typed so the row keeps showing its error
- * instead of silently turning into a finished set after a reload.
+ * Counts above the game's maximum are kept as typed (up to a sane cap), so a shared link or a reload shows the
+ * same "too high" error the sharer saw instead of silently turning into a finished row or set.
+ * A set that is fully logged can't also be marked unobtainable, so that mark is dropped.
  */
-export function sanitize(data: Dataset, raw: unknown, { keepOutOfRange = false }: { keepOutOfRange?: boolean } = {}): PlayerState {
+export function sanitize(data: Dataset, raw: unknown): PlayerState {
   const base = emptyState(data);
   if (!raw || typeof raw !== 'object') return base;
   const r = raw as Partial<PlayerState>;
   if (typeof r.chapterId === 'string' && data.chapters.some((c) => c.id === r.chapterId)) base.chapterId = r.chapterId;
   for (const q of data.requirements) {
-    const v = toCount(r.req?.[q.id]);
+    const v = toCount(r.req?.[q.id], q.unit === 'dollars' ? MAX_DOLLARS : MAX_COUNT);
     if (v !== null) base.req[q.id] = v;
   }
   for (const s of data.cardSets) {
-    const v = toCount(r.cards?.[s.id]);
-    if (v !== null) base.cards[s.id] = keepOutOfRange ? v : Math.min(v, s.size);
+    const v = toCount(r.cards?.[s.id], MAX_COUNT);
+    if (v !== null) base.cards[s.id] = v;
   }
   if (Array.isArray(r.unobtainable)) {
-    base.unobtainable = r.unobtainable.filter((id) => data.cardSets.some((s) => s.id === id));
+    base.unobtainable = r.unobtainable.filter((id) => data.cardSets.some((s) => s.id === id && base.cards[id] !== s.size));
   }
   const answers: MissableAnswer[] = ['logged', 'missed', 'unknown'];
   for (const m of data.missables) {
@@ -83,7 +88,7 @@ export function forgetLoadedState() {
 function readStorage(data: Dataset): PlayerState | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? sanitize(data, JSON.parse(raw), { keepOutOfRange: true }) : null;
+    return raw ? sanitize(data, JSON.parse(raw)) : null;
   } catch {
     return null;
   }

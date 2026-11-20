@@ -66,11 +66,19 @@ export type RowResult =
       impossible: boolean;
     };
 
-/** Count of items the player confirmed missed for this requirement. */
+/** How many checklist items a missable entry covers (a grouped entry covers several). */
+export function missableCount(m: Missable): number {
+  return m.count ?? 1;
+}
+
+/**
+ * Count of items the player confirmed missed for this requirement. A grouped entry answered "missed" counts
+ * every item in it: other copies may exist but aren't confirmed, so the worst case is used.
+ */
 export function lostFor(data: Dataset, state: PlayerState, requirementId: string): number {
-  return passedMissables(data, state).filter(
-    (m) => m.requirementId === requirementId && !m.cardSetId && state.missables[m.id] === 'missed',
-  ).length;
+  return passedMissables(data, state)
+    .filter((m) => m.requirementId === requirementId && !m.cardSetId && state.missables[m.id] === 'missed')
+    .reduce((n, m) => n + missableCount(m), 0);
 }
 
 /** Highest valid count for a requirement, or null when the game total is unknown. */
@@ -92,6 +100,7 @@ export function rowResult(data: Dataset, state: PlayerState, r: Requirement): Ro
   if (value >= r.required) return { kind: 'done', value };
   const remaining = r.required - value;
   if (r.total === null) return { kind: 'remaining', value, remaining, skipLeft: null, impossible: false };
+  // Grouped missables (count > 1) are already summed by lostFor.
   const lost = lostFor(data, state, r.id);
   const skipLeft = r.total - lost - r.required;
   return { kind: 'remaining', value, remaining, skipLeft: Math.max(0, skipLeft), impossible: skipLeft < 0 };
@@ -138,17 +147,21 @@ export interface Pick {
 }
 
 export type CardPlan =
-  | { kind: 'incomplete'; missingSetIds: string[] }
+  /** Enough sets are already complete: nothing left to collect. */
+  | { kind: 'achieved'; doneSetIds: string[] }
+  /** Some sets are blank or over their size. `invalidSetIds` lists the over-size ones, in grid order. */
+  | { kind: 'incomplete'; missingSetIds: string[]; invalidSetIds: string[] }
   | { kind: 'exact'; plan: Pick; needs: SetNeed[] }
   | { kind: 'range'; best: Pick; worst: Pick | null; uncertainSetIds: string[]; needs: SetNeed[] }
   | { kind: 'impossible'; available: number; needs: SetNeed[] };
 
 export function setAvailability(data: Dataset, state: PlayerState, set: CardSet): { availability: SetAvailability; reasons: string[] } {
   // A fully logged set can't be lost: any missable card in it was already collected.
-  if (state.cards[set.id] === set.size) return { availability: 'available', reasons: [] };
+  if (isSetComplete(state, set)) return { availability: 'available', reasons: [] };
   if (state.unobtainable.includes(set.id)) return { availability: 'lost', reasons: ['You marked this set as unobtainable.'] };
   let availability: SetAvailability = 'available';
   const reasons: string[] = [];
+  // A grouped card entry (count > 1) needs no extra arithmetic here: losing any one card already blocks the set.
   for (const m of passedMissables(data, state)) {
     if (m.cardSetId !== set.id) continue;
     const answer = state.missables[m.id] ?? 'unknown';
@@ -173,14 +186,28 @@ export function cheapest(needs: SetNeed[], k: number): Pick | null {
   return { min: chosen.reduce((s, n) => s + n.needed, 0), setIds: chosen.map((n) => n.set.id) };
 }
 
+/** True when every card in the set is logged. */
+export function isSetComplete(state: PlayerState, set: CardSet): boolean {
+  return state.cards[set.id] === set.size;
+}
+
 export function cardPlan(data: Dataset, state: PlayerState): CardPlan {
   const k = data.totals.cardSetsRequired;
+  // Enough finished sets settle it, whatever the other sets say.
+  const done = data.cardSets.filter((s) => isSetComplete(state, s));
+  if (done.length >= k) return { kind: 'achieved', doneSetIds: done.map((s) => s.id) };
+
   // Blank and out-of-range counts both leave a set unknown: the plan never guesses.
   const missing = data.cardSets.filter((s) => {
     const v = state.cards[s.id];
     return v === null || v === undefined || Number.isNaN(v) || isOverMax(v, s.size);
   });
-  if (missing.length) return { kind: 'incomplete', missingSetIds: missing.map((s) => s.id) };
+  if (missing.length)
+    return {
+      kind: 'incomplete',
+      missingSetIds: missing.map((s) => s.id),
+      invalidSetIds: missing.filter((s) => isOverMax(state.cards[s.id], s.size)).map((s) => s.id),
+    };
 
   const needs: SetNeed[] = data.cardSets.map((set) => {
     const logged = Math.min(set.size, Math.max(0, state.cards[set.id] as number));
@@ -220,16 +247,15 @@ export function cardPlan(data: Dataset, state: PlayerState): CardPlan {
 export type SetVerdict = 'done' | 'finish' | 'skip' | 'uncertain';
 
 /**
- * One verdict per set that always agrees with the plan. Sets without a verdict (null) have no plan yet.
+ * One verdict per set that always agrees with the plan. Sets without a verdict (null) have no plan yet, or
+ * nothing left to decide (the card goal is already achieved).
  * In a range plan the worst case finishes only sets that are surely available; when even that falls short
  * (worst is null), the worst case is "finish every available set".
  */
 export function setVerdicts(data: Dataset, state: PlayerState, plan: CardPlan): Record<string, SetVerdict | null> {
   const out: Record<string, SetVerdict | null> = {};
   for (const set of data.cardSets) {
-    const v = state.cards[set.id];
-    const complete = v === set.size;
-    if (complete) {
+    if (isSetComplete(state, set)) {
       out[set.id] = 'done';
       continue;
     }
