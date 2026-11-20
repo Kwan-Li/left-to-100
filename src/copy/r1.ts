@@ -1,5 +1,5 @@
 /**
- * UI round 1 strings. Placeholder values (⟦key⟧) until the copy writer's final text is pasted in.
+ * UI round 1 strings. Final text from the copy writer (copy/COPY_DECK_R1.md), pasted verbatim.
  * Keep this file plain, erasable TypeScript: scripts/make-images.mjs imports it with Node's type stripping
  * to render the OG image, so `pnpm images` picks up pasted text without other changes.
  */
@@ -51,27 +51,28 @@ export interface R1Copy {
 }
 
 export const r1: R1Copy = {
-  trapToggle: (n) => (n === 1 ? `⟦trapToggle.one:${n}⟧` : `⟦trapToggle.other:${n}⟧`),
-  badgeLegend: '⟦badgeLegend⟧',
-  errMax: (max) => `⟦errMax:${max}⟧`,
-  jumpNavLabel: '⟦jumpNavLabel⟧',
-  jumpBeforeFinish: '⟦jumpBeforeFinish⟧',
+  trapToggle: (n) => (n === 1 ? 'Watch out: 1 note' : `Watch out: ${n} notes`),
+  badgeLegend: 'Unmarked items are verified (2+ sources). Badges mark reported (1 source) or disputed items.',
+  errMax: (max) => `Enter ${max} or less`,
+  jumpNavLabel: 'Calculator sections',
+  jumpBeforeFinish: 'Before you finish',
   chapterStrip: {
-    some: (n, chapter) => (n === 1 ? `⟦chapterStrip.some.one:${n}:${chapter}⟧` : `⟦chapterStrip.some.other:${n}:${chapter}⟧`),
-    none: (chapter) => `⟦chapterStrip.none:${chapter}⟧`,
-    notStarted: '⟦chapterStrip.notStarted⟧',
-    finished: '⟦chapterStrip.finished⟧',
+    some: (n, chapter) =>
+      n === 1 ? `1 reported missable at the end of ${chapter}.` : `${n} reported missables at the end of ${chapter}.`,
+    none: (chapter) => `No 100% missables are reported at the end of ${chapter}.`,
+    notStarted: 'Pick your chapter above to see spoiler-safe missable warnings.',
+    finished: 'No chapter lockouts ahead. Log earlier missables to update your plan.',
   },
-  chapterStripLink: '⟦chapterStripLink⟧',
-  dontLoseHeading: (chapter) => `⟦dontLoseHeading:${chapter}⟧`,
-  backToResult: '⟦backToResult⟧',
-  verdictUncertain: '⟦verdictUncertain⟧',
-  verdictDone: '⟦verdictDone⟧',
-  resetConfirm: '⟦resetConfirm⟧',
-  resetCancel: '⟦resetCancel⟧',
-  heroCta: '⟦heroCta⟧',
-  announce: (name, result) => `⟦announce:${name}:${result}⟧`,
-  missableUnanswered: '⟦missableUnanswered⟧',
-  ogTitle: '⟦ogTitle⟧',
-  ogSampleRow: '⟦ogSampleRow⟧',
+  chapterStripLink: 'See chapter missables',
+  dontLoseHeading: (chapter) => `Before you finish ${chapter}`,
+  backToResult: 'Back to your card plan',
+  verdictUncertain: 'Finish or skip',
+  verdictDone: 'Done',
+  resetConfirm: 'Confirm reset',
+  resetCancel: 'Cancel',
+  heroCta: 'Enter your counts',
+  announce: (name, result) => `${name}: ${result}`,
+  missableUnanswered: 'Not answered yet—treated as "Not sure".',
+  ogTitle: "GTA 6 100%: what's left and what to skip",
+  ogSampleRow: 'Animals: 38 to go · skip up to 155',
 };
