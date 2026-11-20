@@ -1,5 +1,5 @@
 /**
- * UI round 3 strings. The copy writer supplies the final text; until then each value is its `'⟦key⟧'` placeholder.
+ * UI round 3 strings. Final text from the copy writer (copy/COPY_DECK_R3.md), pasted verbatim.
  * Same rules as r1.ts: plain, erasable TypeScript.
  */
 
@@ -25,7 +25,7 @@ export interface R3Copy {
 }
 
 export const r3: R3Copy = {
-  rowAtRisk: () => '⟦rowAtRisk⟧',
-  rowAtRiskHint: '⟦rowAtRiskHint⟧',
-  chapterStripLinkNeutral: '⟦chapterStripLinkNeutral⟧',
+  rowAtRisk: (remaining) => `${remaining} to go \u00b7 may still be reachable`,
+  rowAtRiskHint: "Items you marked missed aren't confirmed lost\u2014other copies may still exist.",
+  chapterStripLinkNeutral: 'See chapter notes',
 };
