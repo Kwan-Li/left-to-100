@@ -44,11 +44,14 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
     return (
       <div class={`result ${invalid.length ? 'bad' : ''}`}>
         {invalid.length > 0 ? (
-          <p class="result-big">
-            <a class="result-link" href={`#set-${invalid[0]}`} onClick={toFirstInvalid}>
-              {r2.cardsInvalid(invalid.length)}
-            </a>
-          </p>
+          <>
+            <p class="result-big">{r2.cardsInvalid(invalid.length)}</p>
+            <p>
+              <a class="result-link" href={`#set-${invalid[0]}`} onClick={toFirstInvalid}>
+                {r2.cardsInvalidLink}
+              </a>
+            </p>
+          </>
         ) : (
           <p class="result-big">Enter a count for every set to get your plan.</p>
         )}

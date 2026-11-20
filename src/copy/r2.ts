@@ -1,5 +1,5 @@
 /**
- * UI round 2 strings. Placeholder values (⟦key⟧) until the copy writer's final text is pasted in.
+ * UI round 2 strings. Final text from the copy writer (copy/COPY_DECK_R2.md), pasted verbatim.
  * Same rules as r1.ts: plain, erasable TypeScript.
  */
 
@@ -15,15 +15,19 @@ export interface R2Copy {
   cardsAchieved: string;
   /**
    * Card plan result when n sets have a count above the set size, so no plan can be made.
-   * Shown in the error style; the whole line links to the first set with the error.
+   * Shown in the error style, followed by `cardsInvalidLink`.
    */
   cardsInvalid: (n: number) => string;
+  /** Link after `cardsInvalid` that moves focus to the first set with the error. */
+  cardsInvalidLink: string;
 }
 
 export const r2: R2Copy = {
   chapterStrip: {
-    saveOnly: (chapter) => `⟦chapterStrip.saveOnly:${chapter}⟧`,
+    saveOnly: (chapter) => `No 100% missables are reported in ${chapter}. Keep a manual save before the end.`,
   },
-  cardsAchieved: '⟦cardsAchieved⟧',
-  cardsInvalid: (n) => (n === 1 ? `⟦cardsInvalid.one:${n}⟧` : `⟦cardsInvalid.other:${n}⟧`),
+  cardsAchieved: "You've hit the 15-set target\u2014no more cards needed for 100%.",
+  cardsInvalid: (n) =>
+    n === 1 ? '1 set has a count above its size. Lower it to get your plan.' : `${n} sets have counts above their sizes. Lower them to get your plan.`,
+  cardsInvalidLink: 'Go to first error',
 };

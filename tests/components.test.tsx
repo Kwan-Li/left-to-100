@@ -237,7 +237,8 @@ describe('CardOptimizer', () => {
     render(<CardOptimizer data={data} pageUrl={pageUrl} />);
     await waitFor(() => expect(document.querySelector('#card-result .result.bad')).not.toBeNull());
     const link = document.querySelector('#card-result a.result-link') as HTMLAnchorElement;
-    expect(link.textContent).toBe(r2.cardsInvalid(2));
+    expect(document.querySelector('#card-result .result-big')!.textContent).toBe(r2.cardsInvalid(2));
+    expect(link.textContent).toBe(r2.cardsInvalidLink);
     expect(link.getAttribute('href')).toBe(`#set-${s1.id}`);
     expect(screen.queryByText('Set blank sets to 0')).toBeNull();
     fireEvent.click(link);
