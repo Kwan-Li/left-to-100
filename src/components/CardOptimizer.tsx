@@ -1,6 +1,6 @@
 import { clientData } from '../data/client';
 import type { Dataset } from '../data/schema';
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { r1 } from '../copy/r1';
 import { r2 } from '../copy/r2';
 import { cardPlan, isOverMax, passedMissables, setVerdicts, type CardPlan, type Count, type SetVerdict } from '../lib/plan';
@@ -139,6 +139,21 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
   const resultRef = useRef<HTMLDivElement>(null);
   const [announcement, setAnnouncement] = useState('');
   const valueAtFocus = useRef<Count | undefined>(undefined);
+  /** Set by a toggle or a missable answer: read the result out once it has re-rendered. */
+  const announceNext = useRef(false);
+  const resultText = () => [...(resultRef.current?.querySelectorAll('p') ?? [])].map((p) => p.textContent?.trim()).join(' ');
+  /** A repeat of the same text is changed by a trailing no-break space so the polite region still speaks. */
+  const announce = (text: string) => setAnnouncement((prev) => (prev === text ? `${text}\u00a0` : text));
+  useEffect(() => {
+    if (!announceNext.current) return;
+    announceNext.current = false;
+    announce(resultText());
+  });
+  /** setState for changes that announce the updated plan as soon as it renders. */
+  const setStateAndAnnounce = (s: typeof state) => {
+    announceNext.current = true;
+    setState(s);
+  };
 
   const setCards = (id: string, v: number | null) => {
     const cards = { ...state.cards };
@@ -152,11 +167,13 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
   /** On leaving a changed input, read the updated plan out once (the result box itself is not a live region). */
   const onBlur = (id: string) => {
     if (state.cards[id] === valueAtFocus.current) return;
-    const text = [...(resultRef.current?.querySelectorAll('p') ?? [])].map((p) => p.textContent?.trim()).join(' ');
-    setAnnouncement(text);
+    announce(resultText());
   };
   const toggleLost = (id: string, on: boolean) =>
-    setState({ ...state, unobtainable: on ? [...state.unobtainable, id] : state.unobtainable.filter((x) => x !== id) });
+    setStateAndAnnounce({
+      ...state,
+      unobtainable: on ? [...state.unobtainable, id] : state.unobtainable.filter((x) => x !== id),
+    });
   const fillZero = () => {
     const cards = { ...state.cards };
     for (const s of data.cardSets) if (cards[s.id] === undefined || cards[s.id] === null) cards[s.id] = 0;
@@ -178,7 +195,7 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
         <section class="panel">
           <h2 class="panel-title">Cards you may have missed</h2>
           <p class="muted">You're past the point where these were reported lost. Check Progress &gt; Collections in-game.</p>
-          <MissableQuestions data={data} items={cardMissables} state={state} setState={setState} />
+          <MissableQuestions data={data} items={cardMissables} state={state} setState={setStateAndAnnounce} />
         </section>
       )}
 
@@ -195,10 +212,12 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
             const marked = state.unobtainable.includes(s.id);
             const inputId = `set-${s.id}`;
             const outId = `${inputId}-out`;
+            const nameId = `${inputId}-name`;
+            const lostTextId = `${inputId}-lost`;
             return (
               <li key={s.id} class={`set ${verdict ? `v-${verdict}` : ''} ${n?.availability ?? ''}`}>
                 <div class="set-head">
-                  <label for={inputId} class="set-name">
+                  <label for={inputId} class="set-name" id={nameId}>
                     {s.name}
                   </label>
                   <span class="set-tags">
@@ -235,8 +254,14 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
                   {/* A finished set can't be lost, and finishing it clears any old mark. */}
                   {verdict !== 'done' && (
                     <label class="toggle small">
-                      <input type="checkbox" checked={marked} onChange={(e) => toggleLost(s.id, (e.target as HTMLInputElement).checked)} />
-                      I can't finish this set
+                      {/* Named "I can't finish this set" plus the set name, so each toggle is distinct out of context. */}
+                      <input
+                        type="checkbox"
+                        checked={marked}
+                        aria-labelledby={`${lostTextId} ${nameId}`}
+                        onChange={(e) => toggleLost(s.id, (e.target as HTMLInputElement).checked)}
+                      />
+                      <span id={lostTextId}>I can't finish this set</span>
                     </label>
                   )}
                 </div>

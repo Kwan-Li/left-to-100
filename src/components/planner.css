@@ -205,9 +205,10 @@
     'name input'
     'meta input'
     'hint input'
+    'risk input'
     'traps input'
     'open open';
-  grid-template-rows: auto auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto auto;
   column-gap: 16px;
   align-items: start;
   padding: 12px 0;
@@ -257,9 +258,18 @@
   margin-top: 4px;
 }
 
-/* Open traps take the full row width under the input. */
-.req-traps[open] {
+/* The summary stays in its own cell when opened; only the notes take the full row width under the input. */
+.req-notes {
   grid-area: open;
+}
+
+.req-notes[hidden] {
+  display: none;
+}
+
+/* The muted line under an at-risk row sits with the "where to check" hint and follows its show/hide rules. */
+.req-risk {
+  grid-area: risk;
 }
 
 .req-traps summary {
@@ -342,6 +352,12 @@
 
 .out.bad {
   color: var(--red);
+  font-weight: 600;
+}
+
+/* At risk: out of reach only if unconfirmed losses are real. A warning, not the red "can't reach". */
+.out.risk {
+  color: var(--yellow);
   font-weight: 600;
 }
 

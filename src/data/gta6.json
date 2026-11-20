@@ -1787,6 +1787,7 @@
     },
     {
       "id": "card-victor-maravilla",
+      "copiesMayExist": true,
       "requirementId": "collectible-card-sets",
       "cardSetId": "los-santos-corkers",
       "label": "Victor Maravilla card (Los Santos Corkers)",
@@ -1813,6 +1814,7 @@
     },
     {
       "id": "card-vicki",
+      "copiesMayExist": true,
       "requirementId": "collectible-card-sets",
       "cardSetId": "delights-dancers",
       "label": "Vicki card (Delights Dancers)",
@@ -1839,6 +1841,7 @@
     },
     {
       "id": "magazines-first-safehouse",
+      "copiesMayExist": true,
       "count": 5,
       "requirementId": "magazines-books-comics",
       "label": "Five reading items at the first safehouse: Ashes of Glory, Lethal By Design, Orca A Whole Different Animal, Off the Hook, Body Copy",
@@ -1861,6 +1864,7 @@
     },
     {
       "id": "magazines-starlet-motel",
+      "copiesMayExist": true,
       "count": 2,
       "requirementId": "magazines-books-comics",
       "label": "Two reading items at the Starlet Motel: Help Me Help You Help Me, Wizard Wang",
@@ -1878,6 +1882,7 @@
     },
     {
       "id": "magazines-bayside-apartment",
+      "copiesMayExist": true,
       "count": 2,
       "requirementId": "magazines-books-comics",
       "label": "Two reading items at the Bayside Apartment: Passion B.C., Two Pricks in the Bush",

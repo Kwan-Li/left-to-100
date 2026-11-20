@@ -62,8 +62,13 @@ export type RowResult =
       remaining: number;
       /** How many of the not-yet-done items can still be ignored. null when the total is unknown. */
       skipLeft: number | null;
-      /** True when known losses mean the requirement can no longer be met. */
+      /** True when confirmed losses mean the requirement can no longer be met. */
       impossible: boolean;
+      /**
+       * True when the worst case (every missed item counted as lost) can't meet the requirement, but only
+       * because of losses that aren't confirmed. Never true together with `impossible`.
+       */
+      atRisk: boolean;
     };
 
 /** How many checklist items a missable entry covers (a grouped entry covers several). */
@@ -72,12 +77,31 @@ export function missableCount(m: Missable): number {
 }
 
 /**
- * Count of items the player confirmed missed for this requirement. A grouped entry answered "missed" counts
+ * A missed item is a confirmed loss only when the entry is verified and its data doesn't say other copies
+ * may exist. Anything else is the worst case, not a certainty.
+ */
+export function isConfirmedLoss(m: Missable): boolean {
+  return m.status === 'verified' && !m.copiesMayExist;
+}
+
+function missedFor(data: Dataset, state: PlayerState, requirementId: string): Missable[] {
+  return passedMissables(data, state).filter(
+    (m) => m.requirementId === requirementId && !m.cardSetId && state.missables[m.id] === 'missed',
+  );
+}
+
+/**
+ * Count of items the player marked missed for this requirement. A grouped entry answered "missed" counts
  * every item in it: other copies may exist but aren't confirmed, so the worst case is used.
  */
 export function lostFor(data: Dataset, state: PlayerState, requirementId: string): number {
-  return passedMissables(data, state)
-    .filter((m) => m.requirementId === requirementId && !m.cardSetId && state.missables[m.id] === 'missed')
+  return missedFor(data, state, requirementId).reduce((n, m) => n + missableCount(m), 0);
+}
+
+/** The part of `lostFor` that is a confirmed loss (see `isConfirmedLoss`). */
+export function confirmedLostFor(data: Dataset, state: PlayerState, requirementId: string): number {
+  return missedFor(data, state, requirementId)
+    .filter(isConfirmedLoss)
     .reduce((n, m) => n + missableCount(m), 0);
 }
 
@@ -99,11 +123,12 @@ export function rowResult(data: Dataset, state: PlayerState, r: Requirement): Ro
   const value = Math.max(0, raw);
   if (value >= r.required) return { kind: 'done', value };
   const remaining = r.required - value;
-  if (r.total === null) return { kind: 'remaining', value, remaining, skipLeft: null, impossible: false };
-  // Grouped missables (count > 1) are already summed by lostFor.
-  const lost = lostFor(data, state, r.id);
-  const skipLeft = r.total - lost - r.required;
-  return { kind: 'remaining', value, remaining, skipLeft: Math.max(0, skipLeft), impossible: skipLeft < 0 };
+  if (r.total === null) return { kind: 'remaining', value, remaining, skipLeft: null, impossible: false, atRisk: false };
+  // Grouped missables (count > 1) are already summed by lostFor. The skip margin is the worst case; only
+  // confirmed losses make the row impossible, and unconfirmed ones that would put it out of reach make it at risk.
+  const skipLeft = r.total - lostFor(data, state, r.id) - r.required;
+  const impossible = r.total - confirmedLostFor(data, state, r.id) - r.required < 0;
+  return { kind: 'remaining', value, remaining, skipLeft: Math.max(0, skipLeft), impossible, atRisk: !impossible && skipLeft < 0 };
 }
 
 export interface Summary {
@@ -166,7 +191,7 @@ export function setAvailability(data: Dataset, state: PlayerState, set: CardSet)
     if (m.cardSetId !== set.id) continue;
     const answer = state.missables[m.id] ?? 'unknown';
     if (answer === 'logged') continue;
-    if (answer === 'missed' && m.status === 'verified') {
+    if (answer === 'missed' && isConfirmedLoss(m)) {
       return { availability: 'lost', reasons: [`You marked ${m.label} missed, and that loss is verified.`] };
     }
     availability = 'uncertain';

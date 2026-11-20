@@ -81,6 +81,11 @@ export const Missable = z.object({
    * Missing it uses this many skips. Omitted = 1.
    */
   count: z.number().int().min(1).optional(),
+  /**
+   * True when the entry's own text says other copies may exist elsewhere (e.g. "If no second copy exists",
+   * "Other locations may exist"). A miss is then not a confirmed loss, even if the entry is verified.
+   */
+  copiesMayExist: z.boolean().optional(),
   ...Provenance,
 });
 export type Missable = z.infer<typeof Missable>;

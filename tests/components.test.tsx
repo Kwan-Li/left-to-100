@@ -7,11 +7,16 @@ import DontLose from '../src/components/DontLose';
 import Planner from '../src/components/Planner';
 import { r1 } from '../src/copy/r1';
 import { r2 } from '../src/copy/r2';
+import { r3 } from '../src/copy/r3';
 import { Dataset } from '../src/data/schema';
 import { emptyState } from '../src/lib/plan';
 import { encodeState, forgetLoadedState } from '../src/lib/state';
 
 const data = Dataset.parse(raw);
+/** A card set's count input. Its "I can't finish this set" checkbox also names the set, so query by role. */
+const setInput = (name: string) => screen.getByRole('spinbutton', { name }) as HTMLInputElement;
+/** Chapter labels render with a no-break space inside the chapter strip. */
+const nb = (label: string) => label.replace(/ /g, '\u00a0');
 const pageUrl = 'https://example.com/left-to-100/';
 
 beforeEach(() => {
@@ -125,7 +130,7 @@ describe('Planner chapter strip', () => {
     pick('chapter-1');
     const n = data.missables.filter((m) => m.lostAfterChapterId === 'chapter-1').length;
     expect(data.pointsOfNoReturn.some((p) => p.chapterId === 'chapter-1')).toBe(true);
-    await waitFor(() => expect(strip().textContent).toContain(r1.chapterStrip.some(n, 'Chapter 1')));
+    await waitFor(() => expect(strip().textContent).toContain(r1.chapterStrip.some(n, nb('Chapter 1'))));
   });
 
   it('a chapter with only a save reminder gets its own line', async () => {
@@ -134,7 +139,7 @@ describe('Planner chapter strip', () => {
       (c) => !data.missables.some((m) => m.lostAfterChapterId === c.id) && data.pointsOfNoReturn.some((p) => p.chapterId === c.id),
     )!;
     pick(ch.id);
-    await waitFor(() => expect(strip().textContent).toContain(r2.chapterStrip.saveOnly(ch.label)));
+    await waitFor(() => expect(strip().textContent).toContain(r2.chapterStrip.saveOnly(nb(ch.label))));
     expect(strip().classList.contains('warn')).toBe(false);
   });
 
@@ -209,7 +214,7 @@ describe('CardOptimizer', () => {
     expect(text.filter((t) => t === 'Finish')).toHaveLength(data.totals.cardSetsRequired - 1);
     expect(text.filter((t) => t === r1.verdictDone)).toHaveLength(1);
     expect(text.filter((t) => t === 'Skip')).toHaveLength(data.cardSets.length - data.totals.cardSetsRequired);
-    const tile = (screen.getByLabelText(full.name) as HTMLInputElement).closest('li')!;
+    const tile = (setInput(full.name) as HTMLInputElement).closest('li')!;
     expect(tile.querySelector('.set-verdict')!.textContent).toBe(r1.verdictDone);
     expect(tile.textContent).not.toContain("I can't finish this set");
     expect(tile.textContent).not.toContain('Finish');
@@ -220,7 +225,7 @@ describe('CardOptimizer', () => {
     location.hash = `s=${encodeState({ ...emptyState(data), cards })}`;
     render(<CardOptimizer data={data} pageUrl={pageUrl} />);
     const set = data.cardSets[0];
-    const input = screen.getByLabelText(set.name) as HTMLInputElement;
+    const input = setInput(set.name) as HTMLInputElement;
     await waitFor(() => expect(document.body.textContent).toContain('more cards to finish'));
     fireEvent.input(input, { target: { value: String(set.size + 1) } });
     await waitFor(() => expect(input.getAttribute('aria-invalid')).toBe('true'));
@@ -242,9 +247,9 @@ describe('CardOptimizer', () => {
     expect(link.getAttribute('href')).toBe(`#set-${s1.id}`);
     expect(screen.queryByText('Set blank sets to 0')).toBeNull();
     fireEvent.click(link);
-    expect(document.activeElement).toBe(screen.getByLabelText(s1.name));
+    expect(document.activeElement).toBe(setInput(s1.name));
     // With a blank set as well, the fill button comes back alongside the error.
-    fireEvent.input(screen.getByLabelText(data.cardSets[0].name), { target: { value: '' } });
+    fireEvent.input(setInput(data.cardSets[0].name), { target: { value: '' } });
     await waitFor(() => expect(screen.getByText('Set blank sets to 0')).toBeTruthy());
     expect(document.querySelector('#card-result .result.bad')).not.toBeNull();
   });
@@ -266,7 +271,7 @@ describe('CardOptimizer', () => {
     const cards = Object.fromEntries(data.cardSets.map((s) => [s.id, 0]));
     location.hash = `s=${encodeState({ ...emptyState(data), cards, unobtainable: [set.id] })}`;
     render(<CardOptimizer data={data} pageUrl={pageUrl} />);
-    const input = screen.getByLabelText(set.name) as HTMLInputElement;
+    const input = setInput(set.name) as HTMLInputElement;
     const tile = input.closest('li')!;
     await waitFor(() => expect((tile.querySelector('input[type=checkbox]') as HTMLInputElement).checked).toBe(true));
     fireEvent.input(input, { target: { value: String(set.size) } });
@@ -282,7 +287,7 @@ describe('CardOptimizer', () => {
     const result = document.getElementById('card-result')!;
     expect(result.getAttribute('aria-live')).toBeNull();
     expect(result.getAttribute('role')).toBeNull();
-    const input = screen.getByLabelText(data.cardSets[0].name) as HTMLInputElement;
+    const input = setInput(data.cardSets[0].name) as HTMLInputElement;
     await waitFor(() => expect(result.textContent).toContain('more cards to finish'));
     fireEvent.focus(input);
     fireEvent.input(input, { target: { value: '1' } });
@@ -350,5 +355,181 @@ describe('DontLose', () => {
     const ch2 = data.missables.filter((m) => m.lostAfterChapterId === 'chapter-2');
     await waitFor(() => expect(document.body.textContent).toContain(ch1[0].label));
     for (const m of ch2) expect(document.body.textContent).not.toContain(m.label);
+  });
+});
+
+describe('Round 3: unconfirmed lockouts in the Planner', () => {
+  const mags = data.requirements.find((r) => r.id === 'magazines-books-comics')!;
+  const impossibleText = "Can't reach the target with the items you marked missed.";
+
+  it('Chapter 2, five first-safehouse magazines missed, count 14: the row is at risk, not impossible', async () => {
+    location.hash = `s=${encodeState({
+      ...emptyState(data),
+      chapterId: 'chapter-2',
+      req: { [mags.id]: 14 },
+      missables: { 'magazines-first-safehouse': 'missed' },
+    })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const input = screen.getByLabelText(mags.name) as HTMLInputElement;
+    await waitFor(() => expect(input.value).toBe('14'));
+    const row = input.closest('li')!;
+    const out = row.querySelector('.out')!;
+    expect(out.classList.contains('risk')).toBe(true);
+    expect(out.textContent).toBe(r3.rowAtRisk('16'));
+    expect(row.textContent).not.toContain(impossibleText);
+    // The optional hint line sits under the row and is wired to the input.
+    const hint = row.querySelector('.req-risk')!;
+    expect(hint.textContent).toBe(r3.rowAtRiskHint);
+    expect(input.getAttribute('aria-describedby')!.split(' ')).toContain(hint.id);
+  });
+
+  it('a verified loss that rules the target out still shows the definite outcome', async () => {
+    const med = data.requirements.find((r) => r.id === 'meditation-spots')!;
+    const ds: Dataset = {
+      ...data,
+      missables: data.missables.map((m) => (m.id === 'meditation-first-safehouse-balcony' ? { ...m, count: 4 } : m)),
+    };
+    location.hash = `s=${encodeState({
+      ...emptyState(ds),
+      chapterId: 'chapter-2',
+      req: { [med.id]: 3 },
+      missables: { 'meditation-first-safehouse-balcony': 'missed' },
+    })}`;
+    render(<Planner data={ds} pageUrl={pageUrl} />);
+    const input = screen.getByLabelText(med.name) as HTMLInputElement;
+    await waitFor(() => expect(input.value).toBe('3'));
+    const row = input.closest('li')!;
+    expect(row.querySelector('.out')!.classList.contains('bad')).toBe(true);
+    expect(row.textContent).toContain(impossibleText);
+    expect(row.querySelector('.req-risk')).toBeNull();
+  });
+});
+
+describe('Round 3: hide done waits for the pointer', () => {
+  it('a row that became Done stays while a tap elsewhere is in progress, then hides after it lands', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    fireEvent.click(screen.getByLabelText('Hide done'));
+    const story = data.requirements.find((r) => r.id === 'story-completion')!;
+    const gang = data.requirements.find((r) => r.id === 'gang-operations')!;
+    const input = screen.getByLabelText(story.name) as HTMLInputElement;
+    input.focus();
+    fireEvent.input(input, { target: { value: '100' } });
+    await waitFor(() => expect(input.closest('li')!.textContent).toContain('Done'));
+    const summary = (screen.getByLabelText(gang.name) as HTMLElement).closest('li')!.querySelector('details > summary')!;
+    // Touch order: pointerdown, pointerup, then the compatibility mousedown moves focus (blur), then click.
+    fireEvent.pointerDown(summary);
+    fireEvent.pointerUp(summary);
+    input.blur();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.queryByLabelText(story.name)).toBe(input); // still there under the finger
+    fireEvent.click(summary);
+    await waitFor(() => expect(screen.queryByLabelText(story.name)).toBeNull());
+  });
+
+  it('with a mouse, the row stays while the button is held and hides after the click', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    fireEvent.click(screen.getByLabelText('Hide done'));
+    const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
+    const input = screen.getByLabelText(bank.name) as HTMLInputElement;
+    input.focus();
+    fireEvent.input(input, { target: { value: String(bank.required) } });
+    await waitFor(() => expect(input.closest('li')!.textContent).toContain('Done'));
+    const elsewhere = document.querySelector('.summary')!;
+    fireEvent.pointerDown(elsewhere);
+    input.blur();
+    await new Promise((r) => setTimeout(r, 400));
+    expect(screen.queryByLabelText(bank.name)).toBe(input); // pointer still down: nothing moves
+    fireEvent.pointerUp(elsewhere);
+    fireEvent.click(elsewhere);
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull());
+  });
+
+  it('without a pointer interaction (keyboard), blur hides the row at once', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    fireEvent.click(screen.getByLabelText('Hide done'));
+    const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
+    const input = screen.getByLabelText(bank.name) as HTMLInputElement;
+    await new Promise((r) => setTimeout(r, 350)); // past the 300ms window of the click on "Hide done"
+    input.focus();
+    fireEvent.input(input, { target: { value: String(bank.required) } });
+    await waitFor(() => expect(input.closest('li')!.textContent).toContain('Done'));
+    input.blur();
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 100 });
+  });
+});
+
+describe('Round 3: "Watch out" notes and the chapter strip', () => {
+  it('opening the notes leaves the summary in place and renders the notes in their own full-width cell', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const gang = data.requirements.find((r) => r.id === 'gang-operations')!;
+    const li = (screen.getByLabelText(gang.name) as HTMLElement).closest('li')!;
+    const details = li.querySelector('details.req-traps') as HTMLDetailsElement;
+    const notes = li.querySelector('.req-notes') as HTMLElement;
+    expect(details.querySelector('.req-trap')).toBeNull();
+    expect(notes.hidden).toBe(true);
+    details.open = true;
+    details.dispatchEvent(new Event('toggle'));
+    await waitFor(() => expect(notes.hidden).toBe(false));
+    expect(notes.querySelectorAll('.req-trap').length).toBeGreaterThan(0);
+    expect(details.querySelector('summary')!.getAttribute('aria-controls')).toBe(notes.id);
+  });
+
+  it('uses the neutral link text when the chapter has no checklist missables', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const strip = () => document.querySelector('.chapter-strip')!;
+    const pick = (id: string) => fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: id } });
+    pick('chapter-1');
+    await waitFor(() => expect(strip().querySelector('a')!.textContent).toBe(r1.chapterStripLink));
+    expect(strip().textContent).toContain('Chapter 1');
+    pick('story-finished');
+    await waitFor(() => expect(strip().querySelector('a')!.textContent).toBe(r3.chapterStripLinkNeutral));
+    const quiet = data.chapters.find((c) => c.order > 0 && c.id !== 'story-finished' && !data.missables.some((m) => m.lostAfterChapterId === c.id))!;
+    pick(quiet.id);
+    await waitFor(() => expect(strip().querySelector('a')!.textContent).toBe(r3.chapterStripLinkNeutral));
+  });
+});
+
+describe('Round 3: card toggles for screen readers', () => {
+  const live = () => document.querySelector('.optimizer > [role=status]')!;
+
+  it("each \"I can't finish this set\" checkbox is named with its set name, with no new visible text", async () => {
+    const cards = Object.fromEntries(data.cardSets.map((s) => [s.id, 0]));
+    location.hash = `s=${encodeState({ ...emptyState(data), cards })}`;
+    render(<CardOptimizer data={data} pageUrl={pageUrl} />);
+    for (const s of data.cardSets) {
+      const box = screen.getByRole('checkbox', { name: `I can't finish this set ${s.name}` });
+      expect(box.closest('li')!.contains(setInput(s.name))).toBe(true);
+    }
+    const tile = setInput(data.cardSets[0].name).closest('li')!;
+    expect(tile.querySelector('.set-foot')!.textContent).toBe("I can't finish this set");
+  });
+
+  it('toggling a set announces the updated plan through the polite region', async () => {
+    const cards = Object.fromEntries(data.cardSets.map((s) => [s.id, 0]));
+    location.hash = `s=${encodeState({ ...emptyState(data), cards })}`;
+    render(<CardOptimizer data={data} pageUrl={pageUrl} />);
+    const result = document.getElementById('card-result')!;
+    await waitFor(() => expect(result.textContent).toContain('more cards to finish'));
+    const before = result.textContent;
+    expect(live().textContent).toBe('');
+    const s = data.cardSets[0];
+    fireEvent.click(screen.getByRole('checkbox', { name: `I can't finish this set ${s.name}` }));
+    await waitFor(() => expect(result.textContent).not.toBe(before));
+    await waitFor(() => expect(live().textContent).toContain('more cards to finish'));
+    expect(live().textContent!.replace(/\s+/g, ' ').trim()).toBe(
+      [...result.querySelectorAll('p')].map((p) => p.textContent!.trim()).join(' ').replace(/\s+/g, ' ').trim(),
+    );
+  });
+
+  it('answering a card-missable question announces the updated plan', async () => {
+    const cards = Object.fromEntries(data.cardSets.map((s) => [s.id, 0]));
+    location.hash = `s=${encodeState({ ...emptyState(data), chapterId: 'story-finished', cards, missables: { 'card-victor-maravilla': 'logged', 'card-vicki': 'logged' } })}`;
+    render(<CardOptimizer data={data} pageUrl={pageUrl} />);
+    const result = document.getElementById('card-result')!;
+    await waitFor(() => expect(result.textContent).toContain('more cards to finish'));
+    expect(live().textContent).toBe('');
+    const q = [...document.querySelectorAll('.mq')].find((li) => li.textContent!.includes('Vicki'))!;
+    fireEvent.click(q.querySelectorAll('input[type=radio]')[1]); // Missed it
+    await waitFor(() => expect(live().textContent).toMatch(/depending on/));
   });
 });

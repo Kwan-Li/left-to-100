@@ -104,6 +104,26 @@ const website = {
             update();
             nav.addEventListener('scroll', update, { passive: true });
             addEventListener('resize', update);
+            // Keyboard focus: scroll sideways (scrollLeft math, never scrollIntoView, so the page doesn't move) until the
+            // focused link and its ring are clear of the edge fades, then recompute the fades.
+            nav.addEventListener('focusin', (e) => {
+              const a = e.target.closest && e.target.closest('a');
+              if (!a || nav.scrollWidth <= nav.clientWidth) return;
+              const ring = 5; // 3px outline + 2px offset
+              const fade = 28; // width of an edge fade (global.css .fade-l / .fade-r)
+              const n = nav.getBoundingClientRect();
+              const c = a.getBoundingClientRect();
+              const max = nav.scrollWidth - nav.clientWidth;
+              const left = c.left - n.left; // relative to the strip's visible box
+              const right = c.right - n.left;
+              let target = nav.scrollLeft;
+              if (left - ring < 0 || (left - ring - fade < 0 && nav.scrollLeft > 1)) target += left - ring - fade;
+              else if (right + ring > n.width || (right + ring + fade > n.width && max - nav.scrollLeft > 1))
+                target += right + ring + fade - n.width;
+              target = Math.max(0, Math.min(max, target));
+              if (Math.abs(target - nav.scrollLeft) > 0.5) nav.scrollLeft = target;
+              update();
+            });
           })();
         </script>
       </div>

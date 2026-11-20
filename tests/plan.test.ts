@@ -4,7 +4,9 @@ import raw from '../src/data/gta6.json';
 import { Dataset } from '../src/data/schema';
 import {
   cardPlan,
+  confirmedLostFor,
   emptyState,
+  isConfirmedLoss,
   lostFor,
   passedMissables,
   rowResult,
@@ -31,7 +33,7 @@ describe('requirement rows', () => {
 
   it('computes remaining and skip margin', () => {
     expect(rowResult(data, state({ req: { stunts: 12 } }), req('stunts'))).toEqual({
-      kind: 'remaining', value: 12, remaining: 18, skipLeft: 10, impossible: false,
+      kind: 'remaining', value: 12, remaining: 18, skipLeft: 10, impossible: false, atRisk: false,
     });
   });
 
@@ -145,8 +147,72 @@ describe('grouped missables', () => {
     expect(counted).toEqual({ 'magazines-first-safehouse': 5, 'magazines-starlet-motel': 2, 'magazines-bayside-apartment': 2 });
     const mags = realData.requirements.find((r) => r.id === 'magazines-books-comics')!;
     const st = { ...emptyState(realData), chapterId: 'story-finished', req: { [mags.id]: 0 }, missables: { 'magazines-first-safehouse': 'missed' as const } };
-    // 34 total, 30 needed: 4 spare. Five lost reading items can't be made up.
-    expect(rowResult(realData, st, mags)).toMatchObject({ kind: 'remaining', skipLeft: 0, impossible: true });
+    // 34 total, 30 needed: 4 spare. Five lost reading items can't be made up in the worst case, but other copies
+    // may exist, so the row is at risk rather than impossible.
+    expect(rowResult(realData, st, mags)).toMatchObject({ kind: 'remaining', skipLeft: 0, impossible: false, atRisk: true });
+  });
+});
+
+describe('unconfirmed lockouts', () => {
+  const mags = realData.requirements.find((r) => r.id === 'magazines-books-comics')!;
+
+  it('Chapter 2, five first-safehouse magazines missed, count 14: at risk, not impossible', () => {
+    const st: PlayerState = {
+      ...emptyState(realData),
+      chapterId: 'chapter-2',
+      req: { [mags.id]: 14 },
+      missables: { 'magazines-first-safehouse': 'missed' },
+    };
+    // The worst case is still counted: 5 lost against 4 spare leaves no skips.
+    expect(lostFor(realData, st, mags.id)).toBe(5);
+    expect(confirmedLostFor(realData, st, mags.id)).toBe(0);
+    expect(rowResult(realData, st, mags)).toEqual({
+      kind: 'remaining', value: 14, remaining: 16, skipLeft: 0, impossible: false, atRisk: true,
+    });
+  });
+
+  it('a verified loss that puts the target out of reach is still impossible', () => {
+    // Meditation: 18 total, 15 needed, 3 spare. A verified group of 4 can't be made up.
+    const verified = fixture({
+      missables: [{ ...data.missables[0], id: 'med-pack', count: 4, status: 'verified' }],
+    });
+    const st: PlayerState = { ...emptyState(verified), chapterId: 'ch2', req: { meditation: 5 }, missables: { 'med-pack': 'missed' } };
+    expect(rowResult(verified, st, req('meditation'))).toMatchObject({ kind: 'remaining', skipLeft: 0, impossible: true, atRisk: false });
+  });
+
+  it('a verified entry whose data says other copies may exist is not a confirmed loss', () => {
+    const m = { ...data.missables[0], id: 'med-pack', count: 4, status: 'verified' as const, copiesMayExist: true };
+    expect(isConfirmedLoss(m)).toBe(false);
+    const ds = fixture({ missables: [m] });
+    const st: PlayerState = { ...emptyState(ds), chapterId: 'ch2', req: { meditation: 5 }, missables: { 'med-pack': 'missed' } };
+    expect(rowResult(ds, st, req('meditation'))).toMatchObject({ impossible: false, atRisk: true });
+  });
+
+  it('confirmed and unconfirmed losses together: impossible only when the confirmed part alone rules it out', () => {
+    const ds = fixture({
+      missables: [
+        { ...data.missables[0], id: 'sure', count: 2, status: 'verified' },
+        { ...data.missables[0], id: 'maybe', count: 2, status: 'reported' },
+      ],
+    });
+    const st: PlayerState = { ...emptyState(ds), chapterId: 'ch2', req: { meditation: 5 }, missables: { sure: 'missed', maybe: 'missed' } };
+    expect(rowResult(ds, st, req('meditation'))).toMatchObject({ skipLeft: 0, impossible: false, atRisk: true });
+    const st2 = { ...st, missables: { sure: 'missed' as const } };
+    expect(rowResult(ds, st2, req('meditation'))).toMatchObject({ skipLeft: 1, impossible: false, atRisk: false });
+  });
+
+  it('the real dataset flags copiesMayExist only where its own text says other copies may exist', () => {
+    const flagged = realData.missables.filter((m) => m.copiesMayExist).map((m) => m.id);
+    expect(flagged).toEqual([
+      'card-victor-maravilla',
+      'card-vicki',
+      'magazines-first-safehouse',
+      'magazines-starlet-motel',
+      'magazines-bayside-apartment',
+    ]);
+    for (const m of realData.missables.filter((x) => x.copiesMayExist)) {
+      expect(`${m.effect} ${m.note ?? ''}`).toMatch(/second copy|elsewhere|Other locations may exist|picked up later/);
+    }
   });
 });
 
