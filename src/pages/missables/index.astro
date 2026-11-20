@@ -12,11 +12,11 @@ const reqName = (id: string) => data.requirements.find((r) => r.id === id)?.name
 const faqs = [
   {
     q: 'Is anything missable for 100% in GTA 6?',
-    a: `A few items are reported to become unavailable after certain chapters (${data.missables.length} tracked here). Because most requirements only need part of the total, missing one usually uses up some of your room to skip rather than blocking 100%.`,
+    a: `A few items are reported to become unavailable after certain chapters (${data.missables.length} tracked here). Because most requirements only need part of the total, missing one usually eats into your room to skip rather than blocking 100%.`,
   },
   {
     q: 'Can you replay missions in GTA 6?',
-    a: 'Launch guides report no mission replay, so keeping a separate save before the end of each chapter is the safest habit.',
+    a: 'Early guides report no mission replay, so keeping a separate manual save before finishing each chapter is the safest habit.',
   },
 ];
 
@@ -38,22 +38,23 @@ const schema = [
 ---
 
 <Layout
-  title="GTA 6 Missables for 100% (Spoiler-Safe, by Chapter)"
+  title="GTA 6 100% Missables by Chapter (Spoiler-Safe)"
   description="GTA 6 missables that affect 100%, one chapter at a time with no plot spoilers. See only what you could lose next and when to keep a backup save."
   schema={schema}
   active="missables"
 >
   <h1>GTA 6 missables <span class="accent">that affect 100%</span></h1>
   <p class="lead">
-    Pick your chapter and see only what you can lose at the end of it. No plot details, no mission names, nothing from later
-    chapters.
+    Pick your chapter to see only what you can lose at the end of it. No plot details, no mission names, and nothing from
+    later chapters.
   </p>
 
   <DontLose client:load showPicker />
 
   <h2 id="full-list">Full list by chapter</h2>
   <div class="callout spoiler">
-    Spoiler warning: the full list names chapters and locations for every missable. Open only the chapters you've reached.
+    Spoiler warning: this full list names chapters and locations for every tracked missable. Open only the chapters you've
+    already reached.
   </div>
   {
     chapters.map((c) => {
@@ -63,17 +64,19 @@ const schema = [
       return (
         <details class="faq">
           <summary>
-            Lost after {c.label} ({items.length} {items.length === 1 ? 'item' : 'items'})
+            {items.length > 0
+              ? `End of ${c.label} (${items.length} ${items.length === 1 ? 'missable' : 'missables'})`
+              : `End of ${c.label} (save point note)`}
           </summary>
           <ul>
             {ponr.map((p) => (
               <li>
-                <strong>Point of no return.</strong> {p.label} <StatusBadge status={p.status} />
+                <strong>Point of no return:</strong> {p.label} <StatusBadge status={p.status} />
               </li>
             ))}
             {items.map((m) => (
               <li>
-                <strong>{m.label}</strong> ({reqName(m.requirementId)}): {m.where}. {m.effect} <StatusBadge status={m.status} />
+                <strong>{m.label}</strong> ({reqName(m.requirementId)}): {m.where} {m.effect} <StatusBadge status={m.status} />
               </li>
             ))}
           </ul>

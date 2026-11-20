@@ -14,14 +14,14 @@ export function ShareBar({ data, state, pageUrl }: { data: Dataset; state: Playe
       await navigator.clipboard.writeText(url);
       setMsg('Link copied. Open it on another device to carry your progress over.');
     } catch {
-      setMsg('Copy this link to carry your progress over:');
+      setMsg('Copy this link to move your progress to another device:');
     }
   };
 
   const reset = () => {
-    if (confirm('Clear all your entered progress on this device?')) {
+    if (confirm('Reset all saved progress on this device? Your counts, card sets, chapter, and missable answers will be cleared.')) {
       resetState(data);
-      setMsg('Progress cleared.');
+      setMsg('Progress reset.');
       setLink('');
     }
   };
@@ -33,7 +33,7 @@ export function ShareBar({ data, state, pageUrl }: { data: Dataset; state: Playe
           Copy share link
         </button>
         <button type="button" class="btn ghost" onClick={reset}>
-          Reset
+          Reset progress
         </button>
       </div>
       <p class="share-msg muted" role="status" aria-live="polite">

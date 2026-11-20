@@ -10,7 +10,7 @@ import { emptyState } from '../src/lib/plan';
 import { encodeState, forgetLoadedState } from '../src/lib/state';
 
 const data = Dataset.parse(raw);
-const pageUrl = 'https://example.com/skip-budget/';
+const pageUrl = 'https://example.com/left-to-100/';
 
 beforeEach(() => {
   localStorage.clear();
@@ -36,7 +36,7 @@ describe('Planner', () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
     const r = data.requirements[1];
     fireEvent.input(screen.getByLabelText(r.name), { target: { value: '5' } });
-    await waitFor(() => expect(localStorage.getItem('skip-budget:v1')).toContain(`"${r.id}":5`));
+    await waitFor(() => expect(localStorage.getItem('left-to-100:v1')).toContain(`"${r.id}":5`));
   });
 
   it('loads progress from a share link', async () => {
@@ -52,7 +52,7 @@ describe('CardOptimizer', () => {
     render(<CardOptimizer data={data} pageUrl={pageUrl} />);
     expect(screen.getByText(/Enter a count for every set/)).toBeTruthy();
     fireEvent.click(screen.getByText('Set blank sets to 0'));
-    await waitFor(() => expect(document.body.textContent).toContain('372 more cards finishes 15 sets'));
+    await waitFor(() => expect(document.body.textContent).toContain('You need 372 more cards to finish 15 sets.'));
   });
 
   it('shows a range when a reported-only missable card was missed', async () => {
@@ -73,7 +73,7 @@ describe('DontLose', () => {
   it('reveals nothing before the story starts and only the current chapter after', async () => {
     const { rerender } = render(<DontLose data={data} showPicker />);
     const select = screen.getByRole('combobox') as HTMLSelectElement;
-    expect(document.body.textContent).toContain('Nothing that counts toward 100%');
+    expect(document.body.textContent).toContain('Pick your current chapter above to see spoiler-safe warnings');
     fireEvent.change(select, { target: { value: 'chapter-1' } });
     rerender(<DontLose data={data} showPicker />);
     const ch1 = data.missables.filter((m) => m.lostAfterChapterId === 'chapter-1');

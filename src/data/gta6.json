@@ -87,7 +87,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "No fixed total is shown; guides only estimate a few hundred tasks are available, so missing some during the story is harmless."
+      "note": "No fixed total is shown. Guides estimate a few hundred tasks exist, so missing some during the story is reported to be harmless."
     },
     {
       "id": "gang-operations",
@@ -580,7 +580,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "The 34 total is split as 27 magazines/books/comics plus 7 Book Swaps by PowerPyx's checklist, GTABase and Timesaver. PowerPyx's dedicated magazine page lists 27 slots and gives no separate Book Swap count."
+      "note": "The 34 total is split as 27 magazines/books/comics plus 7 Book Swaps by PowerPyx's checklist, GTABase, and Timesaver. PowerPyx's dedicated magazine page lists 27 slots and gives no separate Book Swap count."
     },
     {
       "id": "meditation-spots",
@@ -713,7 +713,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "The 79 total is reported as 13 + 15 character tattoos, 17 magazine tattoos and 34 luxury watches."
+      "note": "The 79 total is reported as 13 + 15 character tattoos, 17 magazine tattoos, and 34 luxury watches."
     },
     {
       "id": "unique-races",
@@ -784,7 +784,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "PowerPyx, KeenGamer, Press Start and Timesaver give 10 of 13. Shacknews lists 42 and Push Square lists 30; both match the numbers on neighbouring lines (Shooting Range 42, Unique Races 30), so they look like transcription slips, but the conflict is unresolved until someone checks the in-game list."
+      "note": "PowerPyx, KeenGamer, Press Start, and Timesaver give 10 of 13. Shacknews lists 42 and Push Square lists 30; both match the numbers on neighboring lines (Shooting Range 42, Unique Races 30), so they look like transcription slips, but the conflict is unresolved until someone checks the in-game list."
     },
     {
       "id": "shooting-range-golds",
@@ -1018,7 +1018,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "The 397 total is reported as 130 Stunt Jumps, 202 Under the Bridges, 40 Knife Flights and 25 Base Jumps."
+      "note": "The 397 total is reported as 130 Stunt Jumps, 202 Under the Bridges, 40 Knife Flights, and 25 Base Jumps."
     },
     {
       "id": "challenges",
@@ -1153,7 +1153,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "The 66 total is reported as 53 guns, 9 melee and 4 explosives."
+      "note": "The 66 total is reported as 53 guns, 9 melee, and 4 explosives."
     },
     {
       "id": "animals",
@@ -1306,7 +1306,7 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "Spelled without the accent (\"Futbol\") by Push Square, Game-Checklists and GMTreks."
+      "note": "Spelled without the accent (\"Futbol\") by Push Square, Game-Checklists, and GMTreks."
     },
     {
       "id": "liberty-city-swingers",
@@ -1762,7 +1762,7 @@
       "label": "Lucia's balcony meditation at the first safehouse",
       "where": "Balcony of Jason's house in Key Lento; reported to appear partway through Chapter 1.",
       "lostAfterChapterId": "chapter-1",
-      "effect": "The meditation counter can then reach only 17 of 18, so one of the three spare meditations is already spent; 15 is still reachable. The separate all-meditations trophy may also be lost.",
+      "effect": "Missing it caps your meditation count at 17 of 18—spending 1 of your 3 spares, though 15 is still reachable. It may also lock out the separate all-meditations trophy.",
       "status": "verified",
       "sources": [
         {
@@ -1792,7 +1792,7 @@
       "label": "Victor Maravilla card (Los Santos Corkers)",
       "where": "Starlet Motel, Gellhorn (Kelly County): on the kitchen fridge.",
       "lostAfterChapterId": "chapter-2",
-      "effect": "Los Santos Corkers can no longer be completed, leaving 17 completable sets; 15 are needed, so two spare sets remain.",
+      "effect": "If no second copy exists, Los Santos Corkers can't be completed—leaving 17 completable sets (2 spares above the 15 needed).",
       "status": "reported",
       "sources": [
         {
@@ -1818,7 +1818,7 @@
       "label": "Vicki card (Delights Dancers)",
       "where": "Starlet Motel, Gellhorn (Kelly County): office bathroom floor beside the toilet.",
       "lostAfterChapterId": "chapter-2",
-      "effect": "Delights Dancers can no longer be completed. Missing both Starlet Motel cards leaves 16 completable sets, one spare above the 15 needed.",
+      "effect": "If no second copy exists, Delights Dancers can't be completed. Losing both Starlet Motel sets leaves 16 completable sets (1 spare above the 15 needed).",
       "status": "reported",
       "sources": [
         {
@@ -1835,15 +1835,15 @@
         }
       ],
       "lastVerified": "2026-11-20",
-      "note": "Same single-origin caveat as the Victor Maravilla card. The Harley card in the same set (inside Delights) is reported as still collectable later."
+      "note": "Same single-origin caveat as the Victor Maravilla card. The Harley card in the same set (inside Delights) is reported as still collectible later."
     },
     {
       "id": "magazines-first-safehouse",
       "requirementId": "magazines-books-comics",
       "label": "Five reading items at the first safehouse: Ashes of Glory, Lethal By Design, Orca A Whole Different Animal, Off the Hook, Body Copy",
-      "where": "Jason's house in Key Lento: bedside table, living room tables, the tool shed underneath and the back deck.",
+      "where": "Jason's house in Key Lento: bedside table, living room tables, the tool shed underneath, and the back deck.",
       "lostAfterChapterId": "chapter-1",
-      "effect": "These copies disappear. PowerPyx says most titles also exist elsewhere, but no second spot is confirmed for these five; 30 of 34 are needed, so up to four titles can be missing.",
+      "effect": "These copies are reported to disappear after Chapter 1. PowerPyx says most titles also exist elsewhere, but no second spot is confirmed for these 5; 30 of 34 are needed, leaving room to miss up to 4.",
       "status": "reported",
       "sources": [
         {
@@ -1864,7 +1864,7 @@
       "label": "Two reading items at the Starlet Motel: Help Me Help You Help Me, Wizard Wang",
       "where": "Starlet Motel, Gellhorn: reception room table and cafeteria table.",
       "lostAfterChapterId": "chapter-2",
-      "effect": "These copies disappear; other locations may exist but none are confirmed. Counts against the 4-item margin (30 of 34).",
+      "effect": "These copies are reported to disappear after Chapter 2. Other locations may exist, but none are confirmed; any lost title eats into your 4-item skip margin (30 of 34 needed).",
       "status": "reported",
       "sources": [
         {
@@ -1880,7 +1880,7 @@
       "label": "Two reading items at the Bayside Apartment: Passion B.C., Two Pricks in the Bush",
       "where": "Bayside Apartment, Vice City: beside the bathtub and on the table in front of the TV.",
       "lostAfterChapterId": "chapter-3",
-      "effect": "These copies disappear; other locations may exist but none are confirmed. Counts against the 4-item margin (30 of 34).",
+      "effect": "These copies are reported to disappear after Chapter 3. Other locations may exist, but none are confirmed; any lost title eats into your 4-item skip margin (30 of 34 needed).",
       "status": "reported",
       "sources": [
         {
@@ -1920,7 +1920,7 @@
     {
       "id": "end-of-chapter-2",
       "chapterId": "chapter-2",
-      "label": "End of Chapter 2: the Starlet Motel stops being a safehouse and its rooms (two cards, two reading items) can no longer be entered.",
+      "label": "End of Chapter 2: the Starlet Motel rooms (2 cards, 2 reading items) become unavailable to enter.",
       "status": "verified",
       "sources": [
         {
@@ -1971,7 +1971,7 @@
     {
       "id": "end-of-chapter-4",
       "chapterId": "chapter-4",
-      "label": "End of Chapter 4: reported as a hard save point. Missions cannot be replayed and choices made here are permanent, so keep a manual save.",
+      "label": "End of Chapter 4: reported as a major save point—missions can't be replayed and end-of-chapter choices are reported to be permanent, so keep a manual save.",
       "status": "reported",
       "sources": [
         {
@@ -1984,7 +1984,7 @@
     {
       "id": "chapter-5-finale",
       "chapterId": "chapter-5",
-      "label": "Chapter 5 finale: story missions cannot be replayed afterwards. Free roam continues and every checklist item stays doable.",
+      "label": "Chapter 5 finale: story missions can't be replayed afterward. Free roam continues and remaining checklist requirements stay available.",
       "status": "verified",
       "sources": [
         {
@@ -2035,7 +2035,7 @@
         "underwater-discoveries"
       ],
       "title": "Kenton needs 5 of 7, but Underwater Discoveries need all 7",
-      "detail": "The Kenton entry is satisfied by 5 of the 7 shipwreck sets, yet the 33 underwater discoveries sit in those same wrecks and all 33 are required, so in practice all 7 sets must be done.",
+      "detail": "The Kenton entry only asks for 5 of the 7 shipwreck sets, but all 33 Underwater Discoveries sit inside those wrecks and all 33 are required—so you'll end up doing all 7 sets anyway.",
       "status": "verified",
       "sources": [
         {
@@ -2063,7 +2063,7 @@
         "meditation-spots"
       ],
       "title": "18 meditations come from only 10 spots",
-      "detail": "Eight of the ten spots can be done once as each lead character for two meditations each. The first-safehouse balcony spot counts once and the final mountain spot, which appears only after the others, also counts once. 15 of the 18 are required.",
+      "detail": "Guides report that 8 of the 10 spots can be done once as each lead character (2 meditations each). The first-safehouse balcony spot and a final mountain spot (reported to appear after the others) each count once. You need 15 of the 18.",
       "status": "reported",
       "sources": [
         {
@@ -2088,7 +2088,7 @@
         "base-model-vehicles"
       ],
       "title": "Only base models count toward the 200",
-      "detail": "The vehicle database is reported to hold 557 entries: 277 base models plus 280 Standout variants parked at fixed spots. Only base models count toward the 200, and boats and aircraft are included.",
+      "detail": "The vehicle database is reported to hold 557 entries: 277 base models plus 280 Standout variants parked at fixed spots. Guides report that only base models count toward the 200, including boats and aircraft.",
       "status": "reported",
       "sources": [
         {
@@ -2140,8 +2140,8 @@
       "requirementIds": [
         "collectible-card-sets"
       ],
-      "title": "Colour variants count separately; duplicates do not",
-      "detail": "Each colour or metal variant of a card fills its own slot in a set. Picking up a second copy of the same variant adds nothing, though it can be sold. The cheapest 15 complete sets total 372 cards.",
+      "title": "Color variants count separately; duplicates don't",
+      "detail": "Each color or metal variant of a card fills its own slot in a set. Picking up a second copy of the same variant adds nothing, though you can sell it. The 15 smallest sets total 372 cards.",
       "status": "verified",
       "sources": [
         {
@@ -2173,7 +2173,7 @@
         "collectible-card-sets"
       ],
       "title": "Trophy targets are not the checklist targets",
-      "detail": "Several trophies fire at lower counts than the checklist needs: 250 stunts (300 needed), 50 challenges (70), 20 race wins (30) and 3 card sets (15). The meditation trophy goes the other way and wants every meditation, while the checklist accepts 15.",
+      "detail": "Several trophies unlock at lower counts than 100% needs: 250 stunts (300 needed), 50 challenges (70), 20 race wins (30), and 3 card sets (15). The meditation trophy goes the other way—it wants all meditations, while the checklist accepts 15.",
       "status": "verified",
       "sources": [
         {
@@ -2193,7 +2193,7 @@
         "stunts"
       ],
       "title": "Any mix of stunt types works",
-      "detail": "Jumps, under-bridge passes, knife flights and base jumps all feed the same 300 count. Doing each stunt once is enough, and the optional challenges attached to each stunt icon are not needed.",
+      "detail": "Guides report that Stunt Jumps, Under the Bridges, Knife Flights, and Base Jumps all feed the same 300 count. Doing each stunt once is reported to be enough—the optional challenges on each stunt icon aren't required.",
       "status": "reported",
       "sources": [
         {
@@ -2213,7 +2213,7 @@
         "smash-n-grabs"
       ],
       "title": "A store robbery may not count without its safe",
-      "detail": "Guides warn that skipping the backroom safe during a Smash ’N’ Grab can leave that store not \"fully completed\".",
+      "detail": "Guides warn that skipping the backroom safe during a Smash 'N' Grab can leave that store not \"fully completed\".",
       "status": "reported",
       "sources": [
         {
@@ -2233,7 +2233,7 @@
         "basketball-hoops"
       ],
       "title": "Each hoop counts once",
-      "detail": "The 90 must be different hoops; scoring repeatedly at one hoop adds nothing.",
+      "detail": "Guides report that the 90 must be different hoops; scoring repeatedly at the same hoop doesn't add to your count.",
       "status": "reported",
       "sources": [
         {
@@ -2253,7 +2253,7 @@
         "drone-time-trials"
       ],
       "title": "Par time only matters on two of three trials",
-      "detail": "At each drone location the first two trials must beat par (28 runs in total); the third only has to be finished.",
+      "detail": "Guides report that at each drone location, only the first 2 trials must beat par (28 runs total); the third only needs to be finished.",
       "status": "reported",
       "sources": [
         {
@@ -2273,7 +2273,7 @@
         "video-games"
       ],
       "title": "Starting a game is enough",
-      "detail": "Each of the four video games only needs to be launched, not beaten.",
+      "detail": "Guides report that each of the 4 video games only needs to be launched, not beaten.",
       "status": "reported",
       "sources": [
         {
@@ -2292,8 +2292,8 @@
       "requirementIds": [
         "mini-golf"
       ],
-      "title": "Full-size golf courses do not count",
-      "detail": "Only the three mini golf courses count toward this entry; the two regular golf courses are separate.",
+      "title": "Full-size golf courses don't count",
+      "detail": "Guides report that only the 3 mini golf courses count toward this entry; the 2 regular golf courses are separate.",
       "status": "reported",
       "sources": [
         {
@@ -2334,7 +2334,7 @@
         "standard-issue-weapons"
       ],
       "title": "Holding a weapon once registers it",
-      "detail": "A weapon is logged as soon as you equip it once; no kills or purchases beyond that are needed.",
+      "detail": "Guides report that a weapon logs as soon as you equip it once—no kills or purchases beyond that are needed.",
       "status": "reported",
       "sources": [
         {
@@ -2354,7 +2354,7 @@
         "animals"
       ],
       "title": "Binoculars are enough and breeds count separately",
-      "detail": "Studying an animal through binoculars logs it, no hunting required, and different dog and cat breeds each count as their own entry.",
+      "detail": "Guides report that studying an animal through binoculars logs it (no hunting required), and different dog and cat breeds each count as their own entry.",
       "status": "reported",
       "sources": [
         {
@@ -2374,7 +2374,7 @@
         "gang-operations"
       ],
       "title": "Missed valuables take a long time to come back",
-      "detail": "If you leave a gang operation with a valuable still inside, the site does respawn, but only after a long wait; clear it fully on the first visit.",
+      "detail": "Guides report that if you leave a gang operation with a valuable still inside, the site does respawn, but only after a long wait—clear it fully on the first visit.",
       "status": "reported",
       "sources": [
         {

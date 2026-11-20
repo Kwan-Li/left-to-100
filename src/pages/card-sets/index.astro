@@ -18,7 +18,7 @@ const faqs = [
   },
   {
     q: 'Which GTA 6 card sets should I skip?',
-    a: `From scratch, skipping the ${largest.length} largest sets (${largest.map((s) => `${s.name}, ${s.size} cards`).join('; ')}) leaves the fewest cards to find. If you've already started some sets, enter your counts and the planner picks the cheapest ${data.totals.cardSetsRequired} for you.`,
+    a: `Starting from zero, skipping the ${largest.length} largest sets (${largest.map((s) => `${s.name}, ${s.size} cards`).join('; ')}) leaves the fewest cards to find. If you've already started some sets, enter your counts above and the planner picks the ${data.totals.cardSetsRequired} that need the fewest extra cards.`,
   },
   {
     q: 'What is the minimum number of cards for 100%?',
@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     q: 'Do sold cards still count?',
-    a: 'Guides report that a card stays logged in your collection after you sell it, so selling duplicates does not undo set progress.',
+    a: "Yes—multiple guides confirm that a card stays logged in your collection after you sell it at a pawn shop, so selling cards doesn't undo set progress.",
   },
 ];
 
@@ -48,8 +48,8 @@ const schema = [
 ---
 
 <Layout
-  title="GTA 6 Card Sets: Which 15 to Finish (Card Set Planner)"
-  description={`GTA 6 100% needs ${data.totals.cardSetsRequired} of ${data.totals.cardSets} card sets. Enter your counts and get the ${data.totals.cardSetsRequired} that need the fewest extra cards. Minimum: ${minimumCards} cards.`}
+  title="GTA 6 Card Sets Planner: Which 15 to Finish"
+  description={`GTA 6 100% needs ${data.totals.cardSetsRequired} of ${data.totals.cardSets} card sets (minimum ${minimumCards} of ${data.totals.cards} cards). Enter your counts to see which ${data.totals.cardSetsRequired} sets need the fewest extra cards.`}
   schema={schema}
   active="cards"
 >
@@ -64,7 +64,7 @@ const schema = [
   <h2 id="all-sets">All {data.totals.cardSets} card sets, smallest first</h2>
   <p class="prose">
     Starting from zero, the {data.totals.cardSetsRequired} smallest sets add up to <strong>{minimumCards}</strong> cards. Skipping the
-    {largest.length} largest saves {data.totals.cards - minimumCards} pickups compared with collecting everything.
+    {largest.length} largest saves {data.totals.cards - minimumCards} cards compared with collecting all {data.totals.cards}.
   </p>
   <div class="table-wrap">
     <table>
@@ -101,14 +101,13 @@ const schema = [
           Mild spoiler: this names chapters and locations, not plot. <a href={href('/missables/')}>Use the chapter-gated view instead</a>.
         </div>
         <details class="faq">
-          <summary>Show {cardMissables.length} missable cards</summary>
+          <summary>Show {cardMissables.length} reported missable {cardMissables.length === 1 ? 'card' : 'cards'}</summary>
           <ul>
             {cardMissables.map((m) => {
-              const set = data.cardSets.find((s) => s.id === m.cardSetId);
               const ch = data.chapters.find((c) => c.id === m.lostAfterChapterId);
               return (
                 <li>
-                  <strong>{m.label}</strong> ({set?.name}): {m.where}. Reported lost after {ch?.label}. <StatusBadge status={m.status} />
+                  <strong>{m.label}</strong>: {m.where} Reported lost after {ch?.label}. <StatusBadge status={m.status} />
                 </li>
               );
             })}

@@ -1,5 +1,5 @@
 // Offline support: network first for pages and data (so updates show up), cache first for hashed assets.
-const CACHE = 'skip-budget-v1';
+const CACHE = 'left-to-100-v1';
 const scope = self.registration.scope;
 const PRECACHE = ['', 'card-sets/', 'missables/', 'data/', 'gta6.json'].map((p) => new URL(p, scope).toString());
 

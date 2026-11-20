@@ -18,7 +18,7 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
   <g font-family="Helvetica, Arial, sans-serif">
     <rect x="80" y="80" width="72" height="72" rx="18" fill="url(#t)"/>
     <text x="116" y="134" font-size="44" font-weight="900" fill="#fff" text-anchor="middle">%</text>
-    <text x="172" y="131" font-size="40" font-weight="800" fill="#f4f0ff">Skip Budget</text>
+    <text x="172" y="131" font-size="40" font-weight="800" fill="#f4f0ff">LeftTo100</text>
     <text x="80" y="290" font-size="84" font-weight="900" fill="#f4f0ff">GTA 6 100%</text>
     <text x="80" y="385" font-size="84" font-weight="900" fill="url(#t)">completion calculator</text>
     <text x="80" y="470" font-size="34" fill="#b3a9d6">See what's left, what to skip, and which card sets to finish.</text>

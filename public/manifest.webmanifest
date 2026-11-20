@@ -1,7 +1,7 @@
 {
-  "name": "Skip Budget: GTA 6 100% calculator",
-  "short_name": "Skip Budget",
-  "description": "See what's left for GTA 6 100% completion, what you can skip, and which card sets to finish.",
+  "name": "LeftTo100: GTA 6 100% Completion Calculator",
+  "short_name": "LeftTo100",
+  "description": "Free, spoiler-safe GTA 6 100% completion calculator. See what's left, what you can skip, and which 15 card sets to finish.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

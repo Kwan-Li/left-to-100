@@ -17,7 +17,7 @@ function Outcome({ r, res }: { r: Requirement; res: RowResult }) {
   if (res.impossible)
     return (
       <span class="out bad">
-        {fmt(r, res.remaining)} to go. Can't be reached with the items you marked missed.
+        {fmt(r, res.remaining)} to go. Can't reach the target with the items you marked missed.
       </span>
     );
   return (
@@ -26,7 +26,8 @@ function Outcome({ r, res }: { r: Requirement; res: RowResult }) {
       {res.skipLeft !== null && (
         <>
           {' '}
-          · <span class="skip">skip up to {res.skipLeft.toLocaleString('en-US')}</span>
+          ·{' '}
+          <span class="skip">{res.skipLeft === 0 ? 'no skips' : `skip up to ${res.skipLeft.toLocaleString('en-US')}`}</span>
         </>
       )}
     </span>
@@ -59,12 +60,12 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
           <div class="chip unknown">
             <strong>{s.unknown}</strong> not entered
           </div>
-          <div class="chip">of {s.total} requirements</div>
+          <div class="chip">of {s.total} {s.total === 1 ? 'requirement' : 'requirements'}</div>
         </div>
         <div class="planner-actions">
           <label class="toggle">
             <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone((e.target as HTMLInputElement).checked)} />
-            Hide finished
+            Hide done
           </label>
           <ShareBar data={data} state={state} pageUrl={pageUrl} />
         </div>
@@ -79,7 +80,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
               {cat.name} <span class="muted">({rows.length})</span>
             </h3>
             {visible.length === 0 ? (
-              <p class="muted">All finished in this group.</p>
+              <p class="muted">All done in this group.</p>
             ) : (
               <ul class="req-list">
                 {visible.map((r) => {
@@ -96,7 +97,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
                           Need {fmt(r, r.required)}
                           {r.total !== null && <> of {fmt(r, r.total)}</>} <StatusBadge status={r.status} sources={r.sources} note={r.note} />
                         </div>
-                        {r.whereToCount && <div class="req-hint">Count it: {r.whereToCount}</div>}
+                        {r.whereToCount && <div class="req-hint">Where to check: {r.whereToCount}</div>}
                         {traps.map((t) => (
                           <div class="req-trap">
                             <strong>Watch out:</strong> {t.title}. {t.detail} <StatusBadge status={t.status} sources={t.sources} />

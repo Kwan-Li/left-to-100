@@ -88,11 +88,11 @@ const website = {
     <footer class="site-footer">
       <div class="wrap">
         <p>
-          Data version <code>{data.version}</code>, updated {data.updated}. Figures are from public guides published days after
-          launch; treat them as provisional. <a href={href('/data/')}>See sources and status</a>.
+          Data version <code>{data.version}</code>, updated {data.updated}. Numbers come from public guides and player reports;
+          treat unverified figures as provisional. <a href={href('/data/')}>See sources and status</a>.
         </p>
         <p>
-          Free and open source: code MIT, data CC0. <a href={SITE.repo}>Report a correction on GitHub</a>.
+          Free and open source (MIT code, CC0 data). <a href={`${SITE.repo}/issues/new?template=correction.yml`}>Report a correction on GitHub</a>.
         </p>
         <p class="muted">{SITE.disclaimer}</p>
       </div>

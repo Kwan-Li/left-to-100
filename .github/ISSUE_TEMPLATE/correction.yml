@@ -1,5 +1,5 @@
 name: Data correction
-description: Report a wrong number, name or missable.
+description: Report a wrong count, name, missable, or trap.
 title: "Correction: "
 labels: [data]
 body:
@@ -7,7 +7,7 @@ body:
     id: item
     attributes:
       label: What is wrong?
-      description: The requirement, card set or missable, as named on the site.
+      description: The requirement, card set, missable, or trap, as named on the site.
     validations:
       required: true
   - type: input
@@ -26,7 +26,7 @@ body:
     id: sources
     attributes:
       label: Sources
-      description: At least one link. A screenshot or a video timestamp from your own game is best. Guides are fine too.
+      description: "At least one source link. A screenshot or video timestamp from your own game is best; public guides work too."
     validations:
       required: true
   - type: dropdown

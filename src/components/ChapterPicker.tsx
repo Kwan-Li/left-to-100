@@ -11,7 +11,7 @@ export function ChapterPicker({ data, state, setState }: { data: Dataset; state:
           <option value={c.id}>{c.label}</option>
         ))}
       </select>
-      <small class="muted">Used only to hide anything past your chapter. No plot details are shown.</small>
+      <small class="muted">Hides anything past your chapter—no plot spoilers.</small>
     </label>
   );
 }

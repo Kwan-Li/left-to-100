@@ -14,6 +14,15 @@ export default function DontLose({ data = clientData, showPicker = false }: { da
   const upcoming = upcomingMissables(data, state);
   const ponr = data.pointsOfNoReturn.filter((p) => p.chapterId === state.chapterId);
   const passed = passedMissables(data, state);
+  const label = chapter?.label ?? 'this chapter';
+  const heading =
+    state.chapterId === 'not-started' ? 'Before you start' : state.chapterId === 'story-finished' ? 'After the story' : `Before you finish ${label}`;
+  const empty =
+    state.chapterId === 'not-started'
+      ? 'Pick your current chapter above to see spoiler-safe warnings for anything lost at the end of it.'
+      : state.chapterId === 'story-finished'
+        ? "You've finished the story—no chapter lockouts ahead. Answer the checks below if you want your calculator to account for earlier missables."
+        : `Nothing that counts toward 100% is reported lost at the end of ${label}.`;
 
   return (
     <div class="dont-lose">
@@ -23,14 +32,14 @@ export default function DontLose({ data = clientData, showPicker = false }: { da
         </div>
       )}
       <section class="panel" aria-live="polite">
-        <h3>Before you finish {chapter?.label ?? 'this chapter'}</h3>
+        <h3>{heading}</h3>
         {upcoming.length === 0 && ponr.length === 0 ? (
-          <p class="muted">Nothing that counts toward 100% is reported lost at the end of your current chapter.</p>
+          <p class="muted">{empty}</p>
         ) : (
           <ul class="dl-list">
             {ponr.map((p) => (
               <li class="dl save">
-                <strong>Keep a separate save before you finish this chapter.</strong> {p.label} <StatusBadge status={p.status} sources={p.sources} note={p.note} />
+                <strong>Keep a manual save:</strong> {p.label} <StatusBadge status={p.status} sources={p.sources} note={p.note} />
               </li>
             ))}
             {upcoming.map((m) => (
@@ -46,7 +55,7 @@ export default function DontLose({ data = clientData, showPicker = false }: { da
       {passed.length > 0 && (
         <section class="panel">
           <h3>Did you get these?</h3>
-          <p class="muted">You're past the point where these were reported lost. Your answers update the calculator and card planner.</p>
+          <p class="muted">You're past the point where these were reported lost. Your answers update the calculator and card set planner.</p>
           <MissableQuestions data={data} items={passed} state={state} setState={setState} />
         </section>
       )}

@@ -14,7 +14,7 @@ const schema = [
     '@context': 'https://schema.org',
     '@type': 'Dataset',
     name: 'GTA 6 100% completion dataset',
-    description: `Requirements, thresholds, card set sizes, missables and known traps for Grand Theft Auto VI 100% completion, with sources and a verification status for every fact.`,
+    description: `Requirements, thresholds, card set sizes, missables, and known traps for Grand Theft Auto VI 100% completion, with sources and a verification status for every fact.`,
     url: pageUrl,
     license: 'https://creativecommons.org/publicdomain/zero/1.0/',
     isAccessibleForFree: true,
@@ -29,14 +29,14 @@ const schema = [
 ---
 
 <Layout
-  title="Open GTA 6 100% Completion Data (CC0, Sourced)"
-  description="Free CC0 GTA 6 100% completion dataset: requirements, card sets, missables and traps. Every fact is sourced and marked verified, reported or disputed."
+  title="Open GTA 6 100% Completion Data (CC0 JSON)"
+  description="Free CC0 GTA 6 100% completion dataset: requirements, card sets, missables, and traps. Every fact is sourced and marked verified, reported, or disputed."
   schema={schema}
   active="data"
 >
   <h1>Open <span class="accent">GTA 6 100%</span> data</h1>
   <p class="lead">
-    Everything this site calculates comes from one public JSON file. Use it in your own tracker, bot or guide. It's CC0, so no
+    Everything this site calculates comes from one public JSON file. Use it in your own tracker, bot, or guide—it's CC0, so no
     permission or credit is needed.
   </p>
   <p>
@@ -48,20 +48,20 @@ const schema = [
   <div class="grid-2">
     <div class="panel">
       <p><span class="badge verified">verified</span></p>
-      <p class="muted">Two or more independent publishers, each doing their own work, agree. {statusCounts.verified} facts.</p>
+      <p class="muted">Two or more independent publishers doing their own work agree. {statusCounts.verified} {statusCounts.verified === 1 ? 'fact' : 'facts'}.</p>
     </div>
     <div class="panel">
       <p><span class="badge reported">reported</span></p>
-      <p class="muted">One original source so far, even if other sites repeat it. {statusCounts.reported} facts.</p>
+      <p class="muted">One original source so far, even if other sites repeat it. {statusCounts.reported} {statusCounts.reported === 1 ? 'fact' : 'facts'}.</p>
     </div>
     <div class="panel">
       <p><span class="badge disputed">disputed</span></p>
-      <p class="muted">Independent sources disagree. Shown as disputed, never guessed. {statusCounts.disputed} facts.</p>
+      <p class="muted">Independent sources disagree. Shown as disputed, never guessed. {statusCounts.disputed} {statusCounts.disputed === 1 ? 'fact' : 'facts'}.</p>
     </div>
   </div>
   <p class="prose muted">
-    Nobody on this project copies guide text. Numbers and names are facts; every explanation is written in our own words.
-    The team doesn't have access to the game, so corrections from players with sources are what keep this accurate.
+    We don't copy guide text. Numbers and in-game names are facts; every explanation is written in our own words. Because
+    we don't have game access, sourced corrections from players are what keep this data accurate.
   </p>
 
   {
@@ -96,7 +96,7 @@ const schema = [
 
   <h2>Send a correction</h2>
   <p class="prose">
-    Found a wrong number? <a href={`${SITE.repo}/issues/new?template=correction.yml`}>Open a correction</a> with at least one
+    Spotted a wrong number or missing detail? <a href={`${SITE.repo}/issues/new?template=correction.yml`}>Open a correction</a> with at least one
     source link. A screenshot or video timestamp from your own game helps most.
   </p>
 

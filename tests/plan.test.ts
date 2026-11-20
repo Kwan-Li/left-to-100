@@ -15,7 +15,7 @@ describe('requirement rows', () => {
     expect(rowResult(data, state(), req('stunts')).kind).toBe('unknown');
   });
 
-  it('computes remaining and skip budget', () => {
+  it('computes remaining and skip margin', () => {
     expect(rowResult(data, state({ req: { stunts: 12 } }), req('stunts'))).toEqual({
       kind: 'remaining', value: 12, remaining: 18, skipLeft: 10, impossible: false,
     });
@@ -25,7 +25,7 @@ describe('requirement rows', () => {
     expect(rowResult(data, state({ req: { stunts: 30 } }), req('stunts')).kind).toBe('done');
   });
 
-  it('has no skip budget when the total is unknown', () => {
+  it('has no skip margin when the total is unknown', () => {
     const r = rowResult(data, state({ req: { cash: 10 } }), req('cash'));
     expect(r).toMatchObject({ kind: 'remaining', skipLeft: null });
   });

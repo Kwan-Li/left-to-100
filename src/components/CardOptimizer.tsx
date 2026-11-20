@@ -18,7 +18,8 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
       <div class="result">
         <p class="result-big">Enter a count for every set to get your plan.</p>
         <p class="muted">
-          {plan.missingSetIds.length} of {data.cardSets.length} sets are blank. Type 0 for sets you haven't started.
+          {plan.missingSetIds.length} of {data.cardSets.length} {plan.missingSetIds.length === 1 ? 'set is' : 'sets are'} blank. Enter 0 for
+          sets you haven't started.
         </p>
         <button type="button" class="btn" onClick={onFill}>
           Set blank sets to 0
@@ -29,8 +30,10 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
   if (plan.kind === 'impossible')
     return (
       <div class="result bad">
-        <p class="result-big">Only {plan.available} sets are still possible, but {k} are needed.</p>
-        <p class="muted">Check the sets you marked unobtainable or missed. A missed card may still have another copy.</p>
+        <p class="result-big">
+          Only {plan.available} {plan.available === 1 ? 'set is' : 'sets are'} still possible, but you need {k}.
+        </p>
+        <p class="muted">Check any sets you marked unobtainable or missed. A missed card may still have another copy in the game.</p>
       </div>
     );
 
@@ -38,7 +41,13 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
     return (
       <div class="result">
         <p class="result-big">
-          <strong>{plan.plan.min}</strong> more cards finishes {k} sets.
+          {plan.plan.min === 0 ? (
+            <>You've already finished {k} sets—0 more cards needed.</>
+          ) : (
+            <>
+              You need <strong>{plan.plan.min}</strong> more {plan.plan.min === 1 ? 'card' : 'cards'} to finish {k} sets.
+            </>
+          )}
         </p>
         <p>
           <span class="muted">Skip:</span> {skipNames(plan.plan.setIds).join(', ')}.
@@ -46,11 +55,21 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
       </div>
     );
 
+  const uncertain = plan.uncertainSetIds.map(name).join(' and ');
   return (
     <div class="result range">
       <p class="result-big">
-        <strong>{plan.best.min}</strong> to <strong>{plan.worst ? plan.worst.min : 'not possible'}</strong> more cards, depending on
-        whether {plan.uncertainSetIds.map(name).join(' and ')} can still be finished.
+        {plan.worst ? (
+          <>
+            You need <strong>{plan.best.min}</strong> to <strong>{plan.worst.min}</strong> more cards, depending on whether{' '}
+            {uncertain} can still be finished.
+          </>
+        ) : (
+          <>
+            Best case: <strong>{plan.best.min}</strong> more {plan.best.min === 1 ? 'card' : 'cards'}. Worst case: not enough sets
+            left if {uncertain} can't be finished.
+          </>
+        )}
       </p>
       <p>
         <span class="muted">Best case, skip:</span> {skipNames(plan.best.setIds).join(', ')}.
@@ -61,7 +80,7 @@ function Result({ data, plan, onFill }: { data: Dataset; plan: CardPlan; onFill:
         </p>
       )}
       <p class="muted">
-        This stays a range until the loss is verified or you mark the set unobtainable yourself.
+        This stays a range until the missable card is verified or you mark the set unobtainable yourself.
       </p>
     </div>
   );
@@ -134,7 +153,7 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
                     onInput={(e) => setCards(s.id, parseCount((e.target as HTMLInputElement).value))}
                   />
                   <span class="muted">/ {s.size}</span>
-                  {n && <span class={`set-need ${n.needed === 0 ? 'done' : ''}`}>{n.needed === 0 ? 'Complete' : `${n.needed} to go`}</span>}
+                  {n && <span class={`set-need ${n.needed === 0 ? 'done' : ''}`}>{n.needed === 0 ? 'Done' : `${n.needed} to go`}</span>}
                 </div>
                 {chosen.length > 0 && <div class={`set-verdict ${pick ? 'go' : 'skip'}`}>{pick ? 'Finish' : 'Skip'}</div>}
                 {n?.reasons.map((r) => <p class="set-reason">{r}</p>)}

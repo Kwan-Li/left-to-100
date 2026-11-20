@@ -4,7 +4,7 @@ const { compressToEncodedURIComponent, decompressFromEncodedURIComponent } = LZS
 import type { Dataset } from '../data/schema';
 import { emptyState, type Count, type MissableAnswer, type PlayerState } from './plan';
 
-const STORAGE_KEY = 'skip-budget:v1';
+const STORAGE_KEY = 'left-to-100:v1';
 const HASH_KEY = 's';
 
 function toCount(v: unknown): Count {

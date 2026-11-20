@@ -138,13 +138,13 @@ export function setAvailability(data: Dataset, state: PlayerState, set: CardSet)
     const answer = state.missables[m.id] ?? 'unknown';
     if (answer === 'logged') continue;
     if (answer === 'missed' && m.status === 'verified') {
-      return { availability: 'lost', reasons: [`${m.label} was missed, and that loss is verified.`] };
+      return { availability: 'lost', reasons: [`You marked ${m.label} missed, and that loss is verified.`] };
     }
     availability = 'uncertain';
     reasons.push(
       answer === 'missed'
-        ? `${m.label} was missed. It is unconfirmed whether another copy exists.`
-        : `Unknown whether ${m.label} is logged.`,
+        ? `You marked ${m.label} missed. It isn't confirmed whether another copy exists.`
+        : `Not sure whether you logged ${m.label}.`,
     );
   }
   return { availability, reasons };
