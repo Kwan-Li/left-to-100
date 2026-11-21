@@ -1,7 +1,8 @@
-// Offline support: network first for pages and data (so updates show up), cache first for hashed assets.
-const CACHE = 'left-to-100-v1';
+// Offline support: network first for pages and data (so updates show up), cache first for hashed assets and fonts.
+const CACHE = 'left-to-100-v2';
 const scope = self.registration.scope;
-const PRECACHE = ['', 'card-sets/', 'missables/', 'data/', 'gta6.json'].map((p) => new URL(p, scope).toString());
+const FONTS = ['michroma', 'barlow-500', 'barlow-600', 'barlow-700', 'martian-mono'].map((f) => `fonts/${f}.woff2`);
+const PRECACHE = ['', 'card-sets/', 'missables/', 'data/', 'gta6.json', ...FONTS].map((p) => new URL(p, scope).toString());
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
@@ -19,7 +20,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET' || !req.url.startsWith(scope)) return;
-  const isAsset = new URL(req.url).pathname.includes('/_astro/');
+  const path = new URL(req.url).pathname;
+  const isAsset = path.includes('/_astro/') || path.includes('/fonts/');
   if (isAsset) {
     event.respondWith(
       caches.match(req).then(

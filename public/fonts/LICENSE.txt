@@ -1,0 +1,9 @@
+Michroma, Barlow and Martian Mono are licensed under the SIL Open Font License, Version 1.1.
+Full text: https://openfontlicense.org/open-font-license-official-text/
+
+Michroma: Copyright 2011 The Michroma Project Authors (https://github.com/googlefonts/Michroma-font)
+Barlow: Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)
+Martian Mono: Copyright 2021 The Martian Mono Project Authors (https://github.com/evilmartians/mono)
+
+The woff2 files here are unmodified Latin subsets as served by Google Fonts. The TTF copies in scripts/og-fonts/ are
+used only at build time to render og.png.

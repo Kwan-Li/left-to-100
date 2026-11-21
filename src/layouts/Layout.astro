@@ -16,7 +16,30 @@ const { title, description, schema = [], active } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImage = new URL(href('/og.png'), Astro.site).toString();
 /** The same emblem art as the favicon and OG image, sized for the header. */
-const brandMark = emblem.replace('<svg ', '<svg width="32" height="32" aria-hidden="true" focusable="false" ');
+const brandMark = emblem.replace('<svg ', '<svg width="30" height="30" aria-hidden="true" focusable="false" ');
+/** Wordmark pieces ("Left", "To", "100"), spaced apart in CSS; the link text still reads as the one name. */
+const word = SITE.name.match(/^([A-Z][a-z]+)([A-Z][a-z]+)(\d+)$/)?.slice(1) ?? [SITE.name];
+/** Self-hosted fonts (public/fonts, also precached by sw.js). Latin subsets; Martian Mono is one variable file. */
+const fonts = [
+  // Michroma's "%" reads as "o/o" at display sizes, so "%" falls through to Barlow (next in --display).
+  {
+    family: 'Michroma',
+    file: 'michroma.woff2',
+    weight: '400',
+    preload: true,
+    range: 'U+0000-0024,U+0026-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2212',
+  },
+  { family: 'Barlow', file: 'barlow-500.woff2', weight: '500', preload: true },
+  { family: 'Barlow', file: 'barlow-600.woff2', weight: '600', preload: true },
+  { family: 'Barlow', file: 'barlow-700.woff2', weight: '700', preload: false },
+  { family: 'Martian Mono', file: 'martian-mono.woff2', weight: '100 800', preload: true },
+];
+const fontFaces = fonts
+  .map(
+    (f) =>
+      `@font-face{font-family:'${f.family}';font-style:normal;font-weight:${f.weight};font-display:swap;src:url('${href(`/fonts/${f.file}`)}') format('woff2');${'range' in f ? `unicode-range:${f.range};` : ''}}`,
+  )
+  .join('');
 const fullTitle = title.includes(SITE.name) ? title : `${title} | ${SITE.name}`;
 
 const nav = [
@@ -43,8 +66,10 @@ const website = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="robots" content="index,follow,max-image-preview:large" />
-    <meta name="theme-color" content="#120d24" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#fbf7ff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0b0b" />
+    <meta name="color-scheme" content="dark" />
+    {fonts.filter((f) => f.preload).map((f) => <link rel="preload" href={href(`/fonts/${f.file}`)} as="font" type="font/woff2" crossorigin />)}
+    <style is:inline set:html={fontFaces} />
     <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
     <link rel="icon" href={href("/favicon-32.png")} sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href={href('/icon-192.png')} />
@@ -73,7 +98,7 @@ const website = {
       <div class="wrap header-inner">
         <a class="brand" href={href('/')}>
           <span class="brand-mark" set:html={brandMark} />
-          <span>{SITE.name}</span>
+          <span class="brand-word">{word.map((w, i) => (i === word.length - 1 && /^\d+$/.test(w) ? <b>{w}</b> : <span>{w}</span>))}</span>
         </a>
         <nav aria-label="Main">
           <ul>
@@ -114,6 +139,10 @@ const website = {
     </main>
     <footer class="site-footer">
       <div class="wrap">
+        <p class="footer-brand">
+          <span class="brand-mark" set:html={brandMark} />
+          <span class="brand-word">{word.map((w, i) => (i === word.length - 1 && /^\d+$/.test(w) ? <b>{w}</b> : <span>{w}</span>))}</span>
+        </p>
         <p>
           Data version <code>{data.version}</code>, updated {data.updated}. Numbers come from public guides and player reports;
           treat unverified figures as provisional. <a href={href('/data/')}>See sources and status</a>.
