@@ -53,11 +53,13 @@ const schema = [
   schema={schema}
   active="cards"
 >
-  <h1>GTA 6 card sets: <span class="accent">which {data.totals.cardSetsRequired} to finish</span></h1>
-  <p class="lead">
-    100% needs {data.totals.cardSetsRequired} of {data.totals.cardSets} card sets, not all {data.totals.cards} cards. Enter how many
-    you've logged per set, and the planner picks the {data.totals.cardSetsRequired} sets that need the fewest extra cards.
-  </p>
+  <div class="page-head">
+    <h1>GTA 6 card sets: <span class="accent">which {data.totals.cardSetsRequired} to finish</span></h1>
+    <p class="lead">
+      100% needs {data.totals.cardSetsRequired} of {data.totals.cardSets} card sets, not all {data.totals.cards} cards. Enter how many
+      you've logged per set, and the planner picks the {data.totals.cardSetsRequired} sets that need the fewest extra cards.
+    </p>
+  </div>
 
   <CardOptimizer client:load pageUrl={pageUrl} />
 

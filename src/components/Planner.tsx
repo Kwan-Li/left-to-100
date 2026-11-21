@@ -1,8 +1,10 @@
 import { clientData } from '../data/client';
+import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { r1 } from '../copy/r1';
 import { r2 } from '../copy/r2';
 import { r3 } from '../copy/r3';
+import { r4 } from '../copy/r4';
 import type { Dataset, Requirement } from '../data/schema';
 import {
   currentChapter,
@@ -14,11 +16,11 @@ import {
   type PlayerState,
   type RowResult,
 } from '../lib/plan';
-import { edgeFades } from '../lib/edgeFades';
 import { ChapterPicker } from './ChapterPicker';
-import { CountInput } from './CountInput';
+import { CountInput, REVEAL_EVENT } from './CountInput';
 import { ShareBar } from './ShareBar';
 import { FormBadge } from './StatusBadge';
+import { Highlight, WarnIcon, InfoIcon } from './ui';
 import { useStore } from './useStore';
 import './planner.css';
 
@@ -27,6 +29,13 @@ const fmt = (r: Requirement, n: number) =>
 
 const skipText = (skipLeft: number) => (skipLeft === 0 ? 'no skips' : `skip up to ${skipLeft.toLocaleString('en-US')}`);
 const impossibleText = "to go. Can't reach the target with the items you marked missed.";
+
+type Filter = 'all' | 'left' | 'done';
+const FILTERS: { id: Filter; label: string }[] = [
+  { id: 'all', label: r4.filterAll },
+  { id: 'left', label: r4.filterLeft },
+  { id: 'done', label: r4.filterDone },
+];
 
 /** The row outcome as plain text, for the screen-reader announcement. Same words as <Outcome>. */
 function outcomeText(r: Requirement, res: RowResult): string {
@@ -60,14 +69,14 @@ function Outcome({ id, r, res }: { id: string; r: Requirement; res: RowResult })
   if (res.impossible)
     return (
       <span id={id} class="out bad">
-        {fmt(r, res.remaining)} {impossibleText}
+        <strong>{fmt(r, res.remaining)}</strong> {impossibleText}
       </span>
     );
   // Out of reach only if unconfirmed losses are real: a warning, not the definite "can't reach".
   if (res.atRisk)
     return (
       <span id={id} class="out risk">
-        {r3.rowAtRisk(fmt(r, res.remaining))}
+        <Highlight text={r3.rowAtRisk(fmt(r, res.remaining))} part={fmt(r, res.remaining)} />
       </span>
     );
   return (
@@ -76,10 +85,37 @@ function Outcome({ id, r, res }: { id: string; r: Requirement; res: RowResult })
       {res.skipLeft !== null && (
         <>
           {' '}
-          · <span class="skip">{skipText(res.skipLeft)}</span>
+          <span class="sep">·</span> <span class="skip">{skipText(res.skipLeft)}</span>
         </>
       )}
     </span>
+  );
+}
+
+/**
+ * The row's meter (decorative; the numbers are in the text). Segments up to the game's total, a lime fill up to your
+ * count, a tick at the required mark, a striped cyan zone for what you can skip, and a marker at your count.
+ */
+function Meter({ r, value, res }: { r: Requirement; value: Count | undefined; res: RowResult }) {
+  const max = r.total ?? r.required;
+  const segs = Math.max(1, Math.min(max, 40));
+  const pct = (x: number) => Math.max(0, Math.min(100, (x / max) * 100));
+  const v = typeof value === 'number' ? Math.min(value, max) : null;
+  const skipW = r.total === null ? 0 : 100 - pct(r.required);
+  const over = res.kind === 'invalid';
+  return (
+    <div class="meter" aria-hidden="true">
+      <div class="bar" style={{ '--segs': segs }}>
+        {skipW > 0 && <span class="skipzone" style={{ width: `${skipW}%` }} />}
+        <span class="fill" style={{ width: `${over ? 100 : v === null ? 0 : pct(v)}%` }} />
+      </div>
+      {skipW > 0 && (
+        <span class="tick" style={{ left: `${pct(r.required)}%` }}>
+          <span>{fmt(r, r.required)}</span>
+        </span>
+      )}
+      {v !== null && <span class="notch" style={{ left: `${over ? 100 : pct(v)}%` }} />}
+    </div>
   );
 }
 
@@ -89,7 +125,7 @@ function Outcome({ id, r, res }: { id: string; r: Requirement; res: RowResult })
  */
 function ChapterStrip({ data, state }: { data: Dataset; state: PlayerState }) {
   // A non-breaking space keeps "Chapter 2" on one line inside the strip.
-  const label = (currentChapter(data, state)?.label ?? '').replace(/ /g, '\u00a0');
+  const label = (currentChapter(data, state)?.label ?? '').replace(/ /g, ' ');
   const n = upcomingMissables(data, state).length;
   const saveReminder = data.pointsOfNoReturn.some((p) => p.chapterId === state.chapterId);
   const notStarted = state.chapterId === 'not-started';
@@ -104,45 +140,71 @@ function ChapterStrip({ data, state }: { data: Dataset; state: PlayerState }) {
           : r1.chapterStrip.none(label);
   return (
     <p class={`chapter-strip ${n > 0 ? 'warn' : ''}`}>
-      <span>{text}</span>
-      {!notStarted && (
-        <>
-          {' '}
-          <a href="#dont-lose">{n > 0 ? r1.chapterStripLink : r3.chapterStripLinkNeutral}</a>
-        </>
-      )}
+      {n > 0 ? <WarnIcon /> : <InfoIcon />}
+      <span>
+        {text}
+        {!notStarted && (
+          <>
+            {' '}
+            <a href="#dont-lose">{n > 0 ? r1.chapterStripLink : r3.chapterStripLinkNeutral}</a>
+          </>
+        )}
+      </span>
     </p>
   );
 }
 
-export default function Planner({ data = clientData, pageUrl }: { data?: Dataset; pageUrl: string }) {
+export default function Planner({
+  data = clientData,
+  pageUrl,
+  children,
+}: {
+  data?: Dataset;
+  pageUrl: string;
+  /** The page's hero copy, shown beside the plan summary. */
+  children?: ComponentChildren;
+}) {
   const [state, setState, ready] = useStore(data);
-  const [hideDone, setHideDone] = useState(false);
+  const [cat, setCat] = useState(data.categories[0]?.id ?? '');
+  const [filter, setFilter] = useState<Filter>('all');
   /**
-   * The row with focus anywhere inside it (its input, "Watch out" toggle or a badge) stays visible even when Hide
-   * done would remove it, so Tab from a row that just became Done lands on its next control, not on <body>.
+   * The row with focus anywhere inside it (its input, "Watch out" toggle or a badge) stays visible even when the
+   * filter would remove it, so Tab from a row that just became Done lands on its next control, not on <body>.
    */
   const [focusId, setFocusId] = useState<string | null>(null);
   /**
-   * The row whose input was focused last shows its "where to check" hint on phones. Kept on blur: if the hint
-   * collapsed when focus left, the rows below would jump up under a tap that is already landing.
+   * The row whose input was focused last shows its "where to check" hint. Kept on blur: if the hint collapsed when
+   * focus left, the rows below would jump up under a tap that is already landing.
    */
   const [hintId, setHintId] = useState<string | null>(null);
   /**
-   * A row whose input lost focus during a tap or click elsewhere. Hide done leaves it in place until that
+   * A row whose input lost focus during a tap or click elsewhere. The filter leaves it in place until that
    * interaction lands (click, or 300ms after the pointer lifts), so nothing moves under the finger.
    */
   const [heldId, setHeldId] = useState<string | null>(null);
+  /**
+   * The row last changed with its − / + buttons. The steppers never take focus, so this keeps the row on screen
+   * while the finger is still on it; the next pointer press outside the row hands it to `heldId`.
+   */
+  const [stepId, setStepIdState] = useState<string | null>(null);
+  const stepRef = useRef<string | null>(null);
+  const setStepId = (id: string | null) => {
+    stepRef.current = id;
+    setStepIdState(id);
+  };
   const pointer = useRef({ down: false, upAt: -Infinity });
   const releaseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const stepTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   /** Rows whose "Watch out" notes are open. */
   const [openTraps, setOpenTraps] = useState<ReadonlySet<string>>(new Set());
   const [announcement, setAnnouncement] = useState('');
   const valueAtFocus = useRef<Count | undefined>(undefined);
-  const jumpNav = useRef<HTMLElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const s = summary(data, state);
-
-  useEffect(() => (jumpNav.current ? edgeFades(jumpNav.current) : undefined), []);
+  /** A repeat of the same text is changed by a trailing no-break space so the polite region still speaks. */
+  const announce = (text: string) => setAnnouncement((prev) => (prev === text ? `${text} ` : text));
 
   // Pointer tracking for `heldId`. Touch fires blur only after pointerup (on the compatibility mousedown), so a
   // blur within 300ms of pointerup still belongs to the same tap.
@@ -151,9 +213,18 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
       clearTimeout(releaseTimer.current);
       releaseTimer.current = setTimeout(() => setHeldId(null), ms);
     };
-    const down = () => {
+    const outsideStepRow = (t: EventTarget | null) => {
+      const id = stepRef.current;
+      return id !== null && !(t instanceof Element && t.closest(`[data-row="${id}"]`));
+    };
+    const down = (e: PointerEvent) => {
       pointer.current.down = true;
       clearTimeout(releaseTimer.current);
+      // A press outside the row last changed with − / +: hold that row until this interaction lands.
+      if (outsideStepRow(e.target)) {
+        setHeldId(stepRef.current);
+        setStepId(null);
+      }
     };
     const up = () => {
       pointer.current = { down: false, upAt: performance.now() };
@@ -165,27 +236,51 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
       pointer.current.upAt = -Infinity;
       release(0);
     };
+    // Keyboard focus moving elsewhere releases the stepped row at once.
+    const focusin = (e: FocusEvent) => {
+      if (outsideStepRow(e.target)) setStepId(null);
+    };
     document.addEventListener('pointerdown', down, true);
     document.addEventListener('pointerup', up, true);
     document.addEventListener('pointercancel', up, true);
     document.addEventListener('click', click, true);
+    document.addEventListener('focusin', focusin, true);
     return () => {
       clearTimeout(releaseTimer.current);
+      clearTimeout(stepTimer.current);
       document.removeEventListener('pointerdown', down, true);
       document.removeEventListener('pointerup', up, true);
       document.removeEventListener('pointercancel', up, true);
       document.removeEventListener('click', click, true);
+      document.removeEventListener('focusin', focusin, true);
     };
   }, []);
   const pointerBusy = () => pointer.current.down || performance.now() - pointer.current.upAt < 300;
 
-  const groups = data.categories.map((cat) => {
-    const rows = data.requirements.filter((r) => r.categoryId === cat.id);
-    const visible = rows.filter(
-      (r) => !hideDone || r.id === focusId || r.id === heldId || rowResult(data, state, r).kind !== 'done',
-    );
-    return { cat, rows, visible };
+  // Enter on the last count of a category moves into the next category's hidden panel: show it in the same
+  // keystroke (so focus can land there), then select its tab.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const reveal = (e: Event) => {
+      const panel = e.target instanceof Element ? e.target.closest<HTMLElement>('[role="tabpanel"]') : null;
+      if (!panel?.dataset.cat) return;
+      panel.hidden = false;
+      setCat(panel.dataset.cat);
+    };
+    el.addEventListener(REVEAL_EVENT, reveal);
+    return () => el.removeEventListener(REVEAL_EVENT, reveal);
+  }, []);
+
+  const isDone = (r: Requirement) => rowResult(data, state, r).kind === 'done';
+  const matches = (r: Requirement) => filter === 'all' || (filter === 'done') === isDone(r);
+  const groups = data.categories.map((c) => {
+    const rows = data.requirements.filter((r) => r.categoryId === c.id);
+    const visible = rows.filter((r) => matches(r) || r.id === focusId || r.id === heldId || r.id === stepId);
+    const done = rows.filter(isDone).length;
+    return { cat: c, rows, visible, done };
   });
+  const active = groups.find((g) => g.cat.id === cat) ?? groups[0];
   /** The last input on the page gets a "done" Enter key instead of "next". */
   const lastId = groups.flatMap((g) => g.visible).at(-1)?.id;
 
@@ -198,6 +293,7 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
     // A row that becomes Done starts with its notes collapsed.
     const r = data.requirements.find((x) => x.id === id);
     if (r && openTraps.has(id) && rowResult(data, next, r).kind === 'done') setTrapOpen(id, false);
+    return next;
   };
   const setTrapOpen = (id: string, open: boolean) =>
     setOpenTraps((cur) => {
@@ -213,7 +309,17 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
     valueAtFocus.current = state.req[r.id];
   };
   const onBlur = (r: Requirement) => {
-    if (state.req[r.id] !== valueAtFocus.current) setAnnouncement(r1.announce(r.name, outcomeText(r, rowResult(data, state, r))));
+    if (state.req[r.id] !== valueAtFocus.current) announce(r1.announce(r.name, outcomeText(r, rowResult(data, state, r))));
+  };
+  /** − / +: keep the row in place, and read the new outcome once the presses pause (unless its input has focus). */
+  const onStep = (r: Requirement, v: number) => {
+    setStepId(r.id);
+    const inputFocused = document.activeElement?.id === `req-${r.id}`;
+    clearTimeout(stepTimer.current);
+    if (inputFocused) return; // its blur announces
+    const next = { ...state, req: { ...state.req, [r.id]: v } } as PlayerState;
+    const text = r1.announce(r.name, outcomeText(r, rowResult(data, next, r)));
+    stepTimer.current = setTimeout(() => announce(text), 450);
   };
   const onRowFocusIn = (r: Requirement) => setFocusId(r.id);
   /** Focus moving between controls in the same row keeps it; leaving the row releases it (or holds it for a tap). */
@@ -224,142 +330,273 @@ export default function Planner({ data = clientData, pageUrl }: { data?: Dataset
     setFocusId((id) => (id === r.id ? null : id));
   };
 
+  /** Select a category. If the tabs are stuck to the top of the screen, bring the start of the list into view. */
+  const selectCat = (id: string, focusTab = false) => {
+    setCat(id);
+    if (focusTab) tabRefs.current[data.categories.findIndex((c) => c.id === id)]?.focus();
+    const board = boardRef.current;
+    if (!board) return;
+    // Scrolled past the board's top (the tabs are stuck): put the board's top right under the sticky header, so the
+    // tabs stay where they are and the new list starts at its first row.
+    const stickyTop = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sticky-top')) || 0;
+    const top = board.getBoundingClientRect().top;
+    if (top < stickyTop) window.scrollBy(0, top - stickyTop);
+  };
+  const onTabKey = (e: KeyboardEvent, i: number) => {
+    const n = data.categories.length;
+    const to =
+      e.key === 'ArrowRight' || e.key === 'ArrowDown'
+        ? (i + 1) % n
+        : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+          ? (i - 1 + n) % n
+          : e.key === 'Home'
+            ? 0
+            : e.key === 'End'
+              ? n - 1
+              : -1;
+    if (to < 0) return;
+    e.preventDefault();
+    selectCat(data.categories[to].id, true);
+  };
+
+  const counts = { all: active.rows.length, done: active.done, left: active.rows.length - active.done };
+  const cells = Array.from({ length: s.total }, (_, i) => (i < s.done ? 'd' : i < s.done + s.remaining ? 'p' : ''));
+
   return (
-    <div class="planner" aria-busy={!ready}>
-      <div class="panel planner-top">
-        <div class="chapter-block">
-          <ChapterPicker data={data} state={state} setState={setState} />
-          <ChapterStrip data={data} state={state} />
+    <div class="planner" aria-busy={!ready} ref={rootRef}>
+      <div class={`hero${children ? '' : ' no-copy'}`}>
+        {children && <div class="hero-copy">{children}</div>}
+        <section class="hud summary" aria-labelledby="calculator">
+          <div class="hud-head">
+            <h2 id="calculator" class="hud-title">
+              Your 100% plan
+            </h2>
+            <span class="hud-of">
+              of {s.total} {s.total === 1 ? 'requirement' : 'requirements'}
+            </span>
+          </div>
+          <div class="cells" aria-hidden="true">
+            {cells.map((c, i) => (
+              <span key={i} class={`cell ${c}`} style={{ '--i': i }} />
+            ))}
+          </div>
+          <div class="stats">
+            <p class="stat ok">
+              <strong class="n">{s.done}</strong> <span class="l">done</span>
+            </p>
+            <p class="stat todo">
+              <strong class="n">{s.remaining}</strong> <span class="l">in progress</span>
+            </p>
+            <p class="stat unknown">
+              <strong class="n">{s.unknown}</strong> <span class="l">not entered</span>
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div class={`chapter-bar${upcomingMissables(data, state).length > 0 ? ' warn' : ''}`}>
+        <ChapterPicker data={data} state={state} setState={setState} />
+        <ChapterStrip data={data} state={state} />
+      </div>
+
+      <div class="board" id="board" ref={boardRef}>
+        <div class="rail">
+          <div class="tabs" role="tablist" aria-label={r1.jumpNavLabel}>
+            {groups.map((g, i) => {
+              const selected = g.cat.id === active.cat.id;
+              return (
+                <button
+                  key={g.cat.id}
+                  type="button"
+                  role="tab"
+                  id={`tab-${g.cat.id}`}
+                  aria-selected={selected ? 'true' : 'false'}
+                  aria-controls={`panel-${g.cat.id}`}
+                  tabIndex={selected ? 0 : -1}
+                  ref={(el) => {
+                    tabRefs.current[i] = el;
+                  }}
+                  onClick={() => selectCat(g.cat.id)}
+                  onKeyDown={(e) => onTabKey(e, i)}
+                >
+                  <span class="tn">{g.cat.name}</span>
+                  <span class="tc">
+                    <Highlight text={r4.tabProgress(g.done, g.rows.length)} part={String(g.done)} />
+                  </span>
+                  <span class="tc-short" aria-hidden="true">
+                    {g.done}/{g.rows.length}
+                  </span>
+                  <span class="mini" aria-hidden="true">
+                    <i style={{ width: `${(g.done / Math.max(1, g.rows.length)) * 100}%` }} />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <a class="rail-link" href="#dont-lose">
+            <WarnIcon /> {r1.jumpBeforeFinish}
+          </a>
+          <p class="kbd-hint">
+            <kbd>Tab</kbd> {r4.kbdHint.tab}{' '}
+            <kbd>
+              <span aria-hidden="true">↵</span>
+              <span class="sr-only">Enter</span>
+            </kbd>{' '}
+            {r4.kbdHint.enter}
+          </p>
         </div>
-        <div class="summary">
-          <div class="chip ok">
-            <strong>{s.done}</strong> done
+
+        <div class="board-main">
+          <div class="board-head">
+            <h3 class="cat-title" id="cat-title">
+              {active.cat.name} <small>{active.rows.length}</small>
+            </h3>
           </div>
-          <div class="chip todo">
-            <strong>{s.remaining}</strong> in progress
+          <div class="toolbar">
+            <div class="filter" role="group" aria-label={r4.filterLabel}>
+              {FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  data-filter={f.id}
+                  aria-pressed={filter === f.id ? 'true' : 'false'}
+                  onClick={() => setFilter(f.id)}
+                >
+                  {f.label} <span class="ct">{counts[f.id]}</span>
+                </button>
+              ))}
+            </div>
+            <p class="legend" aria-hidden="true">
+              <span>
+                <i class="lg-need" />
+                {r4.legendNeeded}
+              </span>
+              <span>
+                <i class="lg-skip" />
+                {r4.legendSkip}
+              </span>
+            </p>
           </div>
-          <div class="chip unknown">
-            <strong>{s.unknown}</strong> not entered
-          </div>
-          <span class="summary-total muted">
-            of {s.total} {s.total === 1 ? 'requirement' : 'requirements'}
-          </span>
-        </div>
-        <nav class="jump-nav" aria-label={r1.jumpNavLabel} ref={jumpNav}>
-          {data.categories.map((cat) => (
-            <a key={cat.id} href={`#cat-${cat.id}`}>
-              {cat.name}
-            </a>
+
+          {groups.map(({ cat: c, visible }) => (
+            <div
+              key={c.id}
+              class="cat-panel"
+              role="tabpanel"
+              id={`panel-${c.id}`}
+              aria-labelledby={`tab-${c.id}`}
+              data-cat={c.id}
+              hidden={c.id !== active.cat.id}
+            >
+              {visible.length === 0 ? (
+                <p class="empty">{filter === 'done' ? r4.filterEmptyDone : 'All done in this group.'}</p>
+              ) : (
+                <ul class="req-list">
+                  {visible.map((r, k) => {
+                    const res = rowResult(data, state, r);
+                    const traps = data.exceptions.filter((e) => e.requirementIds.includes(r.id));
+                    const inputId = `req-${r.id}`;
+                    const ids = {
+                      target: `${inputId}-target`,
+                      hint: `${inputId}-hint`,
+                      risk: `${inputId}-risk`,
+                      out: `${inputId}-out`,
+                      notes: `${inputId}-notes`,
+                    };
+                    const atRisk = res.kind === 'remaining' && res.atRisk;
+                    const riskHint = atRisk && r3.rowAtRiskHint ? r3.rowAtRiskHint : null;
+                    const trapsOpen = openTraps.has(r.id);
+                    const tone =
+                      res.kind === 'invalid' || (res.kind === 'remaining' && res.impossible) ? ' t-bad' : atRisk ? ' t-risk' : '';
+                    return (
+                      <li
+                        key={r.id}
+                        data-row={r.id}
+                        class={`req ${res.kind}${tone}${r.id === hintId ? ' show-hint' : ''}`}
+                        style={{ '--i': Math.min(k, 14) }}
+                        onFocusIn={() => onRowFocusIn(r)}
+                        onFocusOut={(e) => onRowFocusOut(r, e)}
+                      >
+                        <div class="req-title">
+                          <label for={inputId} class="req-name">
+                            {r.name}
+                          </label>{' '}
+                          <FormBadge status={r.status} sources={r.sources} note={r.note} />
+                        </div>
+                        <div class="req-meta" id={ids.target}>
+                          Need <b>{fmt(r, r.required)}</b>
+                          {r.total !== null && <> of {fmt(r, r.total)}</>}
+                        </div>
+                        <Outcome id={ids.out} r={r} res={res} />
+                        {traps.length > 0 && (
+                          // The summary keeps its own grid cell when opened; the notes render after it in a
+                          // full-width cell at the bottom of the row, so neither the "Watch out" label nor the
+                          // stepper moves under the tap.
+                          <details
+                            class="req-traps"
+                            open={trapsOpen}
+                            onToggle={(e) => setTrapOpen(r.id, (e.currentTarget as HTMLDetailsElement).open)}
+                          >
+                            <summary aria-controls={ids.notes}>
+                              <WarnIcon />
+                              {r1.trapToggle(traps.length)}
+                            </summary>
+                          </details>
+                        )}
+                        <Meter r={r} value={state.req[r.id]} res={res} />
+                        <div class="req-input">
+                          <CountInput
+                            id={inputId}
+                            name={r.name}
+                            value={state.req[r.id]}
+                            max={requirementMax(r)}
+                            unit={r.unit}
+                            last={r.id === lastId}
+                            describedBy={[ids.target, r.whereToCount ? ids.hint : null, ids.out, riskHint ? ids.risk : null]
+                              .filter(Boolean)
+                              .join(' ')}
+                            onValue={(v) => setReq(r.id, v)}
+                            onStep={(v) => onStep(r, v)}
+                            onFocus={() => onFocus(r)}
+                            onBlur={() => onBlur(r)}
+                          />
+                        </div>
+                        {r.whereToCount && (
+                          <div class="req-hint" id={ids.hint}>
+                            Where to check: {r.whereToCount}
+                          </div>
+                        )}
+                        {riskHint && (
+                          <div class="req-hint req-risk" id={ids.risk}>
+                            {riskHint}
+                          </div>
+                        )}
+                        {traps.length > 0 && (
+                          <div class="req-notes" id={ids.notes} hidden={!trapsOpen}>
+                            {traps.map((t) => (
+                              <div key={t.id} class="req-trap">
+                                <strong>Watch out:</strong> {t.title}. {t.detail} <FormBadge status={t.status} sources={t.sources} />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           ))}
-          <a href="#dont-lose">{r1.jumpBeforeFinish}</a>
-        </nav>
-        <div class="planner-actions">
-          <label class="toggle">
-            <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone((e.target as HTMLInputElement).checked)} />
-            Hide done
-          </label>
+          <p class="badge-legend">{r1.badgeLegend}</p>
         </div>
       </div>
 
-      <p class="badge-legend muted">{r1.badgeLegend}</p>
       <p class="sr-only" role="status" aria-live="polite">
         {announcement}
       </p>
 
-      {groups.map(({ cat, rows, visible }) => {
-        return (
-          <section key={cat.id} class="panel req-group" aria-labelledby={`cat-${cat.id}`}>
-            <h3 id={`cat-${cat.id}`}>
-              {cat.name} <span class="muted">({rows.length})</span>
-            </h3>
-            {visible.length === 0 ? (
-              <p class="muted">All done in this group.</p>
-            ) : (
-              <ul class="req-list">
-                {visible.map((r) => {
-                  const res = rowResult(data, state, r);
-                  const traps = data.exceptions.filter((e) => e.requirementIds.includes(r.id));
-                  const inputId = `req-${r.id}`;
-                  const ids = {
-                    target: `${inputId}-target`,
-                    hint: `${inputId}-hint`,
-                    risk: `${inputId}-risk`,
-                    out: `${inputId}-out`,
-                    notes: `${inputId}-notes`,
-                  };
-                  const riskHint = res.kind === 'remaining' && res.atRisk && r3.rowAtRiskHint ? r3.rowAtRiskHint : null;
-                  const trapsOpen = openTraps.has(r.id);
-                  return (
-                    <li
-                      key={r.id}
-                      class={`req ${res.kind}${r.id === hintId ? ' show-hint' : ''}`}
-                      onFocusIn={() => onRowFocusIn(r)}
-                      onFocusOut={(e) => onRowFocusOut(r, e)}
-                    >
-                      <label for={inputId} class="req-name">
-                        {r.name}
-                      </label>
-                      <div class="req-meta" id={ids.target}>
-                        Need {fmt(r, r.required)}
-                        {r.total !== null && <> of {fmt(r, r.total)}</>} <FormBadge status={r.status} sources={r.sources} note={r.note} />
-                      </div>
-                      {r.whereToCount && (
-                        <div class="req-hint" id={ids.hint}>
-                          Where to check: {r.whereToCount}
-                        </div>
-                      )}
-                      {riskHint && (
-                        <div class="req-hint req-risk" id={ids.risk}>
-                          {riskHint}
-                        </div>
-                      )}
-                      <div class="req-input">
-                        <CountInput
-                          id={inputId}
-                          value={state.req[r.id]}
-                          max={requirementMax(r)}
-                          unit={r.unit}
-                          last={r.id === lastId}
-                          describedBy={[ids.target, r.whereToCount ? ids.hint : null, ids.out, riskHint ? ids.risk : null]
-                            .filter(Boolean)
-                            .join(' ')}
-                          onValue={(v) => setReq(r.id, v)}
-                          onFocus={() => onFocus(r)}
-                          onBlur={() => onBlur(r)}
-                        />
-                        <Outcome id={ids.out} r={r} res={res} />
-                      </div>
-                      {traps.length > 0 && (
-                        // The summary keeps its own grid cell when opened; the notes render after it in a full-width
-                        // cell below the input, so the "Watch out" label never moves under the tap.
-                        <details
-                          class="req-traps"
-                          open={trapsOpen}
-                          onToggle={(e) => setTrapOpen(r.id, (e.currentTarget as HTMLDetailsElement).open)}
-                        >
-                          <summary aria-controls={ids.notes}>{r1.trapToggle(traps.length)}</summary>
-                        </details>
-                      )}
-                      {traps.length > 0 && (
-                        <div class="req-notes" id={ids.notes} hidden={!trapsOpen}>
-                          {traps.map((t) => (
-                            <div key={t.id} class="req-trap">
-                              <strong>Watch out:</strong> {t.title}. {t.detail} <FormBadge status={t.status} sources={t.sources} />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-        );
-      })}
-
       {/* Share and reset sit after the last row, so the calculator's first rows come first on small screens. */}
-      <div class="panel share-panel">
+      <div class="share-panel">
         <ShareBar data={data} state={state} pageUrl={pageUrl} />
       </div>
     </div>

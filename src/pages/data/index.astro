@@ -36,28 +36,33 @@ const schema = [
   schema={schema}
   active="data"
 >
-  <h1>Open <span class="accent">GTA 6 100%</span> data</h1>
-  <p class="lead">
-    Everything this site calculates comes from one public JSON file. Use it in your own tracker, bot, or guide—it's CC0, so no
-    permission or credit is needed.
-  </p>
-  <p class="btn-row">
-    <a class="btn primary" href={href('/gta6.json')} download>Download gta6.json</a>
-    <a class="btn ghost" href={SITE.repo}>View on GitHub</a>
-  </p>
+  <div class="page-head">
+    <h1>Open <span class="accent">GTA 6 100%</span> data</h1>
+    <p class="lead">
+      Everything this site calculates comes from one public JSON file. Use it in your own tracker, bot, or guide—it's CC0, so no
+      permission or credit is needed.
+    </p>
+    <p class="btn-row">
+      <a class="btn primary" href={href('/gta6.json')} download>Download gta6.json</a>
+      <a class="btn ghost" href={SITE.repo}>View on GitHub</a>
+    </p>
+  </div>
 
   <h2 id="statuses">How facts are checked</h2>
   <div class="grid-3">
-    <div class="panel">
+    <div class="panel status-card">
       <p><span class="badge verified">verified</span></p>
+      <span class="status-count" aria-hidden="true">{statusCounts.verified}</span>
       <p class="muted">Two or more independent publishers doing their own work agree. {statusCounts.verified} {statusCounts.verified === 1 ? 'fact' : 'facts'}.</p>
     </div>
-    <div class="panel">
+    <div class="panel status-card">
       <p><span class="badge reported">reported</span></p>
+      <span class="status-count" aria-hidden="true">{statusCounts.reported}</span>
       <p class="muted">One original source so far, even if other sites repeat it. {statusCounts.reported} {statusCounts.reported === 1 ? 'fact' : 'facts'}.</p>
     </div>
-    <div class="panel">
+    <div class="panel status-card">
       <p><span class="badge disputed">disputed</span></p>
+      <span class="status-count" aria-hidden="true">{statusCounts.disputed}</span>
       <p class="muted">Independent sources disagree. Shown as disputed, never guessed. {statusCounts.disputed} {statusCounts.disputed === 1 ? 'fact' : 'facts'}.</p>
     </div>
   </div>

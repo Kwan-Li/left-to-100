@@ -5,6 +5,7 @@ import { ChapterPicker } from './ChapterPicker';
 import { MissableQuestions } from './MissableQuestions';
 import { r1 } from '../copy/r1';
 import { FormBadge } from './StatusBadge';
+import { SaveIcon, WarnIcon } from './ui';
 import { useStore } from './useStore';
 import './planner.css';
 
@@ -39,35 +40,41 @@ export default function DontLose({
   return (
     <div class="dont-lose">
       {showPicker && (
-        <div class="panel">
+        <div class="chapter-bar solo">
           <ChapterPicker data={data} state={state} setState={setState} />
         </div>
       )}
       <h2 id={headingId} class="dl-heading">
         {heading}
       </h2>
-      <section class="panel" aria-live="polite">
+      <section class={`panel dl-panel${upcoming.length ? ' warn' : ''}`} aria-live="polite">
         {upcoming.length === 0 && ponr.length === 0 ? (
-          <p class="muted">{empty}</p>
+          <p class="muted dl-empty">{empty}</p>
         ) : (
           <ul class="dl-list">
             {ponr.map((p) => (
               <li key={p.id} class="dl save">
-                <strong>Keep a manual save:</strong> {p.label} <FormBadge status={p.status} sources={p.sources} note={p.note} />
+                <SaveIcon />
+                <div>
+                  <strong>Keep a manual save:</strong> {p.label} <FormBadge status={p.status} sources={p.sources} note={p.note} />
+                </div>
               </li>
             ))}
             {upcoming.map((m) => (
               <li key={m.id} class="dl">
-                <strong>{m.label}</strong> <FormBadge status={m.status} sources={m.sources} note={m.note} />
-                <div class="muted">{m.where}</div>
-                <div>{m.effect}</div>
+                <WarnIcon />
+                <div>
+                  <strong>{m.label}</strong> <FormBadge status={m.status} sources={m.sources} note={m.note} />
+                  <div class="muted dl-where">{m.where}</div>
+                  <div class="dl-effect">{m.effect}</div>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </section>
       {passed.length > 0 && (
-        <section class="panel">
+        <section class="panel dl-check">
           <h3>Did you get these?</h3>
           <p class="muted">You're past the point where these were reported lost. Your answers update the calculator and card set planner.</p>
           <MissableQuestions data={data} items={passed} state={state} setState={setState} />

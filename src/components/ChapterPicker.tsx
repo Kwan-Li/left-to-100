@@ -5,13 +5,15 @@ export function ChapterPicker({ data, state, setState }: { data: Dataset; state:
   const chapters = [...data.chapters].sort((a, b) => a.order - b.order);
   return (
     <label class="chapter-picker">
-      <span>Where are you in the story?</span>
-      <select value={state.chapterId} onChange={(e) => setState({ ...state, chapterId: (e.target as HTMLSelectElement).value })}>
-        {chapters.map((c) => (
-          <option value={c.id}>{c.label}</option>
-        ))}
-      </select>
-      <small class="muted">Hides anything past your chapter—no plot spoilers.</small>
+      <span class="cp-label">Where are you in the story?</span>
+      <span class="select">
+        <select value={state.chapterId} onChange={(e) => setState({ ...state, chapterId: (e.target as HTMLSelectElement).value })}>
+          {chapters.map((c) => (
+            <option value={c.id}>{c.label}</option>
+          ))}
+        </select>
+      </span>
+      <small class="cp-hint">Hides anything past your chapter—no plot spoilers.</small>
     </label>
   );
 }

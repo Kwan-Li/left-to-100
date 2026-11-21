@@ -9,6 +9,7 @@ import { CountInput } from './CountInput';
 import { MissableQuestions } from './MissableQuestions';
 import { ShareBar } from './ShareBar';
 import { FormBadge } from './StatusBadge';
+import { CheckIcon, WarnIcon } from './ui';
 import { useStore } from './useStore';
 import './planner.css';
 
@@ -26,8 +27,13 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
 
   if (plan.kind === 'achieved')
     return (
-      <div class="result">
-        <p class="result-big">{r2.cardsAchieved}</p>
+      <div class="result achieved">
+        <div class="big big-icon" aria-hidden="true">
+          <CheckIcon />
+        </div>
+        <div class="result-body">
+          <p class="result-big">{r2.cardsAchieved}</p>
+        </div>
       </div>
     );
 
@@ -42,7 +48,13 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
       input.scrollIntoView({ block: 'center' });
     };
     return (
-      <div class={`result ${invalid.length ? 'bad' : ''}`}>
+      <div class={`result incomplete ${invalid.length ? 'bad' : ''}`}>
+        {invalid.length > 0 && (
+          <div class="big big-icon" aria-hidden="true">
+            <WarnIcon />
+          </div>
+        )}
+        <div class="result-body">
         {invalid.length > 0 ? (
           <>
             <p class="result-big">{r2.cardsInvalid(invalid.length)}</p>
@@ -66,6 +78,7 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
             </button>
           </>
         )}
+        </div>
       </div>
     );
   }
@@ -73,16 +86,25 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
   if (plan.kind === 'impossible')
     return (
       <div class="result bad">
+        <div class="big big-icon" aria-hidden="true">
+          <WarnIcon />
+        </div>
+        <div class="result-body">
         <p class="result-big">
           Only {plan.available} {plan.available === 1 ? 'set is' : 'sets are'} still possible, but you need {k}.
         </p>
         <p class="muted">Check any sets you marked unobtainable or missed. A missed card may still have another copy in the game.</p>
+        </div>
       </div>
     );
 
   if (plan.kind === 'exact')
     return (
-      <div class="result">
+      <div class="result exact">
+        <div class="big" aria-hidden="true">
+          {plan.plan.min}
+        </div>
+        <div class="result-body">
         <p class="result-big">
           {plan.plan.min === 0 ? (
             <>You've already finished {k} sets—0 more cards needed.</>
@@ -92,15 +114,21 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
             </>
           )}
         </p>
-        <p>
-          <span class="muted">Skip:</span> {skipNames(plan.plan.setIds).join(', ')}.
+        <p class="result-skip">
+          <span class="muted">Skip:</span> <b>{skipNames(plan.plan.setIds).join(', ')}</b>.
         </p>
+        </div>
       </div>
     );
 
   const uncertain = plan.uncertainSetIds.map(name).join(' and ');
   return (
     <div class="result range">
+      <div class="big" aria-hidden="true">
+        {plan.best.min}
+        {plan.worst ? <span class="big-to">–{plan.worst.min}</span> : <span class="big-to">+</span>}
+      </div>
+      <div class="result-body">
       <p class="result-big">
         {plan.worst ? (
           <>
@@ -114,17 +142,18 @@ function Result({ data, plan, blank, onFill }: { data: Dataset; plan: CardPlan; 
           </>
         )}
       </p>
-      <p>
-        <span class="muted">Best case, skip:</span> {skipNames(plan.best.setIds).join(', ')}.
+      <p class="result-skip">
+        <span class="muted">Best case, skip:</span> <b>{skipNames(plan.best.setIds).join(', ')}</b>.
       </p>
       {plan.worst && (
-        <p>
-          <span class="muted">Worst case, skip:</span> {skipNames(plan.worst.setIds).join(', ')}.
+        <p class="result-skip">
+          <span class="muted">Worst case, skip:</span> <b>{skipNames(plan.worst.setIds).join(', ')}</b>.
         </p>
       )}
       <p class="muted">
         This stays a range until the missable card is verified or you mark the set unobtainable yourself.
       </p>
+      </div>
     </div>
   );
 }
@@ -149,6 +178,14 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
     announceNext.current = false;
     announce(resultText());
   });
+  /** − / + on a tile: read the plan out once the presses pause (a focused input announces on blur instead). */
+  const stepTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(stepTimer.current), []);
+  const onStep = (id: string) => {
+    clearTimeout(stepTimer.current);
+    if (document.activeElement?.id === `set-${id}`) return;
+    stepTimer.current = setTimeout(() => announce(resultText()), 450);
+  };
   /** setState for changes that announce the updated plan as soon as it renders. */
   const setStateAndAnnounce = (s: typeof state) => {
     announceNext.current = true;
@@ -182,12 +219,16 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
     requestAnimationFrame(() => resultRef.current?.focus());
   };
 
+  const doneCount = data.cardSets.filter((s) => state.cards[s.id] === s.size).length;
+
   return (
     <div class="optimizer" aria-busy={!ready}>
-      <div class="panel planner-top">
-        <ChapterPicker data={data} state={state} setState={setState} />
+      <div class="opt-top">
         <div id="card-result" ref={resultRef} tabIndex={-1}>
           <Result data={data} plan={plan} blank={blank} onFill={fillZero} />
+        </div>
+        <div class="chapter-bar">
+          <ChapterPicker data={data} state={state} setState={setState} />
         </div>
       </div>
 
@@ -199,10 +240,16 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
         </section>
       )}
 
-      <section class="panel">
-        <h2 class="panel-title">Your card sets</h2>
-        <p class="muted">Enter how many cards from each set are logged in your collection. Sold cards still count.</p>
-        <p class="badge-legend muted">{r1.badgeLegend}</p>
+      <section class="sets-section" aria-labelledby="your-sets">
+        <div class="section-head">
+          <h2 class="panel-title" id="your-sets">
+            Your card sets{' '}
+            <small>
+              {doneCount} / {data.cardSets.length}
+            </small>
+          </h2>
+          <p class="muted">Enter how many cards from each set are logged in your collection. Sold cards still count.</p>
+        </div>
         <ul class="set-grid">
           {data.cardSets.map((s, i) => {
             const n = needs.find((x) => x.set.id === s.id);
@@ -214,31 +261,39 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
             const outId = `${inputId}-out`;
             const nameId = `${inputId}-name`;
             const lostTextId = `${inputId}-lost`;
+            const fill = typeof value === 'number' ? Math.min(1, value / s.size) : 0;
             return (
-              <li key={s.id} class={`set ${verdict ? `v-${verdict}` : ''} ${n?.availability ?? ''}`}>
+              <li
+                key={s.id}
+                class={`set ${verdict ? `v-${verdict}` : 'v-none'} ${n?.availability ?? ''}${invalid ? ' invalid' : ''}`}
+                style={{ '--i': i }}
+              >
                 <div class="set-head">
                   <label for={inputId} class="set-name" id={nameId}>
                     {s.name}
                   </label>
-                  <span class="set-tags">
-                    <FormBadge status={s.status} sources={s.sources} note={s.note} />
-                    {verdict && <span class={`set-verdict ${verdict}`}>{VERDICT_TEXT[verdict]}</span>}
-                  </span>
+                </div>
+                <div class="set-tags">
+                  {verdict && <span class={`set-verdict ${verdict}`}>{VERDICT_TEXT[verdict]}</span>}
+                  <FormBadge status={s.status} sources={s.sources} note={s.note} />
                 </div>
                 <div class="set-row">
                   <CountInput
                     id={inputId}
+                    name={s.name}
                     value={value}
                     max={s.size}
+                    suffix={`/ ${s.size}`}
+                    suffixId={`${inputId}-size`}
                     describedBy={`${inputId}-size ${outId}`}
                     last={i === data.cardSets.length - 1}
                     onValue={(v) => setCards(s.id, v)}
+                    onStep={() => onStep(s.id)}
                     onFocus={() => (valueAtFocus.current = state.cards[s.id])}
                     onBlur={() => onBlur(s.id)}
                   />
-                  <span class="muted" id={`${inputId}-size`}>
-                    / {s.size}
-                  </span>
+                </div>
+                <div class="set-status">
                   <span id={outId} class={invalid ? 'out bad' : 'set-need'}>
                     {invalid ? r1.errMax(s.size) : n && n.needed > 0 ? `${n.needed} to go` : ''}
                   </span>
@@ -265,17 +320,21 @@ export default function CardOptimizer({ data = clientData, pageUrl }: { data?: D
                     </label>
                   )}
                 </div>
+                <span class="gauge" aria-hidden="true">
+                  <i style={{ height: `${invalid ? 100 : fill * 100}%` }} />
+                </span>
               </li>
             );
           })}
         </ul>
+        <p class="badge-legend">{r1.badgeLegend}</p>
         <p class="back-link">
           <a href="#card-result">{r1.backToResult}</a>
         </p>
       </section>
 
       {/* Share and reset sit after the grid, so the result and the first sets come first on small screens. */}
-      <div class="panel share-panel">
+      <div class="share-panel">
         <ShareBar data={data} state={state} pageUrl={pageUrl} />
       </div>
       <p class="sr-only" role="status" aria-live="polite">

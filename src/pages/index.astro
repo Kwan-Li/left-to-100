@@ -8,6 +8,8 @@ import { r1 } from '../copy/r1';
 import { SITE, href } from '../site';
 
 const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+// "LeftTo100" -> ["Left", "To", "100"]: the big hero lockup, with the number on its own line.
+const word = SITE.name.match(/^([A-Z][a-z]+)([A-Z][a-z]+)(\d+)$/)?.slice(1) ?? [SITE.name];
 const flamingos = data.requirements.find((r) => /flamingo/i.test(r.name));
 const stunts = data.requirements.find((r) => /stunt/i.test(r.name));
 const fmt = (unit: string, n: number) => (unit === 'dollars' ? `$${n.toLocaleString('en-US')}` : unit === 'percent' ? `${n}%` : n.toLocaleString('en-US'));
@@ -71,19 +73,21 @@ const schema = [
   schema={schema}
   active="home"
 >
-  <h1>GTA 6 <span class="accent">100% completion</span> calculator</h1>
-  <p class="lead">
-    GTA 6 hides its 100% checklist until the story ends. Enter counts from your Progress menus to see what's left for all {
-      data.totals.requirements
-    } requirements and how many you can skip. Free, spoiler-safe, no account needed.
-  </p>
-  <p class="btn-row hero-actions">
-    <a class="btn primary" href="#calculator">{r1.heroCta}</a>
-    <a class="btn ghost" href={href('/card-sets/')}>Plan your card sets →</a>
-  </p>
-
-  <h2 id="calculator">Your 100% plan</h2>
-  <Planner client:load pageUrl={pageUrl} />
+  <Planner client:load pageUrl={pageUrl}>
+    <p class="hero-mark" aria-hidden="true">
+      {word.slice(0, -1).join(' ')}<span class="hm-num">{word.at(-1)}</span>
+    </p>
+    <h1>GTA 6 <span class="accent">100% completion</span> calculator</h1>
+    <p class="lead">
+      GTA 6 hides its 100% checklist until the story ends. Enter counts from your Progress menus to see what's left for all {
+        data.totals.requirements
+      } requirements and how many you can skip. Free, spoiler-safe, no account needed.
+    </p>
+    <p class="btn-row hero-actions">
+      <a class="btn primary" href="#board">{r1.heroCta}</a>
+      <a class="btn ghost" href={href('/card-sets/')}>Plan your card sets →</a>
+    </p>
+  </Planner>
 
   <DontLose client:load headingId="dont-lose" />
 
@@ -128,7 +132,7 @@ const schema = [
   }
 
   <h2 id="how">How it works</h2>
-  <div class="grid-2">
+  <div class="grid-4 steps">
     <div class="panel">
       <h3>1. Enter what the game shows</h3>
       <p class="muted">
