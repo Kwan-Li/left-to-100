@@ -16,9 +16,12 @@ export interface R4Copy {
    * (The Left filter with nothing left reuses the existing "All done in this group.")
    */
   filterEmptyDone: string;
-  /** Legend next to the filter (desktop only), for the lime part of each row's meter: the amount the game needs. */
+  /**
+   * Meter key next to the filter (one compact line under it on phones). Its swatch is the meter's track with the
+   * white tick: the tick marks how many the game needs. (The lime fill is the player's own count.)
+   */
   legendNeeded: string;
-  /** Legend next to the filter (desktop only), for the striped cyan part of the meter: the amount you can skip. */
+  /** Meter key next to the filter (under it on phones), for the striped cyan zone after the tick: what you can skip. */
   legendSkip: string;
   /**
    * Progress line on each category tab of the desktop rail ("1 / 20 done" in the mockup). `done` = Done rows in the

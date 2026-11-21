@@ -516,18 +516,35 @@
   gap: 7px;
 }
 
+/* The key draws what the meter draws: "Needed" is the empty track with the white required tick, "Can skip" is the
+   striped cyan zone. (Lime is your own count, read straight off the row.) */
 .lg-need,
 .lg-skip {
-  width: 18px;
-  height: 8px;
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 1px;
+  background: var(--bg-2);
 }
 
-.lg-need {
-  background: var(--lime);
+.lg-need::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
 }
 
 .lg-skip {
-  background: repeating-linear-gradient(90deg, var(--cyan) 0 3px, transparent 3px 5px);
+  background:
+    repeating-linear-gradient(90deg, rgb(98 214 255 / 0.55) 0 3px, transparent 3px 5px),
+    var(--bg-2);
+  border-left: 1px dashed rgb(98 214 255 / 0.7);
 }
 
 .cat-panel[hidden] {
@@ -590,6 +607,11 @@
     background 0.15s,
     border-color 0.15s,
     box-shadow 0.15s;
+}
+
+/* The staggered entrance (rows rise, meters grow, markers fade in) plays on first load only: the Planner drops
+   .intro after it, and on the first tab or filter switch, so a switch shows the new rows at once. */
+.intro .req {
   animation: rise 0.45s var(--ease) both;
   animation-delay: calc(var(--i, 0) * 32ms);
 }
@@ -669,30 +691,29 @@
 
 .req-traps {
   grid-area: traps;
-  margin-top: 2px;
-}
-
-.req-traps summary {
+  justify-self: start;
   position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   width: fit-content;
   min-height: 28px;
-  padding: 0 8px 0 0;
+  margin: 2px 0 0;
+  padding: 0 4px 0 0;
+  background: none;
+  border: 0;
+  border-radius: 2px;
   font: 600 12.5px/1.2 var(--body);
   letter-spacing: 0.04em;
+  text-align: left;
   color: var(--amber);
   cursor: pointer;
-  list-style: none;
-}
-
-.req-traps summary::-webkit-details-marker {
-  display: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* A 44px-tall hit area without making the collapsed row taller. */
-.req-traps summary::after {
+.req-traps::after {
   content: '';
   position: absolute;
   left: 0;
@@ -702,21 +723,37 @@
   transform: translateY(-50%);
 }
 
-.req-traps summary .ico {
+.req-traps .ico {
   width: 15px;
   height: 15px;
   flex: none;
 }
 
-.req-traps summary:hover {
+/* Disclosure cue: points down while closed, up while open. Reduced motion drops the turn (global rule). */
+.req-traps .chev {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: square;
+  transition: transform 0.15s var(--ease);
+}
+
+.req-traps[aria-expanded='true'] .chev {
+  transform: rotate(180deg);
+}
+
+.req-traps:hover {
   text-decoration: underline;
 }
 
-.req-traps[open] summary {
+.req-traps[aria-expanded='true'] {
   color: var(--text);
 }
 
-.req.done .req-traps summary {
+.req.done .req-traps {
   color: var(--muted);
 }
 
@@ -774,12 +811,14 @@
   margin-top: 4px;
 }
 
-/* Segmented meter: lime fill up to your count, a tick at the required mark, a striped cyan zone you can skip. */
+/* Segmented meter: lime fill up to your count, a tick at the required mark, a striped cyan zone after the tick for
+   what you can still skip. --mt is the room above the bar for the tick's label. */
 .meter {
+  --mt: 13px;
   grid-area: meter;
   align-self: center;
   position: relative;
-  padding: 13px 0 9px;
+  padding: var(--mt) 0 9px;
 }
 
 .bar {
@@ -795,7 +834,6 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  right: 0;
   background: repeating-linear-gradient(90deg, rgb(98 214 255 / 0.34) 0 3px, transparent 3px 5px);
   border-left: 1px dashed rgb(98 214 255 / 0.55);
 }
@@ -811,6 +849,9 @@
   transition:
     width 0.3s var(--ease),
     background 0.2s;
+}
+
+.intro .bar .fill {
   animation: grow-x 0.9s var(--ease) both;
   animation-delay: calc(var(--i, 0) * 32ms + 150ms);
 }
@@ -830,7 +871,7 @@
 
 .tick {
   position: absolute;
-  top: 9px;
+  top: calc(var(--mt) - 4px);
   width: 2px;
   height: 22px;
   margin-left: -1px;
@@ -850,7 +891,7 @@
 
 .notch {
   position: absolute;
-  top: 28px;
+  top: calc(var(--mt) + 15px);
   width: 0;
   height: 0;
   margin-left: -5px;
@@ -858,6 +899,9 @@
   border-top: 0;
   border-bottom: 7px solid var(--c);
   transition: left 0.3s var(--ease);
+}
+
+.intro .notch {
   animation: fade-in 0.4s ease both;
   animation-delay: calc(var(--i, 0) * 32ms + 600ms);
 }
@@ -1017,6 +1061,11 @@
 
 .out .skip {
   color: var(--cyan);
+}
+
+/* Cyan only when there is something to skip; "no skips" is plain muted text. */
+.out .skip.none {
+  color: var(--muted);
 }
 
 .out.risk {
@@ -1376,7 +1425,8 @@
 .set .stepper .field input {
   width: calc(100% + 2px);
   min-width: 0;
-  padding: 0 34px 0 4px;
+  /* Room on the right for the widest "/ size" (about 31px at 9px from the edge), so 3 digits never slide under it. */
+  padding: 0 44px 0 4px;
   font-size: 17px;
 }
 
@@ -1674,7 +1724,8 @@
 /* Responsive                                                          */
 /* ------------------------------------------------------------------ */
 
-@media (max-width: 1180px) {
+/* Six tiles per row only at the full 1280px column; narrower, six leave too little of the input beside its "/ size". */
+@media (max-width: 1320px) {
   .set-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -1716,7 +1767,7 @@
   }
 
   .meter {
-    padding-top: 15px;
+    --mt: 15px;
   }
 }
 
@@ -1832,6 +1883,19 @@
   .set-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  /* The hero's "Enter your counts" link lands on the chapter bar: clear only the header, not the sticky tabs
+     (they sit below the bar until you scroll past it). */
+  .chapter-bar {
+    scroll-margin-top: -68px;
+  }
+}
+
+/* Between the stacked phone tiles and three across, two tiles keep the input wide enough for 3 digits. */
+@media (max-width: 720px) {
+  .set-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -1926,22 +1990,50 @@
     letter-spacing: 0.08em;
   }
 
+  /* The meter key: one compact line under the filter. */
   .legend {
-    display: none;
+    gap: 14px;
+    font-size: 12px;
+    line-height: 1.2;
   }
 
+  .legend span {
+    gap: 6px;
+  }
+
+  /* The "Watch out" toggle takes the full width under the stepper, so it never wraps beside a 320px stepper. */
   .req {
     column-gap: 10px;
     padding: 11px 10px 8px 12px;
+    grid-template-areas:
+      'name input'
+      'meta input'
+      'out input'
+      'traps traps'
+      'meter meter'
+      'hint hint'
+      'risk risk'
+      'open open';
   }
 
   .req-title {
     font-size: 15px;
   }
 
+  /* Three digits (and "100" before its "%") fit with room to spare: 36px of digits in a 52px / 43px text box. */
   .stepper .field input {
-    width: 58px;
+    width: 66px;
+    padding: 0 6px;
     font-size: 17px;
+  }
+
+  .stepper .field.percent input {
+    padding: 0 17px 0 4px;
+    text-align: right;
+  }
+
+  .field.percent .affix-sym {
+    right: 6px;
   }
 
   .stepper.no-steps .field input {
@@ -1959,6 +2051,11 @@
 
   .req-hint {
     font-size: 13px;
+  }
+
+  /* No tick, no tick label: the bar moves up instead of keeping an empty gap for one. */
+  .meter.no-tick {
+    --mt: 6px;
   }
 
   /* At-risk line: with the "where to check" hint, for the row focused last. */
@@ -2045,8 +2142,19 @@
     border-radius: 0 0 var(--r) 0;
   }
 
+  /* Got it / Missed it / Not sure: three equal columns across the full width, never wrapping onto a second row. */
+  .mq-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
   .seg {
-    padding: 0 12px;
+    justify-content: center;
+    padding: 4px 4px;
+    letter-spacing: 0.06em;
+    text-align: center;
+    line-height: 1.15;
   }
 
   .dl-panel {

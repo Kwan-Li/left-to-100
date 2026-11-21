@@ -421,15 +421,18 @@ describe('Round 3: hide done waits for the pointer', () => {
     input.focus();
     fireEvent.input(input, { target: { value: '100' } });
     await waitFor(() => expect(input.closest('li')!.textContent).toContain('Done'));
-    const summary = (screen.getByLabelText(gang.name) as HTMLElement).closest('li')!.querySelector('details > summary')!;
+    const toggle = (screen.getByLabelText(gang.name) as HTMLElement).closest('li')!.querySelector('button.req-traps')!;
     // Touch order: pointerdown, pointerup, then the compatibility mousedown moves focus (blur), then click.
-    fireEvent.pointerDown(summary);
-    fireEvent.pointerUp(summary);
+    fireEvent.pointerDown(toggle);
+    fireEvent.pointerUp(toggle);
     input.blur();
     await new Promise((r) => setTimeout(r, 50));
     expect(screen.queryByLabelText(story.name)).toBe(input); // still there under the finger
-    fireEvent.click(summary);
-    await waitFor(() => expect(screen.queryByLabelText(story.name)).toBeNull());
+    fireEvent.click(toggle);
+    // Held while another tap may follow; released once the pointer has been idle for 1.2s.
+    await new Promise((r) => setTimeout(r, 400));
+    expect(screen.queryByLabelText(story.name)).toBe(input);
+    await waitFor(() => expect(screen.queryByLabelText(story.name)).toBeNull(), { timeout: 2000 });
   });
 
   it('with a mouse, the row stays while the button is held and hides after the click', async () => {
@@ -447,7 +450,7 @@ describe('Round 3: hide done waits for the pointer', () => {
     expect(screen.queryByLabelText(bank.name)).toBe(input); // pointer still down: nothing moves
     fireEvent.pointerUp(elsewhere);
     fireEvent.click(elsewhere);
-    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull());
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 2000 });
   });
 
   it('without a pointer interaction (keyboard), blur hides the row at once', async () => {
@@ -472,41 +475,49 @@ describe('Round 4: hide done keeps the row while focus is anywhere inside it', (
     const story = data.requirements.find((r) => r.id === 'story-completion')!;
     const input = screen.getByLabelText(story.name) as HTMLInputElement;
     const li = input.closest('li')!;
-    const summary = li.querySelector('details > summary') as HTMLElement;
+    const toggle = li.querySelector('button.req-traps') as HTMLElement;
     const next = li.nextElementSibling!.querySelector('input') as HTMLInputElement;
     input.focus();
     fireEvent.input(input, { target: { value: '100' } });
     await waitFor(() => expect(li.textContent).toContain('Done'));
-    // Tab: focus moves from the input to the summary in the same row.
-    summary.focus();
-    fireEvent.focusOut(input, { relatedTarget: summary });
-    fireEvent.focusIn(summary, { relatedTarget: input });
+    // Tab: focus moves from the input to the "Watch out" toggle in the same row.
+    toggle.focus();
+    fireEvent.focusOut(input, { relatedTarget: toggle });
+    fireEvent.focusIn(toggle, { relatedTarget: input });
     await new Promise((r) => setTimeout(r, 50));
     expect(li.isConnected).toBe(true);
     expect(screen.queryByLabelText(story.name)).toBe(input);
     // Tab again: focus leaves the row for the next row's input, so the row hides and focus stays put.
     next.focus();
-    fireEvent.focusOut(summary, { relatedTarget: next });
-    fireEvent.focusIn(next, { relatedTarget: summary });
+    fireEvent.focusOut(toggle, { relatedTarget: next });
+    fireEvent.focusIn(next, { relatedTarget: toggle });
     await waitFor(() => expect(screen.queryByLabelText(story.name)).toBeNull(), { timeout: 100 });
     expect(next.isConnected).toBe(true);
   });
 });
 
 describe('Round 3: "Watch out" notes and the chapter strip', () => {
-  it('opening the notes leaves the summary in place and renders the notes in their own full-width cell', async () => {
+  it('opening the notes leaves the toggle in place and renders the notes in their own full-width cell', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
     const gang = data.requirements.find((r) => r.id === 'gang-operations')!;
-    const li = (screen.getByLabelText(gang.name) as HTMLElement).closest('li')!;
-    const details = li.querySelector('details.req-traps') as HTMLDetailsElement;
+    const input = screen.getByLabelText(gang.name) as HTMLInputElement;
+    const li = input.closest('li')!;
+    const toggle = li.querySelector('button.req-traps') as HTMLButtonElement;
     const notes = li.querySelector('.req-notes') as HTMLElement;
-    expect(details.querySelector('.req-trap')).toBeNull();
+    expect(toggle.querySelector('.req-trap')).toBeNull();
     expect(notes.hidden).toBe(true);
-    details.open = true;
-    details.dispatchEvent(new Event('toggle'));
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-controls')).toBe(notes.id);
+    // Reading and Tab order: count input, then its "Watch out" toggle, then the notes right after it.
+    expect(input.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(toggle.nextElementSibling).toBe(notes);
+    fireEvent.click(toggle);
     await waitFor(() => expect(notes.hidden).toBe(false));
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
     expect(notes.querySelectorAll('.req-trap').length).toBeGreaterThan(0);
-    expect(details.querySelector('summary')!.getAttribute('aria-controls')).toBe(notes.id);
+    fireEvent.click(toggle);
+    await waitFor(() => expect(notes.hidden).toBe(true));
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('uses the neutral link text when the chapter has no checklist missables', async () => {
@@ -630,7 +641,7 @@ describe('Redesign: steppers', () => {
     expect(screen.queryByLabelText(r.name)).toBe(input); // held while that press is in progress
     fireEvent.pointerUp(elsewhere);
     fireEvent.click(elsewhere);
-    await waitFor(() => expect(screen.queryByLabelText(r.name)).toBeNull());
+    await waitFor(() => expect(screen.queryByLabelText(r.name)).toBeNull(), { timeout: 2000 });
   });
 
   it('keyboard focus moving to another row releases a stepped row at once', async () => {
@@ -721,5 +732,182 @@ describe('Redesign: category tabs and filter', () => {
     const panel = document.getElementById(`panel-${data.categories[0].id}`)!;
     await waitFor(() => expect(panel.textContent).toContain(r4.filterEmptyDone));
     expect(panel.querySelector('li.req')).toBeNull();
+  });
+});
+
+describe('Fixes B1: repeat taps under a filter never land on a row that slid in', () => {
+  /** A touch tap on a − / + button: pointer down and up, then the click. */
+  const tap = (el: Element) => {
+    fireEvent.pointerDown(el);
+    fireEvent.pointerUp(el);
+    fireEvent.click(el);
+  };
+  const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+  const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
+  const payday = data.requirements.find((r) => r.id === 'payday-loan-jobs')!;
+  const smash = data.requirements.find((r) => r.id === 'smash-n-grabs')!;
+
+  it('Left: + on Bank Jobs (to Done), then + three times on Payday Loan Jobs, 280ms apart: Payday 3 → 6', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1, [payday.id]: 3 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(payday.name) as HTMLInputElement).value).toBe('3'));
+    showLeftOnly();
+    const bankInput = screen.getByLabelText(bank.name) as HTMLInputElement;
+    const paydayInput = screen.getByLabelText(payday.name) as HTMLInputElement;
+    const rowsBefore = [...document.querySelectorAll('#panel-story-tasks li.req')];
+    tap(screen.getByRole('button', { name: r4.stepUp(bank.name) }));
+    await waitFor(() => expect(bankInput.closest('li')!.textContent).toContain('Done'));
+    for (let i = 0; i < 3; i++) {
+      await wait(280);
+      // The list hasn't reflowed: same rows, same order, so the same spot is still the Payday + button.
+      expect([...document.querySelectorAll('#panel-story-tasks li.req')]).toEqual(rowsBefore);
+      tap(screen.getByRole('button', { name: r4.stepUp(payday.name) }));
+    }
+    await waitFor(() => expect(paydayInput.value).toBe('6'));
+    expect(screen.getByLabelText(smash.name) as HTMLInputElement).toHaveProperty('value', '');
+    expect(screen.queryByLabelText(bank.name)).toBe(bankInput); // still held: the pointer was idle < 1.2s
+    // After 1.2s with no press, the Done row leaves the Left list.
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 2000 });
+    expect(paydayInput.isConnected).toBe(true);
+  });
+
+  it('Done: − on one row (no longer Done), then − on the next row three times: every tap lands on its own row', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required, [payday.id]: payday.required, [smash.id]: smash.required } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(payday.name) as HTMLInputElement).value).toBe(String(payday.required)));
+    await wait(50);
+    fireEvent.click(document.querySelector('button[data-filter="done"]')!);
+    await waitFor(() => expect(document.querySelectorAll('#panel-story-tasks li.req')).toHaveLength(3));
+    tap(screen.getByRole('button', { name: r4.stepDown(bank.name) }));
+    await waitFor(() => expect((screen.getByLabelText(bank.name) as HTMLInputElement).value).toBe(String(bank.required - 1)));
+    for (let i = 0; i < 3; i++) {
+      await wait(280);
+      expect(document.querySelectorAll('#panel-story-tasks li.req')).toHaveLength(3);
+      tap(screen.getByRole('button', { name: r4.stepDown(payday.name) }));
+    }
+    await waitFor(() => expect((screen.getByLabelText(payday.name) as HTMLInputElement).value).toBe(String(payday.required - 3)));
+    expect((screen.getByLabelText(smash.name) as HTMLInputElement).value).toBe(String(smash.required));
+    await waitFor(() => expect(document.querySelectorAll('#panel-story-tasks li.req')).toHaveLength(1), { timeout: 2000 });
+  });
+
+  it('any press restarts the 1.2s countdown; a held press keeps the rows', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(bank.name) as HTMLInputElement).value).toBe(String(bank.required - 1)));
+    showLeftOnly();
+    tap(screen.getByRole('button', { name: r4.stepUp(bank.name) }));
+    await wait(900);
+    const elsewhere = document.querySelector('.summary')!;
+    fireEvent.pointerDown(elsewhere);
+    await wait(700); // 1.6s since the step, but a pointer is down
+    expect(screen.queryByLabelText(bank.name)).not.toBeNull();
+    fireEvent.pointerUp(elsewhere);
+    await wait(900); // 0.9s idle
+    expect(screen.queryByLabelText(bank.name)).not.toBeNull();
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 1000 });
+  });
+
+  it('switching the filter drops held rows at once', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(bank.name) as HTMLInputElement).value).toBe(String(bank.required - 1)));
+    tap(screen.getByRole('button', { name: r4.stepUp(bank.name) }));
+    await waitFor(() => expect((screen.getByLabelText(bank.name) as HTMLInputElement).value).toBe(String(bank.required)));
+    showLeftOnly();
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 100 });
+  });
+});
+
+describe('Fixes B1: the meter agrees with the written outcome', () => {
+  const rowOf = (name: string) => (screen.getByLabelText(name) as HTMLElement).closest('li')!;
+  const zone = (li: Element) => li.querySelector<HTMLElement>('.meter .skipzone');
+  const pct = (n: number) => parseFloat(n.toFixed(6));
+  const width = (el: HTMLElement) => parseFloat(el.style.width);
+
+  it('skip zone width = the "skip up to n" allowance, starting at the required tick; none for "no skips"', async () => {
+    const stunts = data.requirements.find((r) => r.total !== null && r.total > r.required && r.unit === 'count')!;
+    const exact = data.requirements.find((r) => r.total !== null && r.total === r.required && r.unit === 'count')!;
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [stunts.id]: 0, [exact.id]: 0 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />, {});
+    await waitFor(() => expect((screen.getByLabelText(stunts.name) as HTMLInputElement).value).toBe('0'));
+    const allow = stunts.total! - stunts.required;
+    const li = rowOf(stunts.name);
+    expect(li.querySelector('.out .skip')!.textContent).toBe(`skip up to ${allow.toLocaleString('en-US')}`);
+    expect(li.querySelector('.out .skip')!.classList.contains('none')).toBe(false);
+    const z = zone(li)!;
+    expect(width(z)).toBeCloseTo(pct((allow / stunts.total!) * 100), 3);
+    expect(parseFloat(z.style.left)).toBeCloseTo(pct((stunts.required / stunts.total!) * 100), 3);
+    const exactLi = rowOf(exact.name);
+    expect(exactLi.querySelector('.out .skip')!.textContent).toBe('no skips');
+    expect(exactLi.querySelector('.out .skip')!.classList.contains('none')).toBe(true);
+    expect(zone(exactLi)).toBeNull();
+  });
+
+  it('at risk ("may still be reachable") and impossible rows draw no skip zone; reduced allowance shrinks it', async () => {
+    const mags = data.requirements.find((r) => r.id === 'magazines-books-comics')!;
+    location.hash = `s=${encodeState({
+      ...emptyState(data),
+      chapterId: 'chapter-2',
+      req: { [mags.id]: 14 },
+      missables: { 'magazines-first-safehouse': 'missed' },
+    })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(mags.name) as HTMLInputElement).value).toBe('14'));
+    const li = rowOf(mags.name);
+    expect(li.querySelector('.out')!.classList.contains('risk')).toBe(true);
+    expect(zone(li)).toBeNull();
+    // The required tick still marks the target.
+    expect(li.querySelector('.meter .tick')).not.toBeNull();
+  });
+
+  it('every row in every state: zone present exactly when the plan allows a skip, and never wider than it', async () => {
+    const mags = data.requirements.find((r) => r.id === 'magazines-books-comics')!;
+    const counted = data.requirements.filter((r) => r.total !== null && r.unit !== 'dollars');
+    // A spread of states: not entered, in progress, done, over the maximum, at risk.
+    const req: Record<string, number> = {};
+    counted.forEach((r, i) => {
+      if (i % 4 === 1) req[r.id] = Math.floor(r.required / 2);
+      if (i % 4 === 2) req[r.id] = r.required;
+      if (i % 4 === 3) req[r.id] = r.total! + 1;
+    });
+    req[mags.id] = 14;
+    location.hash = `s=${encodeState({ ...emptyState(data), chapterId: 'chapter-2', req, missables: { 'magazines-first-safehouse': 'missed' } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(mags.name) as HTMLInputElement).value).toBe('14'));
+    let checked = 0;
+    for (const li of document.querySelectorAll<HTMLElement>('li.req')) {
+      const r = data.requirements.find((x) => x.id === li.dataset.row)!;
+      if (r.total === null) continue;
+      const z = zone(li);
+      const skip = li.querySelector('.out .skip');
+      const out = li.querySelector('.out')!;
+      if (out.classList.contains('risk') || out.classList.contains('bad')) expect(z).toBeNull();
+      if (skip?.textContent === 'no skips') expect(z).toBeNull();
+      const m = skip?.textContent?.match(/skip up to ([\d,]+)/);
+      if (m) {
+        const n = Number(m[1].replace(/,/g, ''));
+        expect(z).not.toBeNull();
+        expect(width(z!)).toBeCloseTo((n / r.total!) * 100, 3);
+      }
+      if (z) expect(parseFloat(z.style.left) + width(z)).toBeLessThanOrEqual(100.0001);
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(20);
+  });
+});
+
+describe('Fixes B1: the entrance plays once', () => {
+  it('the planner starts with .intro and drops it on the first filter or tab switch', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const root = document.querySelector('.planner')!;
+    expect(root.classList.contains('intro')).toBe(true);
+    fireEvent.click(document.querySelector('button[data-filter="left"]')!);
+    await waitFor(() => expect(root.classList.contains('intro')).toBe(false));
+  });
+
+  it('and drops it on its own once the entrance is over', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const root = document.querySelector('.planner')!;
+    await waitFor(() => expect(root.classList.contains('intro')).toBe(false), { timeout: 2500 });
   });
 });

@@ -1,6 +1,6 @@
 import { clientData } from '../data/client';
 import type { ComponentChildren } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { r1 } from '../copy/r1';
 import { r2 } from '../copy/r2';
 import { r3 } from '../copy/r3';
@@ -8,6 +8,7 @@ import { r4 } from '../copy/r4';
 import type { Dataset, Requirement } from '../data/schema';
 import {
   currentChapter,
+  lostFor,
   requirementMax,
   rowResult,
   summary,
@@ -29,6 +30,9 @@ const fmt = (r: Requirement, n: number) =>
 
 const skipText = (skipLeft: number) => (skipLeft === 0 ? 'no skips' : `skip up to ${skipLeft.toLocaleString('en-US')}`);
 const impossibleText = "to go. Can't reach the target with the items you marked missed.";
+
+/** How long the pointer must be idle before rows held through a run of taps are released (see `held`). */
+const HOLD_MS = 1200;
 
 type Filter = 'all' | 'left' | 'done';
 const FILTERS: { id: Filter; label: string }[] = [
@@ -85,7 +89,7 @@ function Outcome({ id, r, res }: { id: string; r: Requirement; res: RowResult })
       {res.skipLeft !== null && (
         <>
           {' '}
-          <span class="sep">·</span> <span class="skip">{skipText(res.skipLeft)}</span>
+          <span class="sep">·</span> <span class={`skip${res.skipLeft === 0 ? ' none' : ''}`}>{skipText(res.skipLeft)}</span>
         </>
       )}
     </span>
@@ -93,23 +97,37 @@ function Outcome({ id, r, res }: { id: string; r: Requirement; res: RowResult })
 }
 
 /**
- * The row's meter (decorative; the numbers are in the text). Segments up to the game's total, a lime fill up to your
- * count, a tick at the required mark, a striped cyan zone for what you can skip, and a marker at your count.
+ * How many items the row can still skip: the same allowance the outcome text gives ("skip up to n" / "no skips"),
+ * so 0 when the row is at risk or can't be reached. Rows without a text outcome (not entered, done, over the
+ * maximum) use the same sum: the game's total, minus items marked missed, minus the requirement.
  */
-function Meter({ r, value, res }: { r: Requirement; value: Count | undefined; res: RowResult }) {
+function skipAllowance(data: Dataset, state: PlayerState, r: Requirement, res: RowResult): number {
+  if (r.total === null) return 0;
+  if (res.kind === 'remaining') return res.skipLeft ?? 0;
+  return Math.max(0, r.total - lostFor(data, state, r.id) - r.required);
+}
+
+/**
+ * The row's meter (decorative; the numbers are in the text). Segments up to the game's total, a lime fill up to your
+ * count, a tick at the required mark, a striped cyan zone after the tick for what you can still skip (only as wide
+ * as the outcome's allowance, so none when the row is at risk or out of reach), and a marker at your count.
+ */
+function Meter({ r, value, res, skip }: { r: Requirement; value: Count | undefined; res: RowResult; skip: number }) {
   const max = r.total ?? r.required;
   const segs = Math.max(1, Math.min(max, 40));
   const pct = (x: number) => Math.max(0, Math.min(100, (x / max) * 100));
   const v = typeof value === 'number' ? Math.min(value, max) : null;
-  const skipW = r.total === null ? 0 : 100 - pct(r.required);
+  const tick = r.total !== null && r.required < r.total;
   const over = res.kind === 'invalid';
+  // Over the maximum the whole bar is the red fill: no zone underneath it.
+  const skipW = tick && !over ? Math.min(pct(skip), 100 - pct(r.required)) : 0;
   return (
-    <div class="meter" aria-hidden="true">
+    <div class={`meter${tick ? '' : ' no-tick'}`} aria-hidden="true">
       <div class="bar" style={{ '--segs': segs }}>
-        {skipW > 0 && <span class="skipzone" style={{ width: `${skipW}%` }} />}
+        {skipW > 0 && <span class="skipzone" style={{ left: `${pct(r.required)}%`, width: `${skipW}%` }} />}
         <span class="fill" style={{ width: `${over ? 100 : v === null ? 0 : pct(v)}%` }} />
       </div>
-      {skipW > 0 && (
+      {tick && (
         <span class="tick" style={{ left: `${pct(r.required)}%` }}>
           <span>{fmt(r, r.required)}</span>
         </span>
@@ -178,23 +196,29 @@ export default function Planner({
    */
   const [hintId, setHintId] = useState<string | null>(null);
   /**
-   * A row whose input lost focus during a tap or click elsewhere. The filter leaves it in place until that
-   * interaction lands (click, or 300ms after the pointer lifts), so nothing moves under the finger.
+   * Rows the filter leaves in place during a run of taps: rows changed with − / + (the steppers never take focus)
+   * and rows whose input lost focus to a tap. The list never reflows mid-sequence, so a repeat tap lands on the
+   * row it was aimed at. They are released together once the pointer has been idle for HOLD_MS, at once when
+   * keyboard focus moves, and when the tab or filter changes.
    */
-  const [heldId, setHeldId] = useState<string | null>(null);
-  /**
-   * The row last changed with its − / + buttons. The steppers never take focus, so this keeps the row on screen
-   * while the finger is still on it; the next pointer press outside the row hands it to `heldId`.
-   */
-  const [stepId, setStepIdState] = useState<string | null>(null);
-  const stepRef = useRef<string | null>(null);
-  const setStepId = (id: string | null) => {
-    stepRef.current = id;
-    setStepIdState(id);
+  const [held, setHeldState] = useState<ReadonlySet<string>>(new Set());
+  const heldRef = useRef<ReadonlySet<string>>(held);
+  const setHeld = (next: ReadonlySet<string>) => {
+    heldRef.current = next;
+    setHeldState(next);
   };
   const pointer = useRef({ down: false, upAt: -Infinity });
   const releaseTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const stepTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** The row under the last pointer press: kept visually fixed when held rows are released. */
+  const pressedRow = useRef<string | null>(null);
+  /** Rows measured just before a release (the pressed row first, then the rows after it), for the scroll fix. */
+  const anchor = useRef<[HTMLElement, number][] | null>(null);
+  /**
+   * The staggered row entrance and meter growth play once, on first load. Switching tabs or filters shows the
+   * new rows at once instead of replaying it.
+   */
+  const [intro, setIntro] = useState(true);
   /** Rows whose "Watch out" notes are open. */
   const [openTraps, setOpenTraps] = useState<ReadonlySet<string>>(new Set());
   const [announcement, setAnnouncement] = useState('');
@@ -206,44 +230,72 @@ export default function Planner({
   /** A repeat of the same text is changed by a trailing no-break space so the polite region still speaks. */
   const announce = (text: string) => setAnnouncement((prev) => (prev === text ? `${text} ` : text));
 
-  // Pointer tracking for `heldId`. Touch fires blur only after pointerup (on the compatibility mousedown), so a
+  /** Release every held row now. `anchorId`'s row (or the first row after it that stays) keeps its place on screen. */
+  const releaseHeld = (anchorId: string | null) => {
+    clearTimeout(releaseTimer.current);
+    if (heldRef.current.size === 0) return;
+    const rows = [...(rootRef.current?.querySelectorAll<HTMLElement>('[role="tabpanel"]:not([hidden]) li[data-row]') ?? [])];
+    const i = anchorId === null ? -1 : rows.findIndex((el) => el.dataset.row === anchorId);
+    anchor.current = i < 0 ? null : rows.slice(i).map((el) => [el, el.getBoundingClientRect().top]);
+    setHeld(new Set());
+  };
+  /** (Re)start the idle countdown; it only runs while no pointer is down. */
+  const armRelease = () => {
+    clearTimeout(releaseTimer.current);
+    if (!pointer.current.down && heldRef.current.size > 0)
+      releaseTimer.current = setTimeout(() => releaseHeld(pressedRow.current), HOLD_MS);
+  };
+  const hold = (id: string) => {
+    if (!heldRef.current.has(id)) setHeld(new Set([...heldRef.current, id]));
+    armRelease();
+  };
+  /** A new view (tab or filter): held rows go at once, with no scroll fix. */
+  const dropHeld = () => {
+    clearTimeout(releaseTimer.current);
+    if (heldRef.current.size > 0) setHeld(new Set());
+    setIntro(false);
+  };
+
+  // Safari has no scroll anchoring: when released rows leave the list, scroll by however far the pressed row moved,
+  // so it stays exactly where it was under the finger.
+  useLayoutEffect(() => {
+    const measured = anchor.current;
+    anchor.current = null;
+    const kept = measured?.find(([el]) => el.isConnected);
+    if (!kept) return;
+    const dy = kept[0].getBoundingClientRect().top - kept[1];
+    if (Math.abs(dy) >= 0.5) window.scrollBy(0, dy);
+  }, [held]);
+
+  // The entrance has finished by now (the longest delay is ~1.5s); later renders never replay it.
+  useEffect(() => {
+    const t = setTimeout(() => setIntro(false), 1600);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Pointer tracking for `held`. Touch fires blur only after pointerup (on the compatibility mousedown), so a
   // blur within 300ms of pointerup still belongs to the same tap.
   useEffect(() => {
-    const release = (ms: number) => {
-      clearTimeout(releaseTimer.current);
-      releaseTimer.current = setTimeout(() => setHeldId(null), ms);
-    };
-    const outsideStepRow = (t: EventTarget | null) => {
-      const id = stepRef.current;
-      return id !== null && !(t instanceof Element && t.closest(`[data-row="${id}"]`));
-    };
+    // Any press (a repeat tap, a scroll) restarts the idle countdown; it runs again once the pointer lifts.
     const down = (e: PointerEvent) => {
       pointer.current.down = true;
       clearTimeout(releaseTimer.current);
-      // A press outside the row last changed with − / +: hold that row until this interaction lands.
-      if (outsideStepRow(e.target)) {
-        setHeldId(stepRef.current);
-        setStepId(null);
-      }
+      const row = e.target instanceof Element ? e.target.closest<HTMLElement>('[data-row]') : null;
+      if (row && rootRef.current?.contains(row)) pressedRow.current = row.dataset.row ?? null;
     };
     const up = () => {
       pointer.current = { down: false, upAt: performance.now() };
-      release(300);
+      armRelease();
     };
-    // After the click's own handlers and default action (e.g. a <details> toggling open) have run.
-    const click = () => {
-      if (pointer.current.down) return;
-      pointer.current.upAt = -Infinity;
-      release(0);
-    };
-    // Keyboard focus moving elsewhere releases the stepped row at once.
+    // Keyboard focus moving releases held rows at once, keeping the newly focused row in place.
     const focusin = (e: FocusEvent) => {
-      if (outsideStepRow(e.target)) setStepId(null);
+      if (pointerBusy() || heldRef.current.size === 0) return;
+      const row = e.target instanceof Element ? e.target.closest<HTMLElement>('[data-row]') : null;
+      releaseHeld(row?.dataset.row ?? null);
     };
     document.addEventListener('pointerdown', down, true);
     document.addEventListener('pointerup', up, true);
     document.addEventListener('pointercancel', up, true);
-    document.addEventListener('click', click, true);
     document.addEventListener('focusin', focusin, true);
     return () => {
       clearTimeout(releaseTimer.current);
@@ -251,11 +303,12 @@ export default function Planner({
       document.removeEventListener('pointerdown', down, true);
       document.removeEventListener('pointerup', up, true);
       document.removeEventListener('pointercancel', up, true);
-      document.removeEventListener('click', click, true);
       document.removeEventListener('focusin', focusin, true);
     };
   }, []);
-  const pointerBusy = () => pointer.current.down || performance.now() - pointer.current.upAt < 300;
+  function pointerBusy() {
+    return pointer.current.down || performance.now() - pointer.current.upAt < 300;
+  }
 
   // Enter on the last count of a category moves into the next category's hidden panel: show it in the same
   // keystroke (so focus can land there), then select its tab.
@@ -267,6 +320,7 @@ export default function Planner({
       if (!panel?.dataset.cat) return;
       panel.hidden = false;
       setCat(panel.dataset.cat);
+      setIntro(false);
     };
     el.addEventListener(REVEAL_EVENT, reveal);
     return () => el.removeEventListener(REVEAL_EVENT, reveal);
@@ -276,7 +330,7 @@ export default function Planner({
   const matches = (r: Requirement) => filter === 'all' || (filter === 'done') === isDone(r);
   const groups = data.categories.map((c) => {
     const rows = data.requirements.filter((r) => r.categoryId === c.id);
-    const visible = rows.filter((r) => matches(r) || r.id === focusId || r.id === heldId || r.id === stepId);
+    const visible = rows.filter((r) => matches(r) || r.id === focusId || held.has(r.id));
     const done = rows.filter(isDone).length;
     return { cat: c, rows, visible, done };
   });
@@ -313,7 +367,7 @@ export default function Planner({
   };
   /** − / +: keep the row in place, and read the new outcome once the presses pause (unless its input has focus). */
   const onStep = (r: Requirement, v: number) => {
-    setStepId(r.id);
+    hold(r.id);
     const inputFocused = document.activeElement?.id === `req-${r.id}`;
     clearTimeout(stepTimer.current);
     if (inputFocused) return; // its blur announces
@@ -326,12 +380,13 @@ export default function Planner({
   const onRowFocusOut = (r: Requirement, e: FocusEvent) => {
     const to = e.relatedTarget;
     if (to instanceof Node && (e.currentTarget as HTMLElement).contains(to)) return;
-    if (pointerBusy()) setHeldId(r.id);
+    if (pointerBusy()) hold(r.id);
     setFocusId((id) => (id === r.id ? null : id));
   };
 
   /** Select a category. If the tabs are stuck to the top of the screen, bring the start of the list into view. */
   const selectCat = (id: string, focusTab = false) => {
+    dropHeld();
     setCat(id);
     if (focusTab) tabRefs.current[data.categories.findIndex((c) => c.id === id)]?.focus();
     const board = boardRef.current;
@@ -363,7 +418,7 @@ export default function Planner({
   const cells = Array.from({ length: s.total }, (_, i) => (i < s.done ? 'd' : i < s.done + s.remaining ? 'p' : ''));
 
   return (
-    <div class="planner" aria-busy={!ready} ref={rootRef}>
+    <div class={`planner${intro ? ' intro' : ''}`} aria-busy={!ready} ref={rootRef}>
       <div class={`hero${children ? '' : ' no-copy'}`}>
         {children && <div class="hero-copy">{children}</div>}
         <section class="hud summary" aria-labelledby="calculator">
@@ -394,7 +449,8 @@ export default function Planner({
         </section>
       </div>
 
-      <div class={`chapter-bar${upcomingMissables(data, state).length > 0 ? ' warn' : ''}`}>
+      {/* The hero's "Enter your counts" link lands here, so the chapter picker and the first count are both in view. */}
+      <div id="start" class={`chapter-bar${upcomingMissables(data, state).length > 0 ? ' warn' : ''}`}>
         <ChapterPicker data={data} state={state} setState={setState} />
         <ChapterStrip data={data} state={state} />
       </div>
@@ -460,7 +516,10 @@ export default function Planner({
                   type="button"
                   data-filter={f.id}
                   aria-pressed={filter === f.id ? 'true' : 'false'}
-                  onClick={() => setFilter(f.id)}
+                  onClick={() => {
+                    dropHeld();
+                    setFilter(f.id);
+                  }}
                 >
                   {f.label} <span class="ct">{counts[f.id]}</span>
                 </button>
@@ -528,22 +587,7 @@ export default function Planner({
                           {r.total !== null && <> of {fmt(r, r.total)}</>}
                         </div>
                         <Outcome id={ids.out} r={r} res={res} />
-                        {traps.length > 0 && (
-                          // The summary keeps its own grid cell when opened; the notes render after it in a
-                          // full-width cell at the bottom of the row, so neither the "Watch out" label nor the
-                          // stepper moves under the tap.
-                          <details
-                            class="req-traps"
-                            open={trapsOpen}
-                            onToggle={(e) => setTrapOpen(r.id, (e.currentTarget as HTMLDetailsElement).open)}
-                          >
-                            <summary aria-controls={ids.notes}>
-                              <WarnIcon />
-                              {r1.trapToggle(traps.length)}
-                            </summary>
-                          </details>
-                        )}
-                        <Meter r={r} value={state.req[r.id]} res={res} />
+                        <Meter r={r} value={state.req[r.id]} res={res} skip={skipAllowance(data, state, r, res)} />
                         <div class="req-input">
                           <CountInput
                             id={inputId}
@@ -561,6 +605,33 @@ export default function Planner({
                             onBlur={() => onBlur(r)}
                           />
                         </div>
+                        {traps.length > 0 && (
+                          // The toggle keeps its own grid cell when opened; the notes come right after it in the
+                          // DOM (input, toggle, notes in Tab and reading order) but render in a full-width cell at
+                          // the bottom of the row, so neither the "Watch out" label nor the stepper moves under the tap.
+                          <>
+                            <button
+                              type="button"
+                              class="req-traps"
+                              aria-expanded={trapsOpen ? 'true' : 'false'}
+                              aria-controls={ids.notes}
+                              onClick={() => setTrapOpen(r.id, !trapsOpen)}
+                            >
+                              <WarnIcon />
+                              {r1.trapToggle(traps.length)}
+                              <svg class="chev" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                <path d="m4 6 4 4 4-4" />
+                              </svg>
+                            </button>
+                            <div class="req-notes" id={ids.notes} hidden={!trapsOpen}>
+                              {traps.map((t) => (
+                                <div key={t.id} class="req-trap">
+                                  <strong>Watch out:</strong> {t.title}. {t.detail} <FormBadge status={t.status} sources={t.sources} />
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                         {r.whereToCount && (
                           <div class="req-hint" id={ids.hint}>
                             Where to check: {r.whereToCount}
@@ -569,15 +640,6 @@ export default function Planner({
                         {riskHint && (
                           <div class="req-hint req-risk" id={ids.risk}>
                             {riskHint}
-                          </div>
-                        )}
-                        {traps.length > 0 && (
-                          <div class="req-notes" id={ids.notes} hidden={!trapsOpen}>
-                            {traps.map((t) => (
-                              <div key={t.id} class="req-trap">
-                                <strong>Watch out:</strong> {t.title}. {t.detail} <FormBadge status={t.status} sources={t.sources} />
-                              </div>
-                            ))}
                           </div>
                         )}
                       </li>
