@@ -56,6 +56,7 @@ export function CountInput({
   last = false,
   onValue,
   onStep,
+  canStep,
   onFocus,
   onBlur,
 }: {
@@ -74,6 +75,8 @@ export function CountInput({
   onValue: (v: number | null) => void;
   /** Called after a − / + press has set the new value. */
   onStep?: (v: number) => void;
+  /** Asked before a − / + press changes anything: false ignores the press. */
+  canStep?: () => boolean;
   onFocus?: () => void;
   onBlur?: () => void;
 }) {
@@ -121,6 +124,7 @@ export function CountInput({
   );
   if (unit === 'dollars') return <span class="stepper no-steps">{field}</span>;
   const step = (delta: 1 | -1) => {
+    if (canStep && !canStep()) return;
     const v = stepValue(value, delta, max);
     if (v === value) return;
     onValue(v);

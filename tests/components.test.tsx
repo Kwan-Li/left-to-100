@@ -911,3 +911,121 @@ describe('Fixes B1: the entrance plays once', () => {
     await waitFor(() => expect(root.classList.contains('intro')).toBe(false), { timeout: 2500 });
   });
 });
+
+describe('Fixes B2: after held rows leave the list', () => {
+  const tap = (el: Element) => {
+    fireEvent.pointerDown(el);
+    fireEvent.pointerUp(el);
+    fireEvent.click(el);
+  };
+  const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+  const value = (name: string) => (screen.getByLabelText(name) as HTMLInputElement).value;
+  const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
+  const payday = data.requirements.find((r) => r.id === 'payday-loan-jobs')!;
+  const gang = data.requirements.find((r) => r.id === 'gang-operations')!;
+
+  it('Left, slow tap: − / + on another row is ignored for 400ms after the release, then works', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect(value(bank.name)).toBe(String(bank.required - 1)));
+    showLeftOnly();
+    tap(screen.getByRole('button', { name: r4.stepUp(bank.name) }));
+    await waitFor(() => expect(value(bank.name)).toBe(String(bank.required)));
+    // 1.2s idle: Bank Jobs (now Done) leaves, and the rows around it move under the finger.
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 2000, interval: 10 });
+    const gangPlus = screen.getByRole('button', { name: r4.stepUp(gang.name) });
+    const paydayMinus = screen.getByRole('button', { name: r4.stepDown(payday.name) });
+    tap(gangPlus);
+    tap(paydayMinus);
+    await wait(150);
+    tap(gangPlus);
+    await wait(50);
+    expect(value(gang.name)).toBe('');
+    expect(value(payday.name)).toBe('');
+    await wait(300); // > 400ms since the release
+    tap(gangPlus);
+    await waitFor(() => expect(value(gang.name)).toBe('1'));
+  });
+
+  it('the row kept in place by the release still takes taps at once', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1, [payday.id]: 3 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect(value(payday.name)).toBe('3'));
+    showLeftOnly();
+    tap(screen.getByRole('button', { name: r4.stepUp(bank.name) }));
+    await wait(100);
+    tap(screen.getByRole('button', { name: r4.stepUp(payday.name) })); // the last press: Payday is the anchor
+    await waitFor(() => expect(value(payday.name)).toBe('4'));
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull(), { timeout: 2000, interval: 10 });
+    tap(screen.getByRole('button', { name: r4.stepUp(payday.name) }));
+    await waitFor(() => expect(value(payday.name)).toBe('5'));
+    expect(value(gang.name)).toBe('');
+  });
+
+  it('a release that removes no row does not block taps', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [payday.id]: 3 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect(value(payday.name)).toBe('3'));
+    showLeftOnly();
+    tap(screen.getByRole('button', { name: r4.stepUp(payday.name) })); // 4 of 7: still Left, so it stays
+    await wait(1350);
+    tap(screen.getByRole('button', { name: r4.stepUp(gang.name) }));
+    await waitFor(() => expect(value(gang.name)).toBe('1'));
+  });
+});
+
+describe('Fixes B2: Tab out of a row that leaves the list keeps the newly focused row in place', () => {
+  // happy-dom has no layout: each row is 100px tall, stacked in list order.
+  const realRect = Element.prototype.getBoundingClientRect;
+  const realScrollBy = window.scrollBy;
+  let scrolls: number[] = [];
+  beforeEach(() => {
+    scrolls = [];
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      const li = this.closest('li[data-row]');
+      const rows = li ? [...li.parentElement!.children] : [];
+      const top = li ? rows.indexOf(li) * 100 + (this === li ? 0 : 10) : 0;
+      return { top, bottom: top + 50, left: 0, right: 100, width: 100, height: 50, x: 0, y: top, toJSON() {} } as DOMRect;
+    };
+    window.scrollBy = ((_x: number, y: number) => {
+      scrolls.push(y);
+    }) as typeof window.scrollBy;
+  });
+  afterEach(() => {
+    Element.prototype.getBoundingClientRect = realRect;
+    window.scrollBy = realScrollBy;
+  });
+  const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
+  const payday = data.requirements.find((r) => r.id === 'payday-loan-jobs')!;
+
+  it('Left: typing Bank Jobs to Done, then Tab to Payday Loan Jobs scrolls by the 100px the Payday row moved up', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(bank.name) as HTMLInputElement).value).toBe(String(bank.required - 1)));
+    showLeftOnly();
+    const bankInput = screen.getByLabelText(bank.name) as HTMLInputElement;
+    const paydayInput = screen.getByLabelText(payday.name) as HTMLInputElement;
+    bankInput.focus();
+    fireEvent.input(bankInput, { target: { value: String(bank.required) } });
+    await waitFor(() => expect(bankInput.closest('li')!.textContent).toContain('Done'));
+    expect(scrolls).toEqual([]);
+    paydayInput.focus();
+    await waitFor(() => expect(screen.queryByLabelText(bank.name)).toBeNull());
+    expect(document.activeElement).toBe(paydayInput);
+    expect(scrolls).toEqual([-100]);
+  });
+
+  it('All: nothing leaves, nothing scrolls', async () => {
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [bank.id]: bank.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(bank.name) as HTMLInputElement).value).toBe(String(bank.required - 1)));
+    const bankInput = screen.getByLabelText(bank.name) as HTMLInputElement;
+    bankInput.focus();
+    fireEvent.input(bankInput, { target: { value: String(bank.required) } });
+    await waitFor(() => expect(bankInput.closest('li')!.textContent).toContain('Done'));
+    (screen.getByLabelText(payday.name) as HTMLInputElement).focus();
+    await new Promise((res) => setTimeout(res, 50));
+    expect(screen.queryByLabelText(bank.name)).toBe(bankInput);
+    expect(scrolls).toEqual([]);
+  });
+});

@@ -33,6 +33,11 @@ const impossibleText = "to go. Can't reach the target with the items you marked 
 
 /** How long the pointer must be idle before rows held through a run of taps are released (see `held`). */
 const HOLD_MS = 1200;
+/**
+ * After that release takes rows out of the list, − / + presses on any other row are ignored for this long: the list
+ * has just moved under the finger, so a tap already on its way would land on a row that slid into its place.
+ */
+const STEP_GUARD_MS = 400;
 
 type Filter = 'all' | 'left' | 'done';
 const FILTERS: { id: Filter; label: string }[] = [
@@ -212,8 +217,15 @@ export default function Planner({
   const stepTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   /** The row under the last pointer press: kept visually fixed when held rows are released. */
   const pressedRow = useRef<string | null>(null);
-  /** Rows measured just before a release (the pressed row first, then the rows after it), for the scroll fix. */
-  const anchor = useRef<[HTMLElement, number][] | null>(null);
+  /**
+   * Rows measured just before a release (the pressed or newly focused row first, then the rows after it), for the
+   * scroll fix. Kept until the current task ends, so every render it causes (a row leaving, hints moving) is corrected.
+   */
+  const anchor = useRef<[Element, number][] | null>(null);
+  /** The rows on screen when the idle timer released held rows: if any of them left, STEP_GUARD_MS starts. */
+  const released = useRef<{ rows: HTMLElement[]; anchorId: string | null } | null>(null);
+  /** Until `until`, − / + presses count only on `row` (the row kept in place by the release). */
+  const stepGuard = useRef<{ until: number; row: string | null }>({ until: -Infinity, row: null });
   /**
    * The staggered row entrance and meter growth play once, on first load. Switching tabs or filters shows the
    * new rows at once instead of replaying it.
@@ -230,21 +242,47 @@ export default function Planner({
   /** A repeat of the same text is changed by a trailing no-break space so the polite region still speaks. */
   const announce = (text: string) => setAnnouncement((prev) => (prev === text ? `${text} ` : text));
 
-  /** Release every held row now. `anchorId`'s row (or the first row after it that stays) keeps its place on screen. */
-  const releaseHeld = (anchorId: string | null) => {
+  const visibleRows = () => [...(rootRef.current?.querySelectorAll<HTMLElement>('[role="tabpanel"]:not([hidden]) li[data-row]') ?? [])];
+  /**
+   * Measure `el` for the scroll fix: its row and the rows after it (the first of them still in the list after the
+   * next render keeps its place), or `el` alone outside the rows. A measurement already pending in this task wins.
+   * `inViewOnly`: skip it unless `el` is fully on screen (below the sticky bars), so focus moving to a control off
+   * screen still scrolls it into view.
+   */
+  const anchorOn = (el: Element | null, inViewOnly = false) => {
+    if (anchor.current || !el) return;
+    if (inViewOnly) {
+      const r = el.getBoundingClientRect();
+      const top = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      if (r.top < top || r.bottom > window.innerHeight) return;
+    }
+    const rows = visibleRows();
+    const row = el.closest<HTMLElement>('li[data-row]');
+    const i = row ? rows.indexOf(row) : -1;
+    const els = i >= 0 ? rows.slice(i) : [el];
+    anchor.current = els.map((x) => [x, x.getBoundingClientRect().top]);
+    setTimeout(() => (anchor.current = null));
+  };
+  /**
+   * Release every held row now. `anchorId`'s row (or the first row after it that stays) keeps its place on screen.
+   * `fromIdle`: released by the idle timer, so a tap may already be on its way (see STEP_GUARD_MS).
+   */
+  const releaseHeld = (anchorId: string | null, fromIdle = false) => {
     clearTimeout(releaseTimer.current);
     if (heldRef.current.size === 0) return;
-    const rows = [...(rootRef.current?.querySelectorAll<HTMLElement>('[role="tabpanel"]:not([hidden]) li[data-row]') ?? [])];
-    const i = anchorId === null ? -1 : rows.findIndex((el) => el.dataset.row === anchorId);
-    anchor.current = i < 0 ? null : rows.slice(i).map((el) => [el, el.getBoundingClientRect().top]);
+    const rows = visibleRows();
+    anchorOn(rows.find((el) => el.dataset.row === anchorId) ?? null);
+    released.current = fromIdle ? { rows, anchorId } : null;
     setHeld(new Set());
   };
   /** (Re)start the idle countdown; it only runs while no pointer is down. */
   const armRelease = () => {
     clearTimeout(releaseTimer.current);
     if (!pointer.current.down && heldRef.current.size > 0)
-      releaseTimer.current = setTimeout(() => releaseHeld(pressedRow.current), HOLD_MS);
+      releaseTimer.current = setTimeout(() => releaseHeld(pressedRow.current, true), HOLD_MS);
   };
+  /** Whether a − / + press on `id`'s row counts (see STEP_GUARD_MS). */
+  const stepAllowed = (id: string) => id === stepGuard.current.row || performance.now() >= stepGuard.current.until;
   const hold = (id: string) => {
     if (!heldRef.current.has(id)) setHeld(new Set([...heldRef.current, id]));
     armRelease();
@@ -256,16 +294,18 @@ export default function Planner({
     setIntro(false);
   };
 
-  // Safari has no scroll anchoring: when released rows leave the list, scroll by however far the pressed row moved,
-  // so it stays exactly where it was under the finger.
+  // Safari has no scroll anchoring (and Chromium anchors to content above the rows): when released rows leave the
+  // list, scroll by however far the pressed row moved, so it stays exactly where it was under the finger. The same
+  // goes for the newly focused row when keyboard focus leaves a row that then leaves the list.
   useLayoutEffect(() => {
-    const measured = anchor.current;
-    anchor.current = null;
-    const kept = measured?.find(([el]) => el.isConnected);
+    const rel = released.current;
+    released.current = null;
+    if (rel?.rows.some((el) => !el.isConnected)) stepGuard.current = { until: performance.now() + STEP_GUARD_MS, row: rel.anchorId };
+    const kept = anchor.current?.find(([el]) => el.isConnected);
     if (!kept) return;
     const dy = kept[0].getBoundingClientRect().top - kept[1];
     if (Math.abs(dy) >= 0.5) window.scrollBy(0, dy);
-  }, [held]);
+  }, [held, focusId, hintId]);
 
   // The entrance has finished by now (the longest delay is ~1.5s); later renders never replay it.
   useEffect(() => {
@@ -376,11 +416,15 @@ export default function Planner({
     stepTimer.current = setTimeout(() => announce(text), 450);
   };
   const onRowFocusIn = (r: Requirement) => setFocusId(r.id);
-  /** Focus moving between controls in the same row keeps it; leaving the row releases it (or holds it for a tap). */
+  /**
+   * Focus moving between controls in the same row keeps it; leaving the row releases it (or holds it for a tap).
+   * Keyboard focus leaving keeps the newly focused control where it is if this row then leaves the list.
+   */
   const onRowFocusOut = (r: Requirement, e: FocusEvent) => {
     const to = e.relatedTarget;
     if (to instanceof Node && (e.currentTarget as HTMLElement).contains(to)) return;
     if (pointerBusy()) hold(r.id);
+    else if (to instanceof Element) anchorOn(to, true);
     setFocusId((id) => (id === r.id ? null : id));
   };
 
@@ -584,7 +628,12 @@ export default function Planner({
                         </div>
                         <div class="req-meta" id={ids.target}>
                           Need <b>{fmt(r, r.required)}</b>
-                          {r.total !== null && <> of {fmt(r, r.total)}</>}
+                          {r.total !== null && (
+                            <>
+                              {' '}
+                              <span class="of">of {fmt(r, r.total)}</span>
+                            </>
+                          )}
                         </div>
                         <Outcome id={ids.out} r={r} res={res} />
                         <Meter r={r} value={state.req[r.id]} res={res} skip={skipAllowance(data, state, r, res)} />
@@ -601,6 +650,7 @@ export default function Planner({
                               .join(' ')}
                             onValue={(v) => setReq(r.id, v)}
                             onStep={(v) => onStep(r, v)}
+                            canStep={() => stepAllowed(r.id)}
                             onFocus={() => onFocus(r)}
                             onBlur={() => onBlur(r)}
                           />
