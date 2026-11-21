@@ -689,6 +689,11 @@
   font-weight: 700;
 }
 
+/* A narrow row wraps before "of", never between "of" and the total. */
+.req-meta .of {
+  white-space: nowrap;
+}
+
 .req-traps {
   grid-area: traps;
   justify-self: start;
@@ -698,7 +703,9 @@
   gap: 6px;
   width: fit-content;
   min-height: 28px;
-  margin: 2px 0 0;
+  /* 3px lower than its cell, so the focus ring clears the descenders of the "Need" line above; the cell keeps its
+     height. (Narrower rows put the meter's tick label right under it instead: see the 1080px query.) */
+  margin: 5px 0 -3px;
   padding: 0 4px 0 0;
   background: none;
   border: 0;
@@ -834,8 +841,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  background: repeating-linear-gradient(90deg, rgb(98 214 255 / 0.34) 0 3px, transparent 3px 5px);
-  border-left: 1px dashed rgb(98 214 255 / 0.55);
+  background: repeating-linear-gradient(90deg, rgb(98 214 255 / 0.55) 0 3px, transparent 3px 5px);
+  border-left: 1px dashed rgb(98 214 255 / 0.7);
 }
 
 .bar .fill {
@@ -1766,6 +1773,10 @@
     justify-self: start;
   }
 
+  .req-traps {
+    margin: 2px 0 0;
+  }
+
   .meter {
     --mt: 15px;
   }
@@ -1888,6 +1899,14 @@
      (they sit below the bar until you scroll past it). */
   .chapter-bar {
     scroll-margin-top: -68px;
+  }
+}
+
+/* Too narrow for the picker and the warning side by side (its link would stick out of the bar): the warning goes
+   under the picker. */
+@media (max-width: 760px) {
+  .chapter-bar {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

@@ -451,7 +451,19 @@ em {
 }
 
 a.badge {
+  position: relative;
   text-decoration: none;
+}
+
+/* A 44px-tall hit area (like the "Watch out" toggle's) without taking more room. It grows downward only, over the
+   text under the badge: a badge that wrapped under its row's name never covers the name's first line. */
+a.badge::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: -1px;
+  height: 44px;
 }
 
 a.badge:hover {

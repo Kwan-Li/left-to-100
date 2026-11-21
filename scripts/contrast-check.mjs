@@ -94,6 +94,11 @@ const fills = {
 for (const [bgName, bg] of Object.entries(fills)) add('control border', '--control-border', t('control-border'), bgName, bg, 3);
 add('control border', '--red (invalid)', t('red'), 'input fill (--input-bg)', t('input-bg'), 3);
 for (const [bgName, bg] of Object.entries(all)) add('focus ring', '--focus', t('focus'), bgName, bg, 3);
+// Row meters (planner.css .bar .skipzone, and the key's .lg-skip): the striped cyan "can skip" zone (cyan 55% over the
+// bg-2 track) against the empty track and the segment gaps (--bg) next to its stripes.
+const stripe = mix(t('cyan'), 0.55, t('bg-2'));
+add('meter', 'skip stripe (cyan 55% on bg-2)', stripe, 'track (bg-2)', t('bg-2'), 3);
+add('meter', 'skip stripe (cyan 55% on bg-2)', stripe, 'segment gap (bg)', t('bg'), 3);
 
 const pad = (s, n) => String(s).padEnd(n);
 console.log(pad('category', 15), pad('pair', 58), pad('fg', 8), pad('bg', 8), 'ratio  min  result');
