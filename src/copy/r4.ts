@@ -1,6 +1,5 @@
 /**
- * Redesign (Direction B, "Pause Menu") strings. Placeholder values (⟦key⟧) until the copy writer's final text is
- * pasted in. Same rules as r1.ts: plain, erasable TypeScript.
+ * Redesign (Direction B, "Pause Menu") strings, pasted verbatim from copy/COPY_DECK_R4.md. Same rules as r1.ts: plain, erasable TypeScript.
  */
 
 export interface R4Copy {
@@ -41,18 +40,18 @@ export interface R4Copy {
 }
 
 export const r4: R4Copy = {
-  filterLabel: '⟦filterLabel⟧',
-  filterAll: '⟦filterAll⟧',
-  filterLeft: '⟦filterLeft⟧',
-  filterDone: '⟦filterDone⟧',
-  filterEmptyDone: '⟦filterEmptyDone⟧',
-  legendNeeded: '⟦legendNeeded⟧',
-  legendSkip: '⟦legendSkip⟧',
-  tabProgress: (done, total) => `⟦tabProgress:${done}/${total}⟧`,
+  filterLabel: 'Filter requirements',
+  filterAll: 'All',
+  filterLeft: 'Left',
+  filterDone: 'Done',
+  filterEmptyDone: 'Nothing done in this group yet\u2014switch to All or Left.',
+  legendNeeded: 'Needed',
+  legendSkip: 'Can skip',
+  tabProgress: (done, total) => `${done} of ${total} done`,
   kbdHint: {
-    tab: '⟦kbdHint.tab⟧',
-    enter: '⟦kbdHint.enter⟧',
+    tab: 'move focus',
+    enter: 'next count',
   },
-  stepDown: (name) => `⟦stepDown:${name}⟧`,
-  stepUp: (name) => `⟦stepUp:${name}⟧`,
+  stepDown: (name) => `Decrease ${name}`,
+  stepUp: (name) => `Increase ${name}`,
 };
