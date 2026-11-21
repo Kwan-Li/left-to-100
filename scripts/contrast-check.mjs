@@ -68,6 +68,12 @@ const tinted = [
 // Body text and every accent used as text, on every plain surface; on tinted surfaces, the colors used there.
 for (const fg of ALL) for (const [bgName, bg] of Object.entries(plain)) add('text', `--${fg}`, t(fg), bgName, bg, 4.5);
 for (const [bgName, bg, fgs] of tinted) for (const fg of fgs) add('text', `--${fg}`, t(fg), bgName, bg, 4.5);
+// Row outcomes: "skip up to n" is cyan, but "no skips" is muted (cyan only when there is something to skip). Rows sit
+// on the panel, or panel-2 while focused.
+for (const [bgName, bg] of [['row (panel)', t('panel')], ['focused row (panel-2)', t('panel-2')]]) {
+  add('outcome', '"skip up to n" --cyan', t('cyan'), bgName, bg, 4.5);
+  add('outcome', '"no skips" --muted', t('muted'), bgName, bg, 4.5);
+}
 const tint = Object.fromEntries(tinted.map(([n, bg]) => [n, bg]));
 const all = { ...plain, ...tint };
 // Dark ink on the lime fills: primary button, pressed filter, selected answer, DONE chips, skip link.
