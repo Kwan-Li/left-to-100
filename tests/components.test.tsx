@@ -4,10 +4,12 @@ import raw from '../src/data/gta6.json';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import CardOptimizer from '../src/components/CardOptimizer';
 import DontLose from '../src/components/DontLose';
+import { stepValue } from '../src/components/CountInput';
 import Planner from '../src/components/Planner';
 import { r1 } from '../src/copy/r1';
 import { r2 } from '../src/copy/r2';
 import { r3 } from '../src/copy/r3';
+import { r4 } from '../src/copy/r4';
 import { Dataset } from '../src/data/schema';
 import { emptyState } from '../src/lib/plan';
 import { encodeState, forgetLoadedState } from '../src/lib/state';
@@ -18,6 +20,8 @@ const setInput = (name: string) => screen.getByRole('spinbutton', { name }) as H
 /** Chapter labels render with a no-break space inside the chapter strip. */
 const nb = (label: string) => label.replace(/ /g, '\u00a0');
 const pageUrl = 'https://example.com/left-to-100/';
+/** The "Left" filter above the rows (it replaced the "Hide done" checkbox): Done rows hide, with the same safety. */
+const showLeftOnly = () => fireEvent.click(document.querySelector('button[data-filter="left"]')!);
 
 beforeEach(() => {
   localStorage.clear();
@@ -29,7 +33,9 @@ afterEach(cleanup);
 describe('Planner', () => {
   it('shows every requirement and updates a row when a count is typed', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    expect(screen.getAllByRole('spinbutton')).toHaveLength(data.requirements.length);
+    // One input per requirement. Two of the three category panels are hidden tab panels, so include hidden inputs.
+    expect(screen.getAllByRole('spinbutton', { hidden: true })).toHaveLength(data.requirements.length);
+    expect(screen.getAllByRole('spinbutton').length).toBeLessThan(data.requirements.length);
     const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
     const input = screen.getByLabelText(bank.name) as HTMLInputElement;
     fireEvent.input(input, { target: { value: '10' } });
@@ -57,7 +63,7 @@ describe('Planner', () => {
 describe('Planner: hide done keeps the focused row', () => {
   it('does not hide a row while its input has focus, then hides it on blur', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    fireEvent.click(screen.getByLabelText('Hide done'));
+    showLeftOnly();
     const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
     const input = screen.getByLabelText(bank.name) as HTMLInputElement;
     input.focus();
@@ -74,7 +80,7 @@ describe('Planner: hide done keeps the focused row', () => {
 
   it('keeps focus on the next input when Enter leaves a row that hides', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    fireEvent.click(screen.getByLabelText('Hide done'));
+    showLeftOnly();
     const inputs = screen.getAllByRole('spinbutton') as HTMLInputElement[];
     const [first, second] = inputs;
     const firstReq = data.requirements[0];
@@ -408,7 +414,7 @@ describe('Round 3: unconfirmed lockouts in the Planner', () => {
 describe('Round 3: hide done waits for the pointer', () => {
   it('a row that became Done stays while a tap elsewhere is in progress, then hides after it lands', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    fireEvent.click(screen.getByLabelText('Hide done'));
+    showLeftOnly();
     const story = data.requirements.find((r) => r.id === 'story-completion')!;
     const gang = data.requirements.find((r) => r.id === 'gang-operations')!;
     const input = screen.getByLabelText(story.name) as HTMLInputElement;
@@ -428,7 +434,7 @@ describe('Round 3: hide done waits for the pointer', () => {
 
   it('with a mouse, the row stays while the button is held and hides after the click', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    fireEvent.click(screen.getByLabelText('Hide done'));
+    showLeftOnly();
     const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
     const input = screen.getByLabelText(bank.name) as HTMLInputElement;
     input.focus();
@@ -446,10 +452,10 @@ describe('Round 3: hide done waits for the pointer', () => {
 
   it('without a pointer interaction (keyboard), blur hides the row at once', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    fireEvent.click(screen.getByLabelText('Hide done'));
+    showLeftOnly();
     const bank = data.requirements.find((r) => r.id === 'bank-jobs')!;
     const input = screen.getByLabelText(bank.name) as HTMLInputElement;
-    await new Promise((r) => setTimeout(r, 350)); // past the 300ms window of the click on "Hide done"
+    await new Promise((r) => setTimeout(r, 350)); // past the 300ms window of the click on the filter
     input.focus();
     fireEvent.input(input, { target: { value: String(bank.required) } });
     await waitFor(() => expect(input.closest('li')!.textContent).toContain('Done'));
@@ -461,8 +467,8 @@ describe('Round 3: hide done waits for the pointer', () => {
 describe('Round 4: hide done keeps the row while focus is anywhere inside it', () => {
   it('Tab from a row that just became Done to its "Watch out" toggle keeps the row; leaving the row hides it', async () => {
     render(<Planner data={data} pageUrl={pageUrl} />);
-    fireEvent.click(screen.getByLabelText('Hide done'));
-    await new Promise((r) => setTimeout(r, 350)); // past the 300ms window of the click on "Hide done"
+    showLeftOnly();
+    await new Promise((r) => setTimeout(r, 350)); // past the 300ms window of the click on the filter
     const story = data.requirements.find((r) => r.id === 'story-completion')!;
     const input = screen.getByLabelText(story.name) as HTMLInputElement;
     const li = input.closest('li')!;
@@ -560,5 +566,160 @@ describe('Round 3: card toggles for screen readers', () => {
     const q = [...document.querySelectorAll('.mq')].find((li) => li.textContent!.includes('Vicki'))!;
     fireEvent.click(q.querySelectorAll('input[type=radio]')[1]); // Missed it
     await waitFor(() => expect(live().textContent).toMatch(/depending on/));
+  });
+});
+
+describe('Redesign: steppers', () => {
+  it('stepValue: blank + gives 1 and − gives 0, never below 0, + stops at the maximum', () => {
+    expect(stepValue(undefined, 1, 10)).toBe(1);
+    expect(stepValue(null, -1, 10)).toBe(0);
+    expect(stepValue(0, -1, 10)).toBe(0);
+    expect(stepValue(4, 1, 10)).toBe(5);
+    expect(stepValue(10, 1, 10)).toBe(10);
+    expect(stepValue(12, 1, 10)).toBe(12); // over max: + does nothing
+    expect(stepValue(12, -1, 10)).toBe(11); // − walks back toward a valid count
+    expect(stepValue(7, 1, null)).toBe(8);
+  });
+
+  it('− / + change the count without taking focus, and are named after the requirement', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const r = data.requirements.find((x) => x.unit === 'count' && x.categoryId === data.categories[0].id)!;
+    const input = screen.getByLabelText(r.name) as HTMLInputElement;
+    const plus = screen.getByRole('button', { name: r4.stepUp(r.name) });
+    const minus = screen.getByRole('button', { name: r4.stepDown(r.name) });
+    expect(plus.tabIndex).toBe(-1);
+    expect(minus.tabIndex).toBe(-1);
+    fireEvent.click(plus);
+    await waitFor(() => expect(input.value).toBe('1'));
+    fireEvent.click(plus);
+    await waitFor(() => expect(input.value).toBe('2'));
+    fireEvent.click(minus);
+    await waitFor(() => expect(input.value).toBe('1'));
+    expect(document.activeElement).not.toBe(plus);
+    // Mouse presses don't move focus to the button (the default is prevented).
+    const md = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    plus.dispatchEvent(md);
+    expect(md.defaultPrevented).toBe(true);
+  });
+
+  it('dollar amounts get no steppers', () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const r = data.requirements.find((x) => x.unit === 'dollars');
+    if (!r) return;
+    expect(screen.queryByRole('button', { name: r4.stepUp(r.name), hidden: true })).toBeNull();
+  });
+
+  it('with the Left filter, a row stepped to Done stays under the finger until a press lands elsewhere', async () => {
+    const r = data.requirements.find((x) => x.unit === 'count' && x.categoryId === data.categories[0].id)!;
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [r.id]: r.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(r.name) as HTMLInputElement).value).toBe(String(r.required - 1)));
+    showLeftOnly();
+    await new Promise((res) => setTimeout(res, 350));
+    const input = screen.getByLabelText(r.name) as HTMLInputElement;
+    const plus = screen.getByRole('button', { name: r4.stepUp(r.name) });
+    fireEvent.pointerDown(plus);
+    fireEvent.pointerUp(plus);
+    fireEvent.click(plus);
+    await waitFor(() => expect(input.closest('li')!.textContent).toContain('Done'));
+    await new Promise((res) => setTimeout(res, 400));
+    expect(screen.queryByLabelText(r.name)).toBe(input); // still there: the finger may press − next
+    const elsewhere = document.querySelector('.summary')!;
+    fireEvent.pointerDown(elsewhere);
+    await new Promise((res) => setTimeout(res, 50));
+    expect(screen.queryByLabelText(r.name)).toBe(input); // held while that press is in progress
+    fireEvent.pointerUp(elsewhere);
+    fireEvent.click(elsewhere);
+    await waitFor(() => expect(screen.queryByLabelText(r.name)).toBeNull());
+  });
+
+  it('keyboard focus moving to another row releases a stepped row at once', async () => {
+    const [r, other] = data.requirements.filter((x) => x.unit === 'count' && x.categoryId === data.categories[0].id);
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [r.id]: r.required - 1 } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(r.name) as HTMLInputElement).value).toBe(String(r.required - 1)));
+    showLeftOnly();
+    await new Promise((res) => setTimeout(res, 350));
+    fireEvent.click(screen.getByRole('button', { name: r4.stepUp(r.name) }));
+    await waitFor(() => expect(screen.getByLabelText(r.name).closest('li')!.textContent).toContain('Done'));
+    (screen.getByLabelText(other.name) as HTMLInputElement).focus();
+    await waitFor(() => expect(screen.queryByLabelText(r.name)).toBeNull(), { timeout: 200 });
+  });
+});
+
+describe('Redesign: category tabs and filter', () => {
+  it('is a tablist with one tabpanel per category; arrow keys, Home and End move the selection', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(data.categories.length);
+    expect(tabs.map((t) => t.getAttribute('aria-selected'))).toEqual(data.categories.map((_, i) => String(i === 0)));
+    expect(tabs.map((t) => t.tabIndex)).toEqual(data.categories.map((_, i) => (i === 0 ? 0 : -1)));
+    const panelOf = (t: HTMLElement) => document.getElementById(t.getAttribute('aria-controls')!)!;
+    expect(panelOf(tabs[0]).hidden).toBe(false);
+    expect(panelOf(tabs[1]).hidden).toBe(true);
+    expect(panelOf(tabs[0]).getAttribute('aria-labelledby')).toBe(tabs[0].id);
+
+    tabs[0].focus();
+    fireEvent.keyDown(tabs[0], { key: 'ArrowRight' });
+    await waitFor(() => expect(tabs[1].getAttribute('aria-selected')).toBe('true'));
+    expect(document.activeElement).toBe(tabs[1]);
+    expect(tabs[1].tabIndex).toBe(0);
+    expect(panelOf(tabs[1]).hidden).toBe(false);
+    expect(panelOf(tabs[0]).hidden).toBe(true);
+
+    fireEvent.keyDown(tabs[1], { key: 'End' });
+    await waitFor(() => expect(document.activeElement).toBe(tabs.at(-1)));
+    fireEvent.keyDown(tabs.at(-1)!, { key: 'ArrowRight' }); // wraps
+    await waitFor(() => expect(document.activeElement).toBe(tabs[0]));
+    fireEvent.keyDown(tabs[0], { key: 'ArrowLeft' }); // wraps back
+    await waitFor(() => expect(document.activeElement).toBe(tabs.at(-1)));
+    fireEvent.keyDown(tabs.at(-1)!, { key: 'Home' });
+    await waitFor(() => expect(tabs[0].getAttribute('aria-selected')).toBe('true'));
+  });
+
+  it('Enter on the last count of a category moves into the next category and selects its tab', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    const tabs = screen.getAllByRole('tab');
+    const firstPanel = document.getElementById(tabs[0].getAttribute('aria-controls')!)!;
+    const secondPanel = document.getElementById(tabs[1].getAttribute('aria-controls')!)!;
+    const lastOfFirst = [...firstPanel.querySelectorAll<HTMLInputElement>('input[data-count]')].at(-1)!;
+    const firstOfSecond = secondPanel.querySelector<HTMLInputElement>('input[data-count]')!;
+    lastOfFirst.focus();
+    fireEvent.keyDown(lastOfFirst, { key: 'Enter' });
+    expect(secondPanel.hidden).toBe(false);
+    expect(document.activeElement).toBe(firstOfSecond);
+    await waitFor(() => expect(tabs[1].getAttribute('aria-selected')).toBe('true'));
+    expect(document.activeElement).toBe(firstOfSecond);
+  });
+
+  it('All / Left / Done show counts for the selected category, and Done shows only Done rows', async () => {
+    const cat = data.categories[0];
+    const rows = data.requirements.filter((r) => r.categoryId === cat.id);
+    const done = rows[0];
+    location.hash = `s=${encodeState({ ...emptyState(data), req: { [done.id]: done.required } })}`;
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await waitFor(() => expect((screen.getByLabelText(done.name) as HTMLInputElement).value).toBe(String(done.required)));
+    const btn = (id: string) => document.querySelector<HTMLButtonElement>(`button[data-filter="${id}"]`)!;
+    expect(btn('all').getAttribute('aria-pressed')).toBe('true');
+    expect(btn('all').querySelector('.ct')!.textContent).toBe(String(rows.length));
+    expect(btn('done').querySelector('.ct')!.textContent).toBe('1');
+    expect(btn('left').querySelector('.ct')!.textContent).toBe(String(rows.length - 1));
+    await new Promise((res) => setTimeout(res, 350));
+    fireEvent.click(btn('done'));
+    await waitFor(() => expect(btn('done').getAttribute('aria-pressed')).toBe('true'));
+    await new Promise((res) => setTimeout(res, 350));
+    const panel = document.getElementById(`panel-${cat.id}`)!;
+    await waitFor(() => expect(panel.querySelectorAll('li.req')).toHaveLength(1));
+    expect(panel.querySelector('li.req')!.textContent).toContain(done.name);
+  });
+
+  it('the Done filter with nothing done says so instead of showing an empty list', async () => {
+    render(<Planner data={data} pageUrl={pageUrl} />);
+    await new Promise((res) => setTimeout(res, 50));
+    fireEvent.click(document.querySelector('button[data-filter="done"]')!);
+    await new Promise((res) => setTimeout(res, 350));
+    const panel = document.getElementById(`panel-${data.categories[0].id}`)!;
+    await waitFor(() => expect(panel.textContent).toContain(r4.filterEmptyDone));
+    expect(panel.querySelector('li.req')).toBeNull();
   });
 });
