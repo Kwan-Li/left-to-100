@@ -178,7 +178,8 @@ kbd {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgb(10 11 11 / 0.9);
+  /* Nearly opaque: the chapter bar and rows scrolling underneath must not ghost through. */
+  background: rgb(10 11 11 / 0.97);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
@@ -328,6 +329,14 @@ h3 {
 
 p {
   margin: 0 0 12px;
+}
+
+/* Barlow ships no italic, and a synthesized slant runs into the next character (")" after "verified"). Emphasis is
+   upright and a step bolder instead. */
+em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .lead {
@@ -994,6 +1003,11 @@ input[type='checkbox'] {
   color: var(--lime);
 }
 
+/* A short two-column table (label, count): narrow, so each count sits near its label. */
+.table-wrap.narrow {
+  max-width: 34rem;
+}
+
 /* 404: a "signal lost" screen. */
 .lost-screen {
   display: grid;
@@ -1017,18 +1031,16 @@ input[type='checkbox'] {
 /* Medium and small screens                                            */
 /* ------------------------------------------------------------------ */
 
-@media (max-width: 640px) {
+/* Two-row header from 760px down: the desktop row (brand plus the four links) needs about 720px with the web fonts
+   loaded, so it switches with some room to spare. The brand gets a row of its own, the nav runs across the full
+   width below it, and where even that is too narrow (320px) the nav row scrolls sideways with edge fades.
+   Not sticky here. */
+@media (max-width: 760px) {
   :root {
     --header-h: 54px;
     --sticky-top: 0px;
   }
 
-  .wrap {
-    width: calc(100% - 28px);
-  }
-
-  /* Two rows on phones, so neither the brand nor a link is cut off: the brand, then the nav across the full width.
-     Where even that is too narrow (320px), the nav row scrolls sideways with edge fades. Not sticky on phones. */
   .site-header {
     position: static;
   }
@@ -1038,24 +1050,6 @@ input[type='checkbox'] {
     gap: 0;
     height: auto;
     padding-top: 6px;
-  }
-
-  .brand {
-    gap: 8px;
-  }
-
-  .brand-mark svg {
-    width: 26px;
-    height: 26px;
-  }
-
-  .brand-word {
-    font-size: 10.5px;
-    letter-spacing: 0.1em;
-  }
-
-  .brand-word b {
-    font-size: 12px;
   }
 
   /* Padding keeps a focused link's ring (2px + 2px offset) inside the scroll area, which clips both axes:
@@ -1078,6 +1072,30 @@ input[type='checkbox'] {
     min-width: 100%;
     justify-content: space-between;
     padding: 2px 5px 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    width: calc(100% - 28px);
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-mark svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .brand-word {
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .brand-word b {
+    font-size: 12px;
   }
 
   .site-header nav a {

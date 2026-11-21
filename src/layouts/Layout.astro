@@ -112,19 +112,27 @@ const website = {
         <script is:inline>
           // Phones: the nav is a sideways strip. Before first paint, scroll it (sideways only, never the page) so the
           // current page's link is in view, centered where possible, then fade only the edges that hide more links.
-          // Scroll, resize and keyboard-focus handling come from edgeFades() in the script below.
+          // The web fonts change the link widths after first paint, so it's done again once they load (unless the
+          // strip was scrolled in between). Scroll, resize and keyboard-focus handling come from edgeFades() below.
           (() => {
             const nav = document.querySelector('.site-header nav');
             if (!nav) return;
-            const cur = nav.querySelector('a[aria-current="page"]');
-            if (cur && nav.scrollWidth > nav.clientWidth) {
-              const n = nav.getBoundingClientRect();
-              const c = cur.getBoundingClientRect();
-              nav.scrollLeft += c.left + c.width / 2 - (n.left + n.width / 2);
-            }
-            // Same toggles as edgeFades() `update` (src/lib/edgeFades.ts).
-            nav.classList.toggle('fade-l', nav.scrollLeft > 1);
-            nav.classList.toggle('fade-r', nav.scrollWidth - nav.clientWidth - nav.scrollLeft > 1);
+            const place = () => {
+              const cur = nav.querySelector('a[aria-current="page"]');
+              if (cur && nav.scrollWidth > nav.clientWidth) {
+                const n = nav.getBoundingClientRect();
+                const c = cur.getBoundingClientRect();
+                nav.scrollLeft += c.left + c.width / 2 - (n.left + n.width / 2);
+              }
+              // Same toggles as edgeFades() `update` (src/lib/edgeFades.ts).
+              nav.classList.toggle('fade-l', nav.scrollLeft > 1);
+              nav.classList.toggle('fade-r', nav.scrollWidth - nav.clientWidth - nav.scrollLeft > 1);
+              return nav.scrollLeft;
+            };
+            const at = place();
+            document.fonts?.ready.then(() => {
+              if (Math.abs(nav.scrollLeft - at) < 1) place();
+            });
           })();
         </script>
         <script>

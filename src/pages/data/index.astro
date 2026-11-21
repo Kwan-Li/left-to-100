@@ -75,7 +75,7 @@ const schema = [
     disputed.length > 0 && (
       <>
         <h2>Currently disputed</h2>
-        <ul>
+        <ul class="plain-list prose">
           {disputed.map((r) => (
             <li>
               <strong>{label(r as never)}</strong>
@@ -88,7 +88,7 @@ const schema = [
   }
 
   <h2>What's in the file</h2>
-  <div class="table-wrap">
+  <div class="table-wrap narrow">
     <table>
       <tbody>
         <tr><td>Requirements</td><td class="num">{data.requirements.length}</td></tr>
